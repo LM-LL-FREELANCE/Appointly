@@ -11,5 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "express": "5.2.1"
+  },
+  "devDependencies": {
+    "eslint": "^10.4.1"
   }
 }
