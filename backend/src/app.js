@@ -1,7 +1,11 @@
 import express from "express"
 import cors from "cors"
+import { errorHandler } from "./middleware/errorHandler"
+
 export const app = express()
 
+app.disable("x-powered-by")
+app.use(express.json())
 app.use(cors({
     origin: (origin, callback) => {
         const ACCEPTED_ORIGINS = [
@@ -18,5 +22,5 @@ app.use(cors({
         return callback(new Error('Not allowed by CORS'))
     }
 }))
-app.disable("x-powered-by")
-app.use(express.json())
+
+app.use(errorHandler)
