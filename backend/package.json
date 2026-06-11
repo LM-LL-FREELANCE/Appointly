@@ -1,10 +1,15 @@
 {
-  "name": "express-template",
-  "version": "1.0.0",
+  "name": "backend",
+  "version": "0.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node --watch --env-file=.env src/server.js",
+    "db:schema": "node --env-file=.env src/scripts/run_sql.js schema.sql",
+    "db:seed": "node --env-file=.env src/scripts/run_sql.js seed.sql",
+    "db:reset": "node --env-file=.env src/scripts/run_sql.js drop.sql && pnpm run db:schema && pnpm run db:seed"
   },
   "keywords": [],
   "author": "",
@@ -15,6 +20,7 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "eslint": "^10.4.1",
-    "globals": "^17.6.0"
+    "globals": "^17.6.0",
+    "mysql2": "^3.22.5"
   }
 }
