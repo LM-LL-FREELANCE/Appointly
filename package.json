@@ -5,6 +5,9 @@
     "dev": "pnpm --parallel --filter backend --filter frontend dev",
     "dev:back": "pnpm --filter backend dev",
     "dev:front": "pnpm --filter frontend dev",
-    "build": "pnpm --filter frontend build"
+    "build": "pnpm --filter frontend build",
+    "db:schema": "pnpm --filter backend run db:schema",
+    "db:seed": "pnpm --filter backend run db:seed",
+    "db:reset": "pnpm --filter backend run db:reset"
   }
 }
