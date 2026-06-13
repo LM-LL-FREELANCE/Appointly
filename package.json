@@ -2,7 +2,7 @@
   "name": "appointly",
   "private": true,
   "scripts": {
-    "dev": "pnpm --parallel --filter backend --filter frontend dev",
+    "dev": "pnpm --filter backend --filter frontend dev",
     "dev:back": "pnpm --filter backend dev",
     "dev:front": "pnpm --filter frontend dev",
     "build": "pnpm --filter frontend build",
