@@ -11,3 +11,4 @@ export async function getTurnosByDni(dni) {
 
   return rows
 }
+

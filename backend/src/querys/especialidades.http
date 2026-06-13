@@ -1,0 +1,2 @@
+###Get all especialidades
+GET http://localhost:4000/api/especialidades/

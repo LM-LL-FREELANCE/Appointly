@@ -4,7 +4,12 @@ export const getTurnosByDni = async (req, res, next) => {
   try {
     const turnos = await profesionalesService.obtenerTurnosPorDni(Number(req.params.dni))
     res.status(200).json(turnos)
-  } catch(err) {
+  } catch (err) {
     next(err)
   }
+}
+
+
+export class ProfesionalesController {
+
 }
