@@ -1,2 +1,8 @@
+###Get all doctors
+GET http://localhost:4000/api/profesionales/
+
 ###Get all especialidades
-GET http://localhost:4000/api/especialidades/
+GET http://localhost:4000/api/profesionales?especialidad=1&obrasocial=3
+
+###Get a profesional by dni
+GET http://localhost:4000/api/profesionales/30156789

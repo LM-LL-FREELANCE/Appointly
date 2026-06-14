@@ -1,8 +1,9 @@
 import { Router } from "express";
-import { getTurnosByDni } from "../controllers/profesionales.controller.js"
+import { getTurnosByDni, ProfesionalesController } from "../controllers/profesionales.controller.js"
 
-const router = Router()
+const profesionalesRouter = Router()
 
-router.get("/:dni/turnos", getTurnosByDni)
-
-export default router
+profesionalesRouter.get("/:dni/turnos", getTurnosByDni)
+profesionalesRouter.get("/", ProfesionalesController.filterBy)
+profesionalesRouter.get(":dni", ProfesionalesController.getByDni)
+export default profesionalesRouter
