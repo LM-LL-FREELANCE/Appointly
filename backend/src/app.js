@@ -5,6 +5,8 @@ import profesionalesRouter from "./routes/profesionales.routes.js"
 import { obraSocialesRouter } from "./routes/obra-sociales.routes.js"
 import { especialidadesRouter } from "./routes/especialidades.routes.js"
 
+import horariosRouter from "./routes/horarios.routes.js"
+
 export const app = express()
 
 app.disable("x-powered-by")
@@ -25,12 +27,12 @@ app.use(cors({
 }))
 
 
+
 /*Routers */
 app.use("/api/profesionales", profesionalesRouter)
 app.use("/api/obra-sociales", obraSocialesRouter)
 app.use("/api/especialidades", especialidadesRouter)
-
-
+app.use("/api/horarios", horariosRouter)
 
 /*Error handler */
 app.use(errorHandler)

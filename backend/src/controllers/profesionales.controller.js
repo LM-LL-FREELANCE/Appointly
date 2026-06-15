@@ -1,17 +1,58 @@
+import { ProfesionalesService } from "../services/profesionales.service.js"
 import { ProfesionalesModel } from "../models/profesionales.model.js"
-import * as profesionalesService from "../services/profesionales.service.js"
-
-export const getTurnosByDni = async (req, res, next) => {
-  try {
-    const turnos = await profesionalesService.obtenerTurnosPorDni(Number(req.params.dni))
-    res.status(200).json(turnos)
-  } catch (err) {
-    next(err)
-  }
-}
-
 
 export class ProfesionalesController {
+
+  static async getHorariosByDni(req, res, next) {
+    const dni = Number(req.params.dni)
+
+    try {
+      const horarios = await ProfesionalesService.obtenerHorariosPorDni(dni)
+      res.status(200).json(horarios)
+
+    } catch (err) {
+      next(err)
+    }
+  }
+
+  static async createHorario(req, res, next) {
+    const { dia_semana, hora_inicio, hora_fin } = req.body
+    const dni = req.params.dni
+
+    try {
+      const horario = await ProfesionalesService.createHorario(dni, { dia_semana, hora_inicio, hora_fin })
+      res.status(201).json(horario)
+
+    } catch (err) {
+      next(err)
+    }
+  }
+
+  static async updateHorario(req, res, next) {
+    const { dia_semana, hora_inicio, hora_fin } = req.body
+    const id = req.params.id
+
+    try {
+      const horario = await ProfesionalesService.updateHorario(id, { dia_semana, hora_inicio, hora_fin })
+      res.status(200).json(horario)
+
+    } catch (err) {
+      next(err)
+    }
+
+  }
+
+  static async deleteHorario(req, res, next) {
+
+    try {
+      await ProfesionalesService.deleteHorario(req.params.id)
+      res.status(204).send()
+
+    } catch (err) {
+      next(err)
+    }
+  }
+
   static async filterBy(req, res) {
     const { especialidad, obrasocial } = req.query
     const profesionales = await ProfesionalesModel.filterBy({ especialidad, obraSocial: obrasocial })
@@ -20,6 +61,7 @@ export class ProfesionalesController {
     }
     return res.json(profesionales)
   }
+
   static async getByDni(req, res) {
     const { dni } = req.params
     const profesionalData = await ProfesionalesModel.getByDni({ dni })
@@ -29,4 +71,6 @@ export class ProfesionalesController {
 
     return res.json(profesionalData)
   }
-} 
+}
+
+
