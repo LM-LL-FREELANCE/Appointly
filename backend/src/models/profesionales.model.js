@@ -1,21 +1,21 @@
 import { pool } from "../config/db.js"
 
 export class ProfesionalesModel {
-    static async getHorariosByDni(dni) {
+  static async getHorariosByDni(dni) {
 
-      const [rows] = await pool.query(`
+    const [rows] = await pool.query(`
         SELECT id_horario, horario_atencion.dia_semana, horario_atencion.hora_inicio, horario_atencion.hora_fin
         FROM horario_atencion
         INNER JOIN profesional
         ON horario_atencion.dni_profesional = profesional.dni_profesional
         WHERE profesional.dni_profesional = ?
         `, [dni])
-      
-      return rows
-    }
 
-    static async checkOverlap(dni, {dia_semana, hora_inicio, hora_fin}) {
-      const [result] = await pool.query(`
+    return rows
+  }
+
+  static async checkOverlap(dni, { dia_semana, hora_inicio, hora_fin }) {
+    const [result] = await pool.query(`
         SELECT COUNT(*) AS count
         FROM horario_atencion
         WHERE dni_profesional = ?
@@ -24,46 +24,91 @@ export class ProfesionalesModel {
         AND hora_fin > ?
         `, [dni, dia_semana, hora_fin, hora_inicio])
 
-      return result
-    }
+    return result
+  }
 
-    static async createHorario(dni, {dia_semana, hora_inicio, hora_fin}) {
-      const [result] = await pool.query(`
+  static async createHorario(dni, { dia_semana, hora_inicio, hora_fin }) {
+    const [result] = await pool.query(`
         INSERT INTO horario_atencion (dni_profesional, dia_semana, hora_inicio, hora_fin)
         VALUES (?, ?, ?, ?)
         `, [dni, dia_semana, hora_inicio, hora_fin])
 
-      const [row] = await pool.query(`
+    const [row] = await pool.query(`
         SELECT *
         FROM horario_atencion
         WHERE id_horario = ?
         `, [result.insertId])
 
-      return row[0]
-    }
+    return row[0]
+  }
 
-    static async updateHorario(id, {dia_semana, hora_inicio, hora_fin}) {
-      await pool.query(`
+  static async updateHorario(id, { dia_semana, hora_inicio, hora_fin }) {
+    await pool.query(`
         UPDATE horario_atencion
         SET dia_semana = ?, hora_inicio = ?, hora_fin = ?
         WHERE id_horario = ?
         `, [dia_semana, hora_inicio, hora_fin, id])
 
-      const [row] = await pool.query(`
+    const [row] = await pool.query(`
         SELECT *
         FROM horario_atencion
         WHERE id_horario = ?
         `, [id])
 
-      return row[0]
-    }
+    return row[0]
+  }
 
-    static async deleteHorario(id) {
-      const [result] = await pool.query(`
+  static async deleteHorario(id) {
+    const [result] = await pool.query(`
         DELETE FROM horario_atencion
         WHERE id_horario = ?
         `, [id])
 
-      return result.affectedRows
+    return result.affectedRows
+  }
+  static async filterBy({ especialidad, obraSocial }) {
+    let query = `SELECT p.dni_profesional, p.nombre, p.apellido, p.correo, p.foto_url, p.fecha_nacimiento, e.tipo AS "Especialidad", ob.nombre_obra_social AS "Obra sociales" FROM profesional p `
+    const conditions = []
+    const values = []
+    if (especialidad) {
+      query += `INNER JOIN profesional_especialidad pe ON p.dni_profesional = pe.dni_profesional
+            INNER JOIN especialidad e ON pe.id_especialidad = e.id_especialidad `
+      conditions.push(`e.id_especialidad = ? `)
+      values.push(especialidad)
     }
+    if (obraSocial) {
+      query += `INNER JOIN obra_social_profesional obp ON p.dni_profesional = obp.dni_profesional
+            INNER JOIN obra_social ob ON obp.id_obra_social = ob.id_obra_social `
+      conditions.push(`ob.id_obra_social = ? `)
+      values.push(obraSocial)
+    }
+
+    if (conditions.length) {
+      query += ` WHERE ` + conditions.join(' AND ')
+    }
+    const [profesionales] = await pool.query(query, values)
+    return profesionales
+  }
+
+  static async getByDni({ dni }) {
+    const [rows] = await pool.query(`
+            SELECT nombre, apellido, correo, foto_url, fecha_nacimiento FROM profesional WHERE dni_profesional = ?
+            `, [dni])
+
+    const profesional = rows[0]
+    if (!profesional) return null
+
+
+    const [especialidad] = await pool.query(`
+            SELECT e.tipo AS "Especialidad" FROM especialidad e INNER JOIN profesional_especialidad pe
+                ON e.id_especialidad = pe.id_especialidad WHERE pe.dni_profesional = ?
+            `, [dni])
+
+    const [obraSociales] = await pool.query(`
+            SELECT ob.nombre_obra_social AS "Obra Sociales" FROM obra_social ob INNER JOIN 
+            obra_social_profesional osp ON ob.id_obra_social = osp.id_obra_social WHERE osp.dni_profesional = ?
+            `, [dni])
+
+    return { ...profesional, especialidad, obraSociales }
+  }
 }

@@ -2,14 +2,16 @@ import express from "express"
 import cors from "cors"
 import errorHandler from "./middlewares/error.middleware.js"
 import profesionalesRouter from "./routes/profesionales.routes.js"
+import { obraSocialesRouter } from "./routes/obra-sociales.routes.js"
+import { especialidadesRouter } from "./routes/especialidades.routes.js"
+
 import horariosRouter from "./routes/horarios.routes.js"
 
 export const app = express()
 
 app.disable("x-powered-by")
-
 app.use(express.json())
-
+/*CORS middleware */
 app.use(cors({
     origin: (origin, callback) => {
         const ACCEPTED_ORIGINS = [
@@ -24,8 +26,13 @@ app.use(cors({
     }
 }))
 
-app.use("/api/profesionales", profesionalesRouter)
 
+
+/*Routers */
+app.use("/api/profesionales", profesionalesRouter)
+app.use("/api/obra-sociales", obraSocialesRouter)
+app.use("/api/especialidades", especialidadesRouter)
 app.use("/api/horarios", horariosRouter)
 
+/*Error handler */
 app.use(errorHandler)
