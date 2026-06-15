@@ -2,7 +2,7 @@ import { pool } from "../config/db.js"
 
 export class ProfesionalesModel {
     static async filterBy({ especialidad, obraSocial }) {
-        let query = `SELECT p.dni_profesional, p.nombre, p.apellido FROM profesional p `
+        let query = `SELECT p.dni_profesional, p.nombre, p.apellido, p.correo, p.foto_url, p.fecha_nacimiento, e.tipo AS "Especialidad", ob.nombre_obra_social AS "Obra sociales" FROM profesional p `
         const conditions = []
         const values = []
         if (especialidad) {
@@ -14,7 +14,7 @@ export class ProfesionalesModel {
         if (obraSocial) {
             query += `INNER JOIN obra_social_profesional obp ON p.dni_profesional = obp.dni_profesional
             INNER JOIN obra_social ob ON obp.id_obra_social = ob.id_obra_social `
-            conditions.push(`ob.nombre_obra_social = ? `)
+            conditions.push(`ob.id_obra_social = ? `)
             values.push(obraSocial)
         }
 
@@ -35,7 +35,7 @@ export class ProfesionalesModel {
 
 
         const [especialidad] = await pool.query(`
-            SELECT e.tipo AS "Especialidad" FROM especialidad e INNNER JOIN profesional_especialidad pe
+            SELECT e.tipo AS "Especialidad" FROM especialidad e INNER JOIN profesional_especialidad pe
                 ON e.id_especialidad = pe.id_especialidad WHERE pe.dni_profesional = ?
             `, [dni])
 
