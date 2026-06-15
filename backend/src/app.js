@@ -2,6 +2,7 @@ import express from "express"
 import cors from "cors"
 import errorHandler from "./middlewares/error.middleware.js"
 import profesionalesRouter from "./routes/profesionales.routes.js"
+import horariosRouter from "./routes/horarios.routes.js"
 
 export const app = express()
 
@@ -24,5 +25,7 @@ app.use(cors({
 }))
 
 app.use("/api/profesionales", profesionalesRouter)
+
+app.use("/api/horarios", horariosRouter)
 
 app.use(errorHandler)
