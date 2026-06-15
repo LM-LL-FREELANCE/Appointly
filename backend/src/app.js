@@ -1,7 +1,7 @@
 import express from "express"
 import cors from "cors"
 import errorHandler from "./middlewares/error.middleware.js"
-import profesionalesRouter from "./routes/profesionales.routes.js"
+import { profesionalesRouter } from "./routes/profesionales.routes.js"
 import { obraSocialesRouter } from "./routes/obra-sociales.routes.js"
 import { especialidadesRouter } from "./routes/especialidades.routes.js"
 

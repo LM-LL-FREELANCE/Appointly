@@ -67,27 +67,42 @@ export class ProfesionalesModel {
     return result.affectedRows
   }
   static async filterBy({ especialidad, obraSocial }) {
-    let query = `SELECT p.dni_profesional, p.nombre, p.apellido, p.correo, p.foto_url, p.fecha_nacimiento, e.tipo AS "Especialidad", ob.nombre_obra_social AS "Obra sociales" FROM profesional p `
-    const conditions = []
-    const values = []
+    let query = `
+      SELECT 
+        p.dni_profesional, 
+        p.nombre, 
+        p.apellido, 
+        p.correo, 
+        p.foto_url, 
+        p.fecha_nacimiento, 
+        e.tipo AS "Especialidad", 
+        ob.nombre_obra_social AS "Obra sociales" 
+      FROM profesional p 
+      LEFT JOIN profesional_especialidad pe ON p.dni_profesional = pe.dni_profesional
+      LEFT JOIN especialidad e ON pe.id_especialidad = e.id_especialidad 
+      LEFT JOIN obra_social_profesional obp ON p.dni_profesional = obp.dni_profesional
+      LEFT JOIN obra_social ob ON obp.id_obra_social = ob.id_obra_social
+    `;
+
+    const conditions = [];
+    const values = [];
+
     if (especialidad) {
-      query += `INNER JOIN profesional_especialidad pe ON p.dni_profesional = pe.dni_profesional
-            INNER JOIN especialidad e ON pe.id_especialidad = e.id_especialidad `
-      conditions.push(`e.id_especialidad = ? `)
-      values.push(especialidad)
-    }
-    if (obraSocial) {
-      query += `INNER JOIN obra_social_profesional obp ON p.dni_profesional = obp.dni_profesional
-            INNER JOIN obra_social ob ON obp.id_obra_social = ob.id_obra_social `
-      conditions.push(`ob.id_obra_social = ? `)
-      values.push(obraSocial)
+      conditions.push(`e.id_especialidad = ?`);
+      values.push(especialidad);
     }
 
-    if (conditions.length) {
-      query += ` WHERE ` + conditions.join(' AND ')
+    if (obraSocial) {
+      conditions.push(`ob.id_obra_social = ?`);
+      values.push(obraSocial);
     }
-    const [profesionales] = await pool.query(query, values)
-    return profesionales
+
+    if (conditions.length > 0) {
+      query += ` WHERE ` + conditions.join(' AND ');
+    }
+
+    const [profesionales] = await pool.query(query, values);
+    return profesionales;
   }
 
   static async getByDni({ dni }) {

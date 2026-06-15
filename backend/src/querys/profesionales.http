@@ -1,2 +1,43 @@
-###Get a profesional by a filter
-GET 
+### Get horarios availables for profesionales by dni
+GET http://localhost:4000/api/profesionales/27845123/horarios
+x-user-dni: 27845123
+x-user-rol: profesional
+
+###post a horario for a profesional
+POST http://localhost:4000/api/profesionales/27845123/horarios
+x-user-dni: 27845123
+x-user-rol: profesional
+Content-Type: application/json
+
+{
+  "dia_semana": 1,
+  "hora_inicio": "22:00",
+  "hora_fin": "23:00"
+}
+
+###update and horario in turnos for a profesional
+PUT http://localhost:4000/api/horarios/17
+x-user-dni: 27845123
+x-user-rol: profesional
+Content-Type: application/json
+
+{
+  "dia_semana": 5,
+  "hora_inicio": "20:00",
+  "hora_fin": "21:00"
+}
+
+
+###delete a turno for a profesional
+DELETE http://localhost:4000/api/horarios/17
+x-user-dni: 27845123
+x-user-rol: profesional
+
+###get all doctors
+GET http://localhost:4000/api/profesionales
+
+###get all doctor with a filter
+GET http://localhost:4000/api/profesionales?especialidad=1&obrasocial=3
+
+###get doctor by dni
+GET http://localhost:4000/api/profesionales/30156789 
