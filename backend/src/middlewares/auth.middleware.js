@@ -1,5 +1,7 @@
 // src/middlewares/auth.middleware.js
 
+import { AppError } from "../utils/AppError.js";
+
 /**
  * Middleware Stand-in para simular identidad mediante Headers
  */
@@ -23,11 +25,8 @@ export const identityStandIn = (req, res, next) => {
  */
 export const grantAccess = (allowedRoles) => {
     return (req, res, next) => {
-        if (!req.user || !allowedRoles.includes(req.user.role)) {
-            return res.status(403).json({
-                error: 'Forbidden',
-                message: 'No tenés permisos para realizar esta acción.'
-            });
+        if (!req.user || !allowedRoles.includes(req.user.rol)) {
+            throw new AppError("No tenés permisos para realizar esta acción.", 403, "FORBIDDEN")
         }
         next();
     };
