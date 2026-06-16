@@ -5,7 +5,7 @@ import SignUp from "./components/SignUp.jsx"
 
 export default function App() {
   return (
-    <div className="w-full min-h-screen flex flex-col gap-10">
+    <div className="w-full min-h-screen flex gap-10">
       <div>
         {/* NavBar here */}
       </div>
