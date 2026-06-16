@@ -1,4 +1,4 @@
-import { AppShell, Group, Text, Drawer, Burger } from '@mantine/core'
+import { AppShell, Group, Text, Drawer } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import { Route, Routes } from 'react-router-dom'
 import { useState } from 'react'
