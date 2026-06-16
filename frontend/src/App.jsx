@@ -1,55 +1,85 @@
-import { AppShell, Group, NavLink, Text } from '@mantine/core'
+import { AppShell, Group, Text, Drawer, Burger } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import { Route, Routes } from 'react-router-dom'
+import { useState } from 'react'
+
+/*Auth need components */
+import Login from './pages/Login.jsx'
+import SignUp from './pages/SignUp.jsx'
+
 
 import Dashboard from './pages/Dashboard.jsx'
 import Agenda from './pages/Agenda.jsx'
 import Turnos from './pages/Turnos.jsx'
 import Horarios from './pages/Horarios.jsx'
-import MiPerfil from './pages/MiPerfil.jsx'
+import Buscar from './pages/Buscar.jsx'
+import Reservar from './pages/Reservar.jsx'
+import MisTurnos from './pages/MisTurnos.jsx'
 
 import { UserButton } from './components/UserButton.jsx'
+import { NavLinks } from './components/NavLinks.jsx'
 import { SidebarContext } from './hooks/useSidebar.js'
 
 export default function App() {
-  const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
-  const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true);
+  const [mobileOpened, { toggle: toggleMobile, close: closeMobile }] = useDisclosure()
+  const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true)
+  const [rol, setRol] = useState("guest")
+
+  const linksForProfesional = [
+    { label: "Dashboard", path: "/", element: <Dashboard /> },
+    { label: "Agenda", path: "/agenda", element: <Agenda /> },
+    { label: "Turnos", path: "/turnos", element: <Turnos /> },
+    { label: "Horarios de Atencion", path: "/horarios", element: <Horarios /> },
+  ]
+  const defaultLinks = [
+    { label: "Buscar Doctores", path: "/buscar", element: <Buscar /> },
+    { label: "Reservar Turno", path: "/reservar", element: <Reservar /> },
+    { label: "Mis Turnos", path: "/misturnos", element: <MisTurnos /> },
+  ]
+  const links = (rol === "profesional") ? linksForProfesional : defaultLinks
 
   return (
     <SidebarContext.Provider value={{ mobileOpened, toggleMobile, desktopOpened, toggleDesktop }}>
       <AppShell
-        navbar={{ width: 230, breakpoint: 'md', collapsed: { mobile: !mobileOpened, desktop: !desktopOpened } }}
+        navbar={{
+          width: 230,
+          breakpoint: 'md',
+          collapsed: { mobile: true, desktop: !desktopOpened },
+        }}
         padding="md">
-
-        <AppShell.Navbar p="sm">
+        <AppShell.Navbar p="sm" visibleFrom="md">
           <AppShell.Section>
             <Group px="xs" py="sm">
               <Text fw={700} size="lg">Appointly</Text>
             </Group>
           </AppShell.Section>
           <AppShell.Section grow>
-            <NavLink label="Dashboard" href="/" />
-            <NavLink label="Agenda" href="/agenda" />
-            <NavLink label="Turnos" href="/turnos" />
-            <NavLink label="Horarios de Atención" href="/horarios" />
-            <NavLink label="Mi Perfil" href="/perfil" />
+            <NavLinks links={links} />
           </AppShell.Section>
           <AppShell.Section>
             <UserButton />
           </AppShell.Section>
         </AppShell.Navbar>
 
+        <Drawer
+          opened={mobileOpened}
+          onClose={closeMobile}
+          size={230}
+          padding="sm"
+          title="Appointly"
+          hiddenFrom="md">
+          <NavLinks links={links} onNavigate={closeMobile} />
+        </Drawer>
         <AppShell.Main>
           <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/agenda" element={<Agenda />} />
-            <Route path="/turnos" element={<Turnos />} />
-            <Route path="/horarios" element={<Horarios />} />
-            <Route path="/perfil" element={<MiPerfil />} />
+            {links.map(link => (
+              <Route key={link.path} path={link.path} element={link.element} />
+            ))}
+            <Route path="/signup" element={ } />
+            <Route path="/login" element={ } />
           </Routes>
         </AppShell.Main>
-
       </AppShell>
     </SidebarContext.Provider>
-  );
+  )
 }
