@@ -75,8 +75,8 @@ export default function App() {
             {links.map(link => (
               <Route key={link.path} path={link.path} element={link.element} />
             ))}
-            <Route path="/signup" element={ } />
-            <Route path="/login" element={ } />
+            <Route path="/signup" element={<Login />} />
+            <Route path="/login" element={<SignUp />} />
           </Routes>
         </AppShell.Main>
       </AppShell>
