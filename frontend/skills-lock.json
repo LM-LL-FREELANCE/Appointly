@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "mantine-custom-components": {
+      "source": "mantinedev/skills",
+      "sourceType": "github",
+      "skillPath": "skills/mantine-custom-components/SKILL.md",
+      "computedHash": "f61c7368715ee81aeb1bf849041e833551ba376d501105ded998553dfaa3e904"
+    }
+  }
+}

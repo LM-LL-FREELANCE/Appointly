@@ -7,7 +7,7 @@ import { useState } from 'react'
 import Login from './pages/Login.jsx'
 import SignUp from './pages/SignUp.jsx'
 
-
+/*Other components */
 import Dashboard from './pages/Dashboard.jsx'
 import Agenda from './pages/Agenda.jsx'
 import Turnos from './pages/Turnos.jsx'
@@ -16,6 +16,7 @@ import Buscar from './pages/Buscar.jsx'
 import Reservar from './pages/Reservar.jsx'
 import MisTurnos from './pages/MisTurnos.jsx'
 
+/*Hook and some buttons */
 import { UserButton } from './components/UserButton.jsx'
 import { NavLinks } from './components/NavLinks.jsx'
 import { SidebarContext } from './hooks/useSidebar.js'
