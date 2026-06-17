@@ -6,6 +6,7 @@ import {
 import { IconSearch } from '@tabler/icons-react'
 import { PageHeader } from '../components/PageHeader'
 import { DoctorCard } from '../components/DoctorCard'
+import DoctorTable from '../components/DoctorTable'
 import { getFilteredProfesional, getAllEspecialidades, getAllObraSociales } from '../services/profesionales'
 import { useQuery, keepPreviousData } from "@tanstack/react-query"
 
@@ -34,13 +35,14 @@ export default function Buscar() {
     const doctoresFiltrados = profesionales.filter(doc =>
         `${doc.nombre} ${doc.apellido}`.toLowerCase().includes(busqueda.toLowerCase())
     )
-    console.log(profesionales)
     const isLoadingAll = isLoadingProfesionales && isLoadingEspecialidades && isLoadingObraSociales
 
     if (isLoadingAll) {
-        (<Center h={200}>
-            <Loader />
-        </Center>)
+        return (
+            <Center h={200}>
+                <Loader />
+            </Center>
+        )
     }
     return (
         <Stack gap="md">
@@ -112,26 +114,31 @@ export default function Buscar() {
                                 ]}
                             />
                         </Group>
-                        {isLoadingProfesionales ? (
-                            <Center h={200}>
-                                <Loader />
-                            </Center>
-                        ) : doctoresFiltrados.length === 0 ? (
-                            <Text c="dimmed" ta="center" mt="xl">
-                                No se encontraron profesionales con esos filtros.
-                            </Text>
+                        {vista === 'cards' ? (
+                            isLoadingProfesionales ? (
+                                <Center h={200}>
+                                    <Loader />
+                                </Center>
+                            ) : doctoresFiltrados.length === 0 ? (
+                                <Text c="dimmed" ta="center" mt="xl">
+                                    No se encontraron profesionales con esos filtros.
+                                </Text>
+                            ) : (
+                                doctoresFiltrados.map(doc => (
+                                    <DoctorCard
+                                        keyDoctor={doc.dni_profesional}
+                                        doctor={doc}
+                                        onVerDisponibilidad={(d) => console.log('Ver disponibilidad:', d.nombre)}
+                                    />
+                                ))
+                            )
                         ) : (
-                            doctoresFiltrados.map(doc => (
-                                <DoctorCard
-                                    keyDoctor={doc.dni_profesional}
-                                    doctor={doc}
-                                    onVerDisponibilidad={(d) => console.log('Ver disponibilidad:', d.nombre)}
-                                />
-                            ))
+                            <DoctorTable profesionales={doctoresFiltrados} />
                         )}
-                    </Stack>
-                </Grid.Col>
-            </Grid>
-        </Stack>
+
+                </Stack>
+            </Grid.Col>
+        </Grid>
+        </Stack >
     )
 }
