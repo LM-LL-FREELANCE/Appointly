@@ -1,23 +1,22 @@
 import { Card, Group, Avatar, Stack, Text, Badge, Button } from '@mantine/core'
-import { IconMapPin, IconArrowRight } from '@tabler/icons-react'
+import { IconArrowRight } from '@tabler/icons-react'
 
-export function DoctorCard({ doctor, onVerDisponibilidad }) {
-    const { nombre, especialidad, sede, obrasSociales = [], foto } = doctor
+export function DoctorCard({ keyDoctor, doctor, onVerDisponibilidad }) {
+
+
+    const { nombre, apellido, especialidades = [], correo, obrasSociales = [], foto } = doctor
 
     return (
-        <Card withBorder radius="md" padding="md">
+        <Card key={keyDoctor} withBorder radius="md" padding="md">
             <Stack gap="sm">
                 <Group wrap="nowrap" align="flex-start">
                     <Avatar src={foto} alt={nombre} size="lg" radius="xl" />
                     <Stack gap={2}>
-                        <Text fw={600}>{nombre}</Text>
-                        <Text size="sm" c="dimmed">{especialidad}</Text>
-                        {sede && (
-                            <Group gap={4} c="dimmed">
-                                <IconMapPin size={14} />
-                                <Text size="sm">{sede}</Text>
-                            </Group>
-                        )}
+                        <Text fw={600}>{`${nombre} ${apellido}`}</Text>
+                        {especialidades.map(esp => (
+                            <Text key={esp} size="sm" c="dimmed">{esp}</Text>
+                        ))}
+                        <Text size="sm" c="dimmed">{correo}</Text>
                     </Stack>
                 </Group>
 
