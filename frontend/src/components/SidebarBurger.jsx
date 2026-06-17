@@ -5,7 +5,7 @@ export function SidebarBurger() {
   const { mobileOpened, toggleMobile, desktopOpened, toggleDesktop } = useSidebar()
   return (
     <>
-      <Burger opened={mobileOpened} onClick={toggleMobile} hiddenFrom="sm" size="sm" />
+      <Burger opened={mobileOpened} onClick={toggleMobile} hiddenFrom="sm" size="md" />
       <Burger opened={desktopOpened} onClick={toggleDesktop} visibleFrom="sm" size="sm" />
     </>
   )

@@ -23,7 +23,7 @@ import { SidebarContext } from './hooks/useSidebar.js'
 export default function App() {
   const [mobileOpened, { toggle: toggleMobile, close: closeMobile }] = useDisclosure()
   const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true)
-  const [rol, setRol] = useState("guest")
+  const [rol, setRol] = useState("profesional")
 
   const linksForProfesional = [
     { label: "Dashboard", path: "/", element: <Dashboard /> },
@@ -70,6 +70,7 @@ export default function App() {
           hiddenFrom="md">
           <NavLinks links={links} onNavigate={closeMobile} />
         </Drawer>
+
         <AppShell.Main>
           <Routes>
             {links.map(link => (
