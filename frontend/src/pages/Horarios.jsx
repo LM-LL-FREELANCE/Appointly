@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { PageHeader } from "../components/PageHeader.jsx";
 import { Alert, Avatar, Box, Button, Group, Loader, Paper, SimpleGrid, Stack, Switch, Text } from "@mantine/core";
+import { Link } from "react-router-dom";
 import TimeSlot from "../components/TimeSlot.jsx";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getHorariosByDni, createHorario, updateHorario, deleteHorario } from "../services/profesionales.js";
@@ -155,7 +156,7 @@ export default function Horarios() {
           </Stack>
           <Group>
             <Button visibleFrom="md" disabled={isPending} loading={isSaving} onClick={saveHorarios}>Guardar cambios</Button>
-            <Avatar radius="xl" alt="" />
+            <Avatar radius="xl" alt="" component={Link} to="/user" />
           </Group>
         </Group>
       </PageHeader>

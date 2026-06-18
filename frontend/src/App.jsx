@@ -15,6 +15,7 @@ import Horarios from './pages/Horarios.jsx'
 import Buscar from './pages/Buscar.jsx'
 import Reservar from './pages/Reservar.jsx'
 import MisTurnos from './pages/MisTurnos.jsx'
+import User from './pages/User.jsx'
 
 /*Hook and some buttons */
 import { UserButton } from './components/UserButton.jsx'
@@ -79,6 +80,7 @@ export default function App() {
             ))}
             <Route path="/signup" element={<Login />} />
             <Route path="/login" element={<SignUp />} />
+            <Route path="/user" element={<User />} />
           </Routes>
         </AppShell.Main>
       </AppShell>

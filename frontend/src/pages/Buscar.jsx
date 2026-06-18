@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import {
   Grid, Card, Stack, Group, Text,
-  Select, Button, TextInput, SegmentedControl, Title, Center, Loader
+  Select, Button, TextInput, SegmentedControl, Title, Center, Loader, Avatar
 } from '@mantine/core'
 import { IconSearch } from '@tabler/icons-react'
 import { PageHeader } from '../components/PageHeader'
@@ -9,6 +9,7 @@ import { DoctorCard } from '../components/DoctorCard'
 import DoctorTable from '../components/DoctorTable'
 import { getFilteredProfesional, getAllEspecialidades, getAllObraSociales } from '../services/profesionales'
 import { useQuery, keepPreviousData } from "@tanstack/react-query"
+import { Link } from 'react-router-dom'
 
 export default function Buscar() {
   const [busqueda, setBusqueda] = useState('')
@@ -32,32 +33,37 @@ export default function Buscar() {
     queryFn: getAllObraSociales,
   })
 
-    const doctoresFiltrados = profesionales.filter(doc =>
-        `${doc.nombre} ${doc.apellido}`.toLowerCase().includes(busqueda.toLowerCase())
-    )
-    const isLoadingAll = isLoadingProfesionales && isLoadingEspecialidades && isLoadingObraSociales
+  const doctoresFiltrados = profesionales.filter(doc =>
+    `${doc.nombre} ${doc.apellido}`.toLowerCase().includes(busqueda.toLowerCase())
+  )
+  const isLoadingAll = isLoadingProfesionales && isLoadingEspecialidades && isLoadingObraSociales
 
-    if (isLoadingAll) {
-        return (
-            <Center h={200}>
-                <Loader />
-            </Center>
-        )
-    }
+  if (isLoadingAll) {
     return (
-        <Stack gap="md">
-            <PageHeader>
-                <Group justify="space-between" align="center" wrap="wrap" gap="sm" w="100%">
-                    <Title order={4}>Buscar doctores</Title>
-                    <TextInput
-                        placeholder="Buscar por nombre..."
-                        leftSection={<IconSearch size={16} />}
-                        value={busqueda}
-                        onChange={(e) => setBusqueda(e.currentTarget.value)}
-                        w={{ base: '100%', sm: 240 }}
-                    />
-                </Group>
-            </PageHeader>
+      <Center h={200}>
+        <Loader />
+      </Center>
+    )
+  }
+  return (
+    <Stack gap="md">
+      <PageHeader>
+        <Group justify="space-between" style={{ flex: 1 }}>
+          <Title order={4}>Buscar doctores</Title>
+          <Group>
+            <TextInput
+              placeholder="Buscar por nombre..."
+              leftSection={<IconSearch size={16} />}
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.currentTarget.value)}
+              w={{ base: '100%', sm: 240 }}
+            />
+            <Avatar radius="xl" alt="" component={Link} to="/user" />
+          </Group>
+        </Group>
+      </PageHeader>
+
+
 
       <Grid gutter={{ base: 'sm', md: 'md' }}>
         <Grid.Col span={{ base: 12, md: 3 }}>
@@ -99,46 +105,46 @@ export default function Buscar() {
           </Card>
         </Grid.Col>
 
-                <Grid.Col span={{ base: 12, md: 9 }}>
-                    <Stack gap="md">
-                        <Group justify="space-between" align="center" wrap="wrap" gap="xs">
-                            <Text size="sm" c="orange">
-                                Mostrando {doctoresFiltrados.length} de {profesionales.length} profesionales
-                            </Text>
-                            <SegmentedControl
-                                value={vista}
-                                onChange={setVista}
-                                data={[
-                                    { label: 'Cards', value: 'cards' },
-                                    { label: 'Lista', value: 'lista' },
-                                ]}
-                            />
-                        </Group>
-                        {vista === 'cards' ? (
-                            isLoadingProfesionales ? (
-                                <Center h={200}>
-                                    <Loader />
-                                </Center>
-                            ) : doctoresFiltrados.length === 0 ? (
-                                <Text c="dimmed" ta="center" mt="xl">
-                                    No se encontraron profesionales con esos filtros.
-                                </Text>
-                            ) : (
-                                doctoresFiltrados.map(doc => (
-                                    <DoctorCard
-                                        keyDoctor={doc.dni_profesional}
-                                        doctor={doc}
-                                        onVerDisponibilidad={(d) => console.log('Ver disponibilidad:', d.nombre)}
-                                    />
-                                ))
-                            )
-                        ) : (
-                            <DoctorTable profesionales={doctoresFiltrados} />
-                        )}
+        <Grid.Col span={{ base: 12, md: 9 }}>
+          <Stack gap="md">
+            <Group justify="space-between" align="center" wrap="wrap" gap="xs">
+              <Text size="sm" c="orange">
+                Mostrando {doctoresFiltrados.length} de {profesionales.length} profesionales
+              </Text>
+              <SegmentedControl
+                value={vista}
+                onChange={setVista}
+                data={[
+                  { label: 'Cards', value: 'cards' },
+                  { label: 'Lista', value: 'lista' },
+                ]}
+              />
+            </Group>
+            {vista === 'cards' ? (
+              isLoadingProfesionales ? (
+                <Center h={200}>
+                  <Loader />
+                </Center>
+              ) : doctoresFiltrados.length === 0 ? (
+                <Text c="dimmed" ta="center" mt="xl">
+                  No se encontraron profesionales con esos filtros.
+                </Text>
+              ) : (
+                doctoresFiltrados.map(doc => (
+                  <DoctorCard
+                    keyDoctor={doc.dni_profesional}
+                    doctor={doc}
+                    onVerDisponibilidad={(d) => console.log('Ver disponibilidad:', d.nombre)}
+                  />
+                ))
+              )
+            ) : (
+              <DoctorTable profesionales={doctoresFiltrados} />
+            )}
 
-                </Stack>
-            </Grid.Col>
-        </Grid>
-        </Stack >
-    )
+          </Stack>
+        </Grid.Col>
+      </Grid>
+    </Stack >
+  )
 }
