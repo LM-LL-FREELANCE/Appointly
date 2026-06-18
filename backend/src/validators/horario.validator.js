@@ -3,7 +3,7 @@ import { AppError } from "../utils/AppError.js"
 export const horarioValidator = (req, res, next) => {
   const { dia_semana, hora_inicio, hora_fin } = req.body
 
-  const timeChecker = /^([01]\d|2[0-3]):[0-5]\d$/
+  const timeChecker = /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/
 
   if (Number(dia_semana) < 0 || Number(dia_semana) > 6) {
     return next(new AppError("dia_semana debe ser un número entre 0 y 6.", 400, "VALIDATION_ERROR"))

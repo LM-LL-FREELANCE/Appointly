@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import {
-    Grid, Card, Stack, Group, Text,
-    Select, Button, TextInput, SegmentedControl, Title, Center, Loader
+  Grid, Card, Stack, Group, Text,
+  Select, Button, TextInput, SegmentedControl, Title, Center, Loader
 } from '@mantine/core'
 import { IconSearch } from '@tabler/icons-react'
 import { PageHeader } from '../components/PageHeader'
@@ -11,26 +11,26 @@ import { getFilteredProfesional, getAllEspecialidades, getAllObraSociales } from
 import { useQuery, keepPreviousData } from "@tanstack/react-query"
 
 export default function Buscar() {
-    const [busqueda, setBusqueda] = useState('')
-    const [especialidad, setEspecialidad] = useState(null)
-    const [obraSocial, setObraSocial] = useState(null)
-    const [vista, setVista] = useState('cards')
+  const [busqueda, setBusqueda] = useState('')
+  const [especialidad, setEspecialidad] = useState(null)
+  const [obraSocial, setObraSocial] = useState(null)
+  const [vista, setVista] = useState('cards')
 
-    const { data: profesionales = [], isLoading: isLoadingProfesionales } = useQuery({
-        queryKey: ["profesionales", especialidad, obraSocial],
-        queryFn: () => getFilteredProfesional({ especialidad, obraSocial }),
-        placeholderData: keepPreviousData,
-    })
+  const { data: profesionales = [], isLoading: isLoadingProfesionales } = useQuery({
+    queryKey: ["profesionales", especialidad, obraSocial],
+    queryFn: () => getFilteredProfesional({ especialidad, obraSocial }),
+    placeholderData: keepPreviousData,
+  })
 
-    const { data: especialidades = [], isLoading: isLoadingEspecialidades } = useQuery({
-        queryKey: ["especialidades"],
-        queryFn: getAllEspecialidades,
-    })
+  const { data: especialidades = [], isLoading: isLoadingEspecialidades } = useQuery({
+    queryKey: ["especialidades"],
+    queryFn: getAllEspecialidades,
+  })
 
-    const { data: obraSociales = [], isLoading: isLoadingObraSociales } = useQuery({
-        queryKey: ["obrasociales"],
-        queryFn: getAllObraSociales,
-    })
+  const { data: obraSociales = [], isLoading: isLoadingObraSociales } = useQuery({
+    queryKey: ["obrasociales"],
+    queryFn: getAllObraSociales,
+  })
 
     const doctoresFiltrados = profesionales.filter(doc =>
         `${doc.nombre} ${doc.apellido}`.toLowerCase().includes(busqueda.toLowerCase())
@@ -59,45 +59,45 @@ export default function Buscar() {
                 </Group>
             </PageHeader>
 
-            <Grid gutter={{ base: 'sm', md: 'md' }}>
-                <Grid.Col span={{ base: 12, md: 3 }}>
-                    <Card withBorder padding="md" radius="md">
-                        <Stack gap="md">
-                            <Title order={5}>Filtros</Title>
+      <Grid gutter={{ base: 'sm', md: 'md' }}>
+        <Grid.Col span={{ base: 12, md: 3 }}>
+          <Card withBorder padding="md" radius="md">
+            <Stack gap="md">
+              <Title order={5}>Filtros</Title>
 
-                            <Select
-                                label="Especialidad"
-                                placeholder="Todas"
-                                clearable
-                                data={especialidades.map(esp => ({ value: String(esp.id), label: esp.especialidad }))}
-                                value={especialidad}
-                                onChange={setEspecialidad}
-                            />
+              <Select
+                label="Especialidad"
+                placeholder="Todas"
+                clearable
+                data={especialidades.map(esp => ({ value: String(esp.id), label: esp.especialidad }))}
+                value={especialidad}
+                onChange={setEspecialidad}
+              />
 
-                            <Select
-                                label="Obra social"
-                                placeholder="Todas"
-                                clearable
-                                data={obraSociales.map(os => ({ value: String(os.id), label: os.obra_social }))}
-                                value={obraSocial}
-                                onChange={setObraSocial}
-                            />
+              <Select
+                label="Obra social"
+                placeholder="Todas"
+                clearable
+                data={obraSociales.map(os => ({ value: String(os.id), label: os.obra_social }))}
+                value={obraSocial}
+                onChange={setObraSocial}
+              />
 
-                            <Button
-                                variant="outline"
-                                color="gray"
-                                fullWidth
-                                onClick={() => {
-                                    setBusqueda('')
-                                    setEspecialidad(null)
-                                    setObraSocial(null)
-                                }}
-                            >
-                                Limpiar filtros
-                            </Button>
-                        </Stack>
-                    </Card>
-                </Grid.Col>
+              <Button
+                variant="outline"
+                color="gray"
+                fullWidth
+                onClick={() => {
+                  setBusqueda('')
+                  setEspecialidad(null)
+                  setObraSocial(null)
+                }}
+              >
+                Limpiar filtros
+              </Button>
+            </Stack>
+          </Card>
+        </Grid.Col>
 
                 <Grid.Col span={{ base: 12, md: 9 }}>
                     <Stack gap="md">

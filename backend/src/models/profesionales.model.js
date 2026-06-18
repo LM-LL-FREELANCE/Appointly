@@ -14,16 +14,28 @@ export class ProfesionalesModel {
     return rows
   }
 
-  static async checkOverlap(dni, { dia_semana, hora_inicio, hora_fin }) {
-    const [result] = await pool.query(`
+  static async getHorarioById(id) {
+    const [rows] = await pool.query(`
+        SELECT * FROM horario_atencion WHERE id_horario = ?
+        `, [id])
+    return rows[0] ?? null
+  }
+
+  static async checkOverlap(dni, { dia_semana, hora_inicio, hora_fin }, excludeId = null) {
+    const sql = `
         SELECT COUNT(*) AS count
         FROM horario_atencion
         WHERE dni_profesional = ?
         AND dia_semana = ?
         AND hora_inicio < ?
         AND hora_fin > ?
-        `, [dni, dia_semana, hora_fin, hora_inicio])
+        ${excludeId !== null ? 'AND id_horario != ?' : ''}
+        `
+    const params = excludeId !== null
+      ? [dni, dia_semana, hora_fin, hora_inicio, excludeId]
+      : [dni, dia_semana, hora_fin, hora_inicio]
 
+    const [result] = await pool.query(sql, params)
     return result
   }
 
