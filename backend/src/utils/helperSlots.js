@@ -1,4 +1,4 @@
-import { SLOT_DURATION_MIN } from "../config/constants";
+import { SLOT_DURATION_MIN } from "../config/constants.js";
 
 const pad = (n) => String(n).padStart(2, '0')
 
@@ -16,10 +16,10 @@ const rangoDeFechas = (desde, hasta) => {
   const [yd, md, dd] = desde.split("-").map(Number)
   const [yh, mh, dh] = hasta.split("-").map(Number)
 
-  const fin = new Date(yh, mh - 1, dh).getDay()
+  const fin = new Date(yh, mh - 1, dh)
   const fechas = []
-  for (let current = new Date(yd, md - 1, dd); current <= fin; current.setDate(current.getDate + 1)) {
-    fechas.push(`${current.getFullYear}-${pad(current.getMonth() + 1)}-${pad(current.getDate())}`)
+  for (let current = new Date(yd, md - 1, dd); current <= fin; current.setDate(current.getDate() + 1)) {
+    fechas.push(`${current.getFullYear()}-${pad(current.getMonth() + 1)}-${pad(current.getDate())}`)
   }
   return fechas
 }
@@ -33,7 +33,7 @@ const slotsDelBloque = (horaInicio, horaFin, duracion) => {
   return slots
 }
 
-export const calcularSlotsDisponibles = (horarios, turnos, desde, hasta, duracion = SLOT_DURATION_MIN) => {
+export const calcularSlotsDisponibles = ({ horarios, turnos, desde, hasta, duracion = SLOT_DURATION_MIN }) => {
   const porDia = new Map();
   for (const h of horarios) {
     if (!porDia.has(h.dia_semana)) porDia.set(h.dia_semana, []);
@@ -64,3 +64,9 @@ export const calcularSlotsDisponibles = (horarios, turnos, desde, hasta, duracio
     return { fecha, dia_semana: dia, slots };
   });
 }
+export const slotsDelDia = ({ horarios, fecha, duracion = SLOT_DURATION_MIN }) => {
+  const dia = diaDeSemana(fecha);
+  const bloques = horarios.filter((h) => h.dia_semana === dia);
+  const slots = bloques.flatMap((b) => slotsDelBloque(b.hora_inicio, b.hora_fin, duracion));
+  return [...new Set(slots)].sort();
+};

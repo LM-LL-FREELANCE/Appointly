@@ -1,0 +1,10 @@
+### create a turno
+POST http://localhost:4000/api/turnos
+Content-Type: application/json
+
+{
+  "dni_profesional": 27845123,
+  "dni_cliente": 22456789,
+  "fecha_turno": "2026-06-22",
+  "hora_turno": "10:30"
+}

@@ -1,3 +1,6 @@
+@host = http://localhost:4000/api
+
+
 ### Get horarios availables for profesionales by dni
 GET http://localhost:4000/api/profesionales/27845123/horarios
 x-user-dni: 27845123
@@ -41,3 +44,8 @@ GET http://localhost:4000/api/profesionales?especialidad=1&obrasocial=3
 
 ###get doctor by dni
 GET http://localhost:4000/api/profesionales/30156789 
+
+
+### get slots of horarios by profesional dni
+GET http://localhost:4000/api/profesionales/27845123/slots?desde=2026-06-15&hasta=2026-06-19
+
