@@ -42,4 +42,23 @@ export class TurnosModel {
       , [dni, desde, hasta])
     return rows
   }
+  static async existeActivo({ dni, fecha, hora }) {
+    const [rows] = await pool.query(`
+      SELECT 1 FROM turno WHERE dni_profesional = ? AND fecha_turno = ? AND estado = 'activo'
+    
+      `, [dni, fecha, hora])
+
+    return rows.length > 0
+  }
+  static async crearTurno({ dni_profesional, dni_cliente, fecha_turno, hora_turno }) {
+    const [result] = await pool.query(`
+      INSERT INTO turno (fecha_turno,hora_turno,dni_profesional,dni_cliente) VALUES (?,?,?,?)
+      `, [fecha_turno, hora_turno, dni_profesional, dni_cliente])
+
+    return result.insertId
+  }
+  static async getById({ id }) {
+    const [rows] = await pool.query(`SELECT * FROM turno WHERE id_turno = ?`, [id])
+    return rows[0]
+  }
 }

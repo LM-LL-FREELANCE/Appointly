@@ -64,7 +64,7 @@ export const calcularSlotsDisponibles = ({ horarios, turnos, desde, hasta, durac
     return { fecha, dia_semana: dia, slots };
   });
 }
-export const slotsDelDia = (horarios, fecha, duracion = SLOT_DURATION_MIN) => {
+export const slotsDelDia = ({ horarios, fecha, duracion = SLOT_DURATION_MIN }) => {
   const dia = diaDeSemana(fecha);
   const bloques = horarios.filter((h) => h.dia_semana === dia);
   const slots = bloques.flatMap((b) => slotsDelBloque(b.hora_inicio, b.hora_fin, duracion));

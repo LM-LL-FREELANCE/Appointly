@@ -102,7 +102,7 @@ CREATE TABLE turno (
     fecha_turno DATE NOT NULL,
     hora_turno TIME NOT NULL,
     estado ENUM('activo', 'cancelado') NOT NULL DEFAULT 'activo',
-    dni_profesional INT UNSIGNED NOT NULL,
+    hora_turno INT UNSIGNED NOT NULL,
     dni_cliente INT UNSIGNED NOT NULL,
     creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     cancelado_en TIMESTAMP NULL DEFAULT NULL,

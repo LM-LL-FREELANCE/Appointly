@@ -146,7 +146,7 @@ export class ProfesionalesModel {
     return { ...profesional, especialidad, obraSociales }
   }
 
-  static async existe(dni) {
+  static async existe({ dni }) {
     const [rows] = await pool.query(
       'SELECT 1 FROM profesional WHERE dni_profesional = ? LIMIT 1',
       [dni]

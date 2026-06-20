@@ -24,4 +24,12 @@ export class ClientesModel {
 
     return rows
   }
+
+  static async existe({ dni }) {
+    const [rows] = await pool.query(`
+      SELECT 1 FROM cliente WHERE dni_cliente = ? LIMIT 1
+      `, [dni])
+
+    return rows.length > 0
+  }
 }

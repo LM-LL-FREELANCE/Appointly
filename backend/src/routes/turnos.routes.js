@@ -7,3 +7,4 @@ export const turnosRouter = Router();
 
 turnosRouter.get("/:id", identityStandIn, grantAccess(["cliente", "profesional"]), TurnosController.getTurnoById)
 turnosRouter.put("/:id/cancelacion", identityStandIn, grantAccess(["cliente", "profesional"]), TurnosController.cancelTurnoById)
+turnosRouter.post("/", TurnosController.crearTurno)
