@@ -72,9 +72,11 @@ export class ProfesionalesController {
     return res.json(profesionalData)
   }
 
-  static async getSlots(req, res) {
-    const { desde, hasta } = req.query
+  static async existe(req, res) {
+    const { dni } = req.params
+    const existeProfesional = await ProfesionalesModel.existe({ dni })
 
+    return res.json(existeProfesional)
   }
 }
 

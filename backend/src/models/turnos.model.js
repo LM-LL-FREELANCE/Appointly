@@ -36,5 +36,10 @@ export class TurnosModel {
 
     return this.getTurnoById(id)
   }
-
+  static async getTurnosActivos({ dni, desde, hasta }) {
+    const [rows] = await pool.query(`SELECT fecha_turno, hora_turno FROM turno 
+      WHERE dni_profesional = ? AND estado = 'activo' AND fecha_turno BETWEEN ? AND ?`
+      , [dni, desde, hasta])
+    return rows
+  }
 }

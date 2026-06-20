@@ -2,7 +2,7 @@ import { Router } from "express";
 import { ProfesionalesController } from "../controllers/profesionales.controller.js"
 import { grantAccess, identityStandIn } from "../middlewares/auth.middleware.js";
 import { horarioValidator } from "../validators/horario.validator.js";
-
+import { TurnosController } from "../controllers/turnos.controller.js"
 
 export const profesionalesRouter = Router()
 //lean
@@ -13,4 +13,4 @@ profesionalesRouter.post("/:dni/horarios", identityStandIn, grantAccess(["profes
 //luca
 profesionalesRouter.get("/", ProfesionalesController.filterBy)
 profesionalesRouter.get("/:dni", ProfesionalesController.getByDni)
-profesionalesRouter.get("/:dni/slots", ProfesionalesController.getSlots)
+profesionalesRouter.get("/:dni/slots", TurnosController.getSlots)
