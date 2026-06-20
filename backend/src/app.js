@@ -6,6 +6,7 @@ import { obraSocialesRouter } from "./routes/obra-sociales.routes.js"
 import { especialidadesRouter } from "./routes/especialidades.routes.js"
 import { turnosRouter } from "./routes/turnos.routes.js"
 import { horariosRouter } from "./routes/horarios.routes.js"
+import { clientesRouter } from "./routes/clientes.routes.js"
 
 export const app = express()
 
@@ -35,7 +36,7 @@ app.use("/api/obra-sociales", obraSocialesRouter)
 app.use("/api/especialidades", especialidadesRouter)
 app.use("/api/horarios", horariosRouter)
 app.use("/api/turnos", turnosRouter)
-/* app.use("/api/clientes", clientesRouter) */
+app.use("/api/clientes", clientesRouter)
 
 /*Error handler */
 app.use(errorHandler)
