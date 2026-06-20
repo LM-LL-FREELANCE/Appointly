@@ -145,4 +145,8 @@ export class ProfesionalesModel {
 
     return { ...profesional, especialidad, obraSociales }
   }
+
+  static async getSlots({ dni }) {
+
+  }
 }

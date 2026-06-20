@@ -13,3 +13,4 @@ profesionalesRouter.post("/:dni/horarios", identityStandIn, grantAccess(["profes
 //luca
 profesionalesRouter.get("/", ProfesionalesController.filterBy)
 profesionalesRouter.get("/:dni", ProfesionalesController.getByDni)
+profesionalesRouter.get("/:dni/slots", ProfesionalesController.getSlots)
