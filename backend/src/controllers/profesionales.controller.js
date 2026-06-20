@@ -71,6 +71,11 @@ export class ProfesionalesController {
 
     return res.json(profesionalData)
   }
+
+  static async getSlots(req, res) {
+    const { desde, hasta } = req.query
+
+  }
 }
 
 

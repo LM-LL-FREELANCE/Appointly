@@ -25,7 +25,7 @@ import { SidebarContext } from './hooks/useSidebar.js'
 export default function App() {
   const [mobileOpened, { toggle: toggleMobile, close: closeMobile }] = useDisclosure()
   const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true)
-  const [rol, setRol] = useState("profesional")
+  const [rol, setRol] = useState("guest")
 
   const linksForProfesional = [
     { label: "Dashboard", path: "/", element: <Dashboard /> },
