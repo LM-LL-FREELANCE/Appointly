@@ -9,9 +9,10 @@ import { DoctorCard } from '../components/DoctorCard'
 import DoctorTable from '../components/DoctorTable'
 import { getFilteredProfesional, getAllEspecialidades, getAllObraSociales } from '../services/profesionales'
 import { useQuery, keepPreviousData } from "@tanstack/react-query"
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 export default function Buscar() {
+  const navigate = useNavigate()
   const [busqueda, setBusqueda] = useState('')
   const [especialidad, setEspecialidad] = useState(null)
   const [obraSocial, setObraSocial] = useState(null)
@@ -134,12 +135,15 @@ export default function Buscar() {
                   <DoctorCard
                     keyDoctor={doc.dni_profesional}
                     doctor={doc}
-                    onVerDisponibilidad={(d) => console.log('Ver disponibilidad:', d.nombre)}
+                    onVerDisponibilidad={(d) => navigate('/reservar', { state: { doctor: d } })}
                   />
                 ))
               )
             ) : (
-              <DoctorTable profesionales={doctoresFiltrados} />
+              <DoctorTable
+                profesionales={doctoresFiltrados}
+                onVerDisponibilidad={(d) => navigate('/reservar', { state: { doctor: d } })}
+              />
             )}
 
           </Stack>
