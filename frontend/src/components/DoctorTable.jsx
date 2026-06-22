@@ -1,57 +1,57 @@
 import { Table, Badge, Text, Avatar, Group, Button } from "@mantine/core";
 import { IconArrowRight } from '@tabler/icons-react'
 export default function DoctorTable({ profesionales, onVerDisponibilidad }) {
-    const rows = profesionales.map(prof => (
-        <Table.Tr key={prof.dni_profesional}>
-            <Table.Td>
-                <Avatar src={prof.foto} alt={prof.nombre} radius="xl" />
-            </Table.Td>
-            <Table.Td>
-                <Text fw={600}>{`${prof.nombre} ${prof.apellido}`}</Text>
-            </Table.Td>
-            <Table.Td>
-                <Text size="sm">{prof.correo}</Text>
-            </Table.Td>
-            <Table.Td>
-                {(prof.especialidades || []).map((esp, index) => (
-                    <Text key={index} size="sm" c="dimmed">{esp}</Text>
-                ))}
-            </Table.Td>
-            <Table.Td>
-                <Group gap="xs">
-                    {(prof.obrasSociales || []).map(obs => (
-                        <Badge key={obs} variant="outline" color="gray" radius="sm">
-                            {obs}
-                        </Badge>
-                    ))}
-                </Group>
-            </Table.Td>
-            <Table.Td>
-                <Button
-                    rightSection={<IconArrowRight size={14} />}
-                    onClick={() => onVerDisponibilidad?.(profesionales)}>
-                    Disponibilidad
-                </Button>
-            </Table.Td>
-        </Table.Tr>
-    ))
-    return (
-        <Table.ScrollContainer minWidth={700}>
-            <Table striped highlightOnHover verticalSpacing="sm" horizontalSpacing="md">
-                <Table.Thead>
-                    <Table.Tr>
-                        <Table.Th>Foto</Table.Th>
-                        <Table.Th>Nombre y Apellido</Table.Th>
-                        <Table.Th>Correo</Table.Th>
-                        <Table.Th>Especialidades</Table.Th>
-                        <Table.Th>Obras Sociales</Table.Th>
-                        <Table.Th>Ver Dispoinibilidad</Table.Th>
-                    </Table.Tr>
-                </Table.Thead>
-                <Table.Tbody>
-                    {rows}
-                </Table.Tbody>
-            </Table>
-        </Table.ScrollContainer>
-    )
+  const rows = profesionales.map(prof => (
+    <Table.Tr key={prof.dni_profesional}>
+      <Table.Td>
+        <Avatar src={prof.foto} alt={prof.nombre} radius="xl" />
+      </Table.Td>
+      <Table.Td>
+        <Text fw={600}>{`${prof.nombre} ${prof.apellido}`}</Text>
+      </Table.Td>
+      <Table.Td>
+        <Text size="sm">{prof.correo}</Text>
+      </Table.Td>
+      <Table.Td>
+        {(prof.especialidades || []).map((esp, index) => (
+          <Text key={index} size="sm" c="dimmed">{esp}</Text>
+        ))}
+      </Table.Td>
+      <Table.Td>
+        <Group gap="xs">
+          {(prof.obrasSociales || []).map(obs => (
+            <Badge key={obs} variant="outline" color="gray" radius="sm">
+              {obs}
+            </Badge>
+          ))}
+        </Group>
+      </Table.Td>
+      <Table.Td>
+        <Button
+          rightSection={<IconArrowRight size={14} />}
+          onClick={() => onVerDisponibilidad?.(prof)}>
+          Reservar
+        </Button>
+      </Table.Td>
+    </Table.Tr>
+  ))
+  return (
+    <Table.ScrollContainer minWidth={700}>
+      <Table striped highlightOnHover verticalSpacing="sm" horizontalSpacing="md">
+        <Table.Thead>
+          <Table.Tr>
+            <Table.Th>Foto</Table.Th>
+            <Table.Th>Nombre y Apellido</Table.Th>
+            <Table.Th>Correo</Table.Th>
+            <Table.Th>Especialidades</Table.Th>
+            <Table.Th>Obras Sociales</Table.Th>
+            <Table.Th>Reservar</Table.Th>
+          </Table.Tr>
+        </Table.Thead>
+        <Table.Tbody>
+          {rows}
+        </Table.Tbody>
+      </Table>
+    </Table.ScrollContainer>
+  )
 }

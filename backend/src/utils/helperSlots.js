@@ -43,8 +43,9 @@ export const calcularSlotsDisponibles = ({ horarios, turnos, desde, hasta, durac
   const ocupados = new Map();
   for (const t of turnos) {
     const hora = t.hora_turno.slice(0, 5);
-    if (!ocupados.has(t.fecha_turno)) ocupados.set(t.fecha_turno, new Set());
-    ocupados.get(t.fecha_turno).add(hora);
+    const fechaStr = t.fecha_turno instanceof Date ? `${t.fecha_turno.getFullYear()}-${pad(t.fecha_turno.getMonth() + 1)}-${pad(t.fecha_turno.getDate())}` : t.fecha_turno.toString().split("T")[0];
+    if (!ocupados.has(fechaStr)) ocupados.set(fechaStr, new Set());
+    ocupados.get(fechaStr).add(hora);
   }
 
   const ahora = new Date();
