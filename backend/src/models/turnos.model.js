@@ -44,7 +44,7 @@ export class TurnosModel {
   }
   static async existeActivo({ dni, fecha, hora }) {
     const [rows] = await pool.query(`
-      SELECT 1 FROM turno WHERE dni_profesional = ? AND fecha_turno = ? AND estado = 'activo'
+      SELECT 1 FROM turno WHERE dni_profesional = ? AND fecha_turno = ? AND hora_turno = ? AND estado = 'activo'
     
       `, [dni, fecha, hora])
 

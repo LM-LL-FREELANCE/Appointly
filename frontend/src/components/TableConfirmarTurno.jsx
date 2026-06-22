@@ -1,6 +1,6 @@
 import { Table, Alert, Button, Group, Stack, Text } from '@mantine/core';
 
-export function TableConfirmarTurno({ data, onVolver }) {
+export function TableConfirmarTurno({ data, onVolver, onConfirmar, isPending }) {
   const rows = data.map((d, index) => (
     <Table.Tr key={index}>
       <Table.Td c="dimmed" w="30%">
@@ -10,7 +10,7 @@ export function TableConfirmarTurno({ data, onVolver }) {
         {d.valor}
       </Table.Td>
     </Table.Tr>
-  ));
+  ))
 
   return (
     <Stack gap="lg" maw={500} mx="auto" p="md">
@@ -26,7 +26,7 @@ export function TableConfirmarTurno({ data, onVolver }) {
         <Button variant="default" radius="md" onClick={onVolver}>
           ← Volver
         </Button>
-        <Button radius="md">
+        <Button radius="md" onClick={onConfirmar} loading={isPending}>
           Confirmar
         </Button>
       </Group>
