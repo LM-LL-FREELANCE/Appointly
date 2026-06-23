@@ -1,0 +1,75 @@
+import { useState } from "react"
+import { PageHeader } from "../../../components/PageHeader.jsx"
+import { Text, Stack, Group, Avatar, SegmentedControl, Box, Alert, Loader } from "@mantine/core"
+import { TurnoCard } from "./TurnoCard.jsx"
+import TurnosTable from "./TurnosTable.jsx"
+import { useQuery } from "@tanstack/react-query"
+import { getTurnosClienteByDni } from "../../../services/clientes.js"
+
+
+const DNI = '25890123'
+/* 25890123 activo */
+/* 22456789 cancelado */
+
+export default function MisTurnos() {
+
+  const [estado, setEstado] = useState('activo')
+
+  const { data, isPending, isError } = useQuery({
+    queryKey: ['turnos', DNI],
+    queryFn: () => getTurnosClienteByDni({ dni: DNI, rol: 'cliente', estado: estado }),
+    select: (data) => data.map(t => ({
+      ...t,
+      fecha_turno: new Date(t.fecha_turno).toLocaleDateString('es-AR', {
+        timeZone: 'UTC',
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short'
+      }),
+      hora_turno: t.hora_turno.slice(0, 5),
+    }))
+  });
+
+  return (
+    <>
+      <PageHeader>
+        <Group justify="space-between" style={{ flex: 1 }}>
+          <Stack gap={0}>
+            <Text fw={600} fz={{ base: 'xl', sm: 'lg' }}>Mis Turnos</Text>
+          </Stack>
+          <Group>
+            <SegmentedControl visibleFrom="md" size="md" radius="lg" value={estado} onChange={setEstado} data={[{ label: 'Próximos', value: 'activo' }, { label: 'Historial', value: 'cancelado' }]} disabled={isPending} />
+            <Avatar radius="xl" alt="" /* component={Link} */ to="/user" />
+          </Group>
+        </Group>
+      </PageHeader>
+
+      {isPending && (
+        <Group justify="center" mt="xl">
+          <Loader />
+        </Group>
+      )}
+
+      {isError && (
+        <Alert color="red" mt="md">
+          Error al cargar los turnos
+        </Alert>
+      )}
+
+      {!isPending && !isError && (
+        <>
+          <Box px={{ base: 0, md: 'xl' }} visibleFrom="md">
+            <TurnosTable turno={data} dni={DNI} />
+          </Box>
+
+          <Stack gap="sm" pb={10} hiddenFrom="md">
+            <SegmentedControl fullWidth size="xl" radius="lg" value={estado} onChange={setEstado} data={[{ label: 'Próximos', value: 'activo' }, { label: 'Historial', value: 'cancelado' }]} />
+            {data.map((turno) => (
+              <TurnoCard key={turno.id_turno} turno={turno} estado={estado} />
+            ))}
+          </Stack>
+        </>
+      )}
+    </>
+  )
+}
