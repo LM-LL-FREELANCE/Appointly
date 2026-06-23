@@ -1,32 +1,84 @@
-import { Avatar, Badge, Button, Group, Paper, Stack, Text } from '@mantine/core';
-import { Link } from 'react-router-dom'
+import { Avatar, Badge, Box, Button, Drawer, Group, Paper, Stack, Text } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { IconAlertCircle } from '@tabler/icons-react';
+import { Link } from 'react-router-dom';
+import { cancelTurnoById } from '../../../services/clientes.js';
+
+const DNI = '25890123';
 
 export function TurnoCard({ turno, estado }) {
-  const badgeColor = estado === 'activo' ? 'green' : estado === 'cancelado' ? 'red' : 'gray'
+  const badgeColor = estado === 'activo' ? 'green' : estado === 'cancelado' ? 'red' : 'gray';
+  const [drawerOpened, { open: openDrawer, close: closeDrawer }] = useDisclosure(false);
+
+  const queryClient = useQueryClient();
+  const { mutate: cancelar, isPending } = useMutation({
+    mutationFn: () => cancelTurnoById(turno.id_turno, DNI, 'cliente'),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['turnos', DNI] });
+      closeDrawer();
+    },
+  });
 
   return (
-    <Paper withBorder radius="lg" p="md">
-      <Stack gap="md">
-        <Group justify="space-between" align="center" wrap="nowrap">
-          <Text fw={700} fz="lg">{turno.fecha_turno} · {turno.hora_turno}</Text>
-          <Badge variant="dot" color={badgeColor} radius="xl" size="lg">
-            {estado}
-          </Badge>
-        </Group>
+    <>
+      <Paper withBorder radius="lg" p="md">
+        <Stack gap="md">
+          <Group justify="space-between" align="center" wrap="nowrap">
+            <Text fw={700} fz="lg">{turno.fecha_turno} · {turno.hora_turno}</Text>
+            <Badge variant="dot" color={badgeColor} radius="xl" size="lg" tt="uppercase">
+              {estado}
+            </Badge>
+          </Group>
 
-        <Group gap="sm" wrap="nowrap">
-          <Avatar size="lg" radius="xl" /* src={avatarSrc ?? null} */ />
-          <Stack gap={2}>
-            <Text fw={700} fz="lg">{turno.p_nombre} {turno.p_apellido}</Text>
-            <Text fz="lg">{turno.tipo}</Text>
+          <Group gap="sm" wrap="nowrap">
+            <Avatar size="lg" radius="xl" />
+            <Stack gap={2}>
+              <Text fw={700} fz="lg">{turno.p_nombre} {turno.p_apellido}</Text>
+              <Text fz="lg">{turno.tipo}</Text>
+            </Stack>
+          </Group>
+
+          <Group grow gap="sm">
+            <Button variant="default" radius="md" component={Link} to="/misturnos/detalle" state={{ turno, tab: estado }} size="lg">Detalle</Button>
+            {estado === 'activo' && (
+              <Button variant="light" color="red" radius="md" size="lg" onClick={openDrawer}>Cancelar</Button>
+            )}
+          </Group>
+        </Stack>
+      </Paper>
+
+      <Drawer
+        opened={drawerOpened}
+        onClose={closeDrawer}
+        position="bottom"
+        withCloseButton={false}
+        radius="lg"
+        size="50%"
+        overlayProps={{ backgroundOpacity: 0.3 }}
+        styles={{ body: { padding: 0 } }}
+      >
+        <Box px="lg" pt="lg" pb="md">
+          <Group gap="sm" mb="xs" align="center" wrap="nowrap">
+            <IconAlertCircle size={28} color="var(--mantine-color-red-5)" style={{ flexShrink: 0 }} />
+            <Text fw={700} fz="xl">¿Cancelar turno?</Text>
+          </Group>
+          <Text c="dimmed" fz="sm" lh={1.6}>
+            {turno.fecha_turno} · {turno.hora_turno} · {turno.p_nombre} {turno.p_apellido}.{' '}
+            Te avisamos por email.
+          </Text>
+        </Box>
+        <Box px="lg" pb="xl">
+          <Stack gap="sm">
+            <Button fullWidth variant="light" color="red" size="lg" radius="xl" onClick={() => cancelar()} loading={isPending}>
+              Sí, cancelar
+            </Button>
+            <Button fullWidth variant="default" size="lg" radius="xl" onClick={closeDrawer} disabled={isPending}>
+              No, volver
+            </Button>
           </Stack>
-        </Group>
-
-        <Group grow gap="sm">
-          <Button variant="default" radius="md" component={Link} to="/misturnos/detalle" state={{ turno }} size="lg">Detalle</Button>
-          <Button variant="light" color="red" radius="md" component={Link} to="/misturnos/detalle" state={{ turno, openCancel: true }} size="lg">Cancelar</Button>
-        </Group>
-      </Stack>
-    </Paper>
+        </Box>
+      </Drawer>
+    </>
   );
 }

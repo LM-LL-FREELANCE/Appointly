@@ -85,12 +85,12 @@ export default function TurnosTable({ turno, dni }) {
           </Badge>
         </Table.Td>
         <Table.Td>
-          <Group gap={4} wrap="nowrap">
+          <Group gap={4} wrap="wrap">
             <Anchor component="button" size="sm" pr="sm" onClick={() => handleOpenDetail(item)}>
               Detalle
             </Anchor>
             {item.estado === 'activo' && (
-              <Button variant="light" color="red" radius="md" size="compact-sm" onClick={() => handleOpenCancel(item)}>
+              <Button variant="light" color="red" radius="md" size="compact-sm" pr="sm" onClick={() => handleOpenCancel(item)}>
                 Cancelar
               </Button>
             )}

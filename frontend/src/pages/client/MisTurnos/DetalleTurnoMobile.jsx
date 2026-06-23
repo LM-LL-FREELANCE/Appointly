@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Avatar, Badge, Box, Button, Drawer, Group, Paper, Stack, Text } from '@mantine/core';
+import { Badge, Box, Button, Divider, Drawer, Grid, Group, Paper, Stack, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { IconAlertCircle } from '@tabler/icons-react';
@@ -8,18 +8,34 @@ import { cancelTurnoById } from '../../../services/clientes.js';
 
 const DNI = '25890123';
 
+function DetailRow({ label, children }) {
+  return (
+    <>
+      <Grid py="md" align="center">
+        <Grid.Col span={5}>
+          <Text fz="lg" c="dimmed">{label}</Text>
+        </Grid.Col>
+        <Grid.Col span={7}>
+          {children}
+        </Grid.Col>
+      </Grid>
+      <Divider />
+    </>
+  );
+}
+
 export function DetalleTurnoMobile() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { turno, openCancel } = location.state || {};
-  const [drawerOpened, { open: openDrawer, close: closeDrawer }] = useDisclosure(openCancel ?? false);
+  const { turno, tab = 'activo' } = location.state || {};
+  const [drawerOpened, { open: openDrawer, close: closeDrawer }] = useDisclosure(false);
 
   const queryClient = useQueryClient();
   const { mutate: cancelar, isPending } = useMutation({
     mutationFn: () => cancelTurnoById(turno.id_turno, DNI, 'cliente'),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['turnos', DNI] });
-      navigate('/misturnos');
+      navigate('/misturnos', { state: { tab } });
     },
   });
 
@@ -47,37 +63,37 @@ export function DetalleTurnoMobile() {
         <Text fw={600} fz="xl">Detalle</Text>
       </PageHeader>
 
-      <Paper withBorder radius="lg" p="md">
-        <Stack gap="md">
-          <Group justify="flex-end">
-            <Badge variant="dot" color={badgeColor} radius="xl" size="lg">
+      <Stack gap="md">
+        <Paper withBorder radius="lg" px="md" pt="xs" pb={0}>
+          <DetailRow label="Profesional">
+            <Text fz="lg" fw={600}>{turno.p_nombre} {turno.p_apellido}</Text>
+          </DetailRow>
+          <DetailRow label="Especialidad">
+            <Text fz="lg" fw={600}>{turno.tipo}</Text>
+          </DetailRow>
+          <DetailRow label="Fecha" fz="lg">
+            <Text fz="lg" fw={600}>{turno.fecha_turno}</Text>
+          </DetailRow>
+          <DetailRow label="Hora">
+            <Text fz="lg" fw={600}>{turno.hora_turno} hs</Text>
+          </DetailRow>
+          <DetailRow label="Estado">
+            <Badge variant="light" color={badgeColor} radius="xl" size="lg" tt="uppercase">
               {turno.estado}
             </Badge>
-          </Group>
+          </DetailRow>
+        </Paper>
 
-          <Group gap="sm" wrap="nowrap">
-            <Avatar size="lg" radius="xl" />
-            <Stack gap={2}>
-              <Text fw={700} fz="lg">{turno.p_nombre} {turno.p_apellido}</Text>
-              <Text fz="md" c="dimmed">{turno.tipo}</Text>
-            </Stack>
-          </Group>
+        {turno.estado === 'activo' && (
+          <Button variant="light" color="red" size="lg" radius="md" fullWidth onClick={openDrawer}>
+            Cancelar turno
+          </Button>
+        )}
 
-          <Stack gap="xs">
-            <Text><b>Fecha:</b> {turno.fecha_turno}</Text>
-            <Text><b>Hora:</b> {turno.hora_turno} hs</Text>
-          </Stack>
-
-          <Group grow gap="sm" mt="xs">
-            {turno.estado === 'activo' && (
-              <Button variant="light" color="red" size="lg" onClick={openDrawer}>
-                Cancelar Turno
-              </Button>
-            )}
-            <Button variant="default" size="lg" onClick={() => navigate(-1)}>Atrás</Button>
-          </Group>
-        </Stack>
-      </Paper>
+        <Button variant="default" color="gray" size="lg" radius="md" onClick={() => navigate('/misturnos', { state: { tab } })}>
+          Atrás
+        </Button>
+      </Stack>
 
       <Drawer
         opened={drawerOpened}
@@ -85,13 +101,15 @@ export function DetalleTurnoMobile() {
         position="bottom"
         withCloseButton={false}
         radius="lg"
-        size="auto"
+        size="50%"
         overlayProps={{ backgroundOpacity: 0.3 }}
         styles={{ body: { padding: 0 } }}
       >
         <Box px="lg" pt="lg" pb="md">
-          <IconAlertCircle size={28} color="var(--mantine-color-red-5)" style={{ marginBottom: 8 }} />
-          <Text fw={700} fz="xl" mb="xs">¿Cancelar turno?</Text>
+          <Group gap="sm" mb="xs" align="center" wrap="nowrap">
+            <IconAlertCircle size={28} color="var(--mantine-color-red-5)" style={{ flexShrink: 0 }} />
+            <Text fw={700} fz="xl">¿Cancelar turno?</Text>
+          </Group>
           <Text c="dimmed" fz="sm" lh={1.6}>
             {turno.fecha_turno} · {turno.hora_turno} · {turno.p_nombre} {turno.p_apellido}.{' '}
             Te avisamos por email.
@@ -99,25 +117,10 @@ export function DetalleTurnoMobile() {
         </Box>
         <Box px="lg" pb="xl">
           <Stack gap="sm">
-            <Button
-              fullWidth
-              variant="light"
-              color="red"
-              size="lg"
-              radius="xl"
-              onClick={() => cancelar()}
-              loading={isPending}
-            >
+            <Button fullWidth variant="light" color="red" size="lg" radius="xl" onClick={() => cancelar()} loading={isPending}>
               Sí, cancelar
             </Button>
-            <Button
-              fullWidth
-              variant="default"
-              size="lg"
-              radius="xl"
-              onClick={closeDrawer}
-              disabled={isPending}
-            >
+            <Button fullWidth variant="default" size="lg" radius="xl" onClick={closeDrawer} disabled={isPending}>
               No, volver
             </Button>
           </Stack>
