@@ -20,7 +20,7 @@ export default function TurnosTable({ turno, dni }) {
   }
 
   const rows = turno?.map((item) => {
-    const badgeColor = item.estado === 'activo' ? 'green' : 'red'
+    const badgeColor = item.estado === 'activo' ? 'green' : item.estado === 'cancelado' ? 'red' : 'gray'
     return (
       <Table.Tr key={item.id_turno}>
         <Table.Td><Text fz="sm">{item.fecha_turno}</Text></Table.Td>
@@ -33,7 +33,7 @@ export default function TurnosTable({ turno, dni }) {
         </Table.Td>
         <Table.Td><Text fz="sm">{item.tipo}</Text></Table.Td>
         <Table.Td>
-          <Badge variant="dot" color={badgeColor} size="md" radius="xl" tt="capitalize">
+          <Badge variant={item.estado === "completado" ? "light" : "dot"} color={badgeColor} size="md" radius="xl" tt="capitalize">
             {item.estado}
           </Badge>
         </Table.Td>

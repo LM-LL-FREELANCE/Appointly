@@ -3,8 +3,8 @@ import { PageHeader } from "../../../components/PageHeader.jsx"
 import { Text, Stack, Group, Avatar, SegmentedControl, Box, Alert, Loader } from "@mantine/core"
 import { TurnoCard } from "./TurnoCard.jsx"
 import TurnosTable from "./TurnosTable.jsx"
-import { useQuery } from "@tanstack/react-query"
-import { getTurnosClienteByDni } from "../../../services/clientes.js"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { getTurnosClienteByDni, cancelTurnoById } from "../../../services/clientes.js"
 
 
 const DNI = '25890123'
@@ -15,19 +15,57 @@ export default function MisTurnos() {
 
   const [estado, setEstado] = useState('activo')
 
-  const { data, isPending, isError } = useQuery({
+  const { data: [activos, pasados] = [[], []], isPending, isError } = useQuery({
     queryKey: ['turnos', DNI],
     queryFn: () => getTurnosClienteByDni({ dni: DNI, rol: 'cliente', estado: estado }),
-    select: (data) => data.map(t => ({
-      ...t,
-      fecha_turno: new Date(t.fecha_turno).toLocaleDateString('es-AR', {
-        timeZone: 'UTC',
-        weekday: 'short',
-        day: 'numeric',
-        month: 'short'
-      }),
-      hora_turno: t.hora_turno.slice(0, 5),
-    }))
+    select: (data) => {
+      const now = new Date();
+      return data.reduce(
+        ([activos, pasados], t) => {
+          const baseDate = new Date(t.fecha_turno);
+          const [h, m] = t.hora_turno.split(':');
+          const turnoDate = new Date(
+            baseDate.getUTCFullYear(),
+            baseDate.getUTCMonth(),
+            baseDate.getUTCDate(),
+            +h, +m
+          );
+
+          const mapped = {
+            ...t,
+            fecha_turno: baseDate.toLocaleDateString('es-AR', {
+              timeZone: 'UTC',
+              weekday: 'short',
+              day: 'numeric',
+              month: 'short',
+            }),
+            hora_turno: t.hora_turno.slice(0, 5),
+          };
+
+          if (t.estado === 'cancelado' || turnoDate < now) {
+            const estado = t.estado === 'cancelado' ? 'cancelado' : 'completado';
+            return [activos, [...pasados, { ...mapped, estado }]];
+          }
+
+          return [[...activos, mapped], pasados];
+        },
+        [[], []]
+      );
+    }
+  });
+
+  const queryClient = useQueryClient();
+
+  const { mutate: cancelTurno, isPending: isSaving } = useMutation({
+    mutationFn: async () => {
+      await cancelTurnoById(activos.id_turno, DNI, 'cliente')
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cancelados', DNI] })
+    },
+    onError: (err) => {
+      console.error('[Cancelacion] Error al cancelar:', err.message);
+    },
   });
 
   return (
@@ -59,15 +97,19 @@ export default function MisTurnos() {
       {!isPending && !isError && (
         <>
           <Box px={{ base: 0, md: 'xl' }} visibleFrom="md">
-            <TurnosTable turno={data} dni={DNI} />
+            {estado === 'activo' ? (
+              <TurnosTable turno={activos} dni={DNI} />
+            ) : (
+              <TurnosTable turno={pasados} dni={DNI} />
+            )}
           </Box>
 
-          <Stack gap="sm" pb={10} hiddenFrom="md">
+          {/* <Stack gap="sm" pb={10} hiddenFrom="md">
             <SegmentedControl fullWidth size="xl" radius="lg" value={estado} onChange={setEstado} data={[{ label: 'Próximos', value: 'activo' }, { label: 'Historial', value: 'cancelado' }]} />
             {data.map((turno) => (
               <TurnoCard key={turno.id_turno} turno={turno} estado={estado} />
             ))}
-          </Stack>
+          </Stack> */}
         </>
       )}
     </>

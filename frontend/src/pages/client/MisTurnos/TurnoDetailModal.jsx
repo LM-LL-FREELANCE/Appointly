@@ -24,7 +24,7 @@ export function TurnoDetailModal({ opened, onClose, turno, dni }) {
     queryFn: () => getTurnoById({ id_turno: turno.id_turno, dni, rol: 'cliente' }),
   })
 
-  const badgeColor = turno.estado === 'activo' ? 'green' : 'red'
+  const badgeColor = turno.estado === 'activo' ? 'green' : turno.estado === 'cancelado' ? 'red' : 'gray'
 
   const reservadoEl = detail?.creado_en
     ? new Date(detail.creado_en).toLocaleString('es-AR', {
@@ -62,7 +62,7 @@ export function TurnoDetailModal({ opened, onClose, turno, dni }) {
           <Text fz="sm" fw={500}>{turno.hora_turno} hs</Text>
         </DetailRow>
         <DetailRow label="Estado">
-          <Badge variant="dot" color={badgeColor} size="md" radius="xl" tt="capitalize">
+          <Badge variant={turno.estado === "completado" ? "light" : "dot"} color={badgeColor} size="md" radius="xl" tt="capitalize">
             {turno.estado}
           </Badge>
         </DetailRow>

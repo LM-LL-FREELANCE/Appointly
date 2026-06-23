@@ -41,3 +41,17 @@ export const getTurnoById = async ({ id_turno, dni, rol }) => {
     return r.json()
   })
 }
+
+export const cancelTurnoById = async (id, requesterDni, requesterRol) => {
+  return await fetch(`${BASE_URL}/api/turnos/${id}/cancelar`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-user-dni': requesterDni,
+      'x-user-rol': requesterRol,
+    }
+  }).then((r) => {
+    if (!r.ok) throw new Error('Error al cancelar el turno')
+    return r.json()
+  })
+}
