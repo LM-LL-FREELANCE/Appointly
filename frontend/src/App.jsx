@@ -14,7 +14,7 @@ import Turnos from './pages/Turnos.jsx'
 import Horarios from './pages/Horarios.jsx'
 import Buscar from './pages/Buscar.jsx'
 import Reservar from './pages/Reservar.jsx'
-import MisTurnos from './pages/MisTurnos.jsx'
+import MisTurnos from './pages/client/MisTurnos/MisTurnos.jsx'
 import User from './pages/User.jsx'
 
 /*Hook and some buttons */
@@ -36,7 +36,7 @@ export default function App() {
   const defaultLinks = [
     { label: "Buscar Doctores", path: "/buscar", element: <Buscar /> },
     { label: "Reservar Turno", path: "/reservar", element: <Reservar /> },
-    { label: "Mis Turnos", path: "/misturnos", element: <MisTurnos /> },
+    { label: "Mis Turnos", path: "/misturnos/*", element: <MisTurnos /> },
   ]
   const links = (rol === "profesional") ? linksForProfesional : defaultLinks
 
