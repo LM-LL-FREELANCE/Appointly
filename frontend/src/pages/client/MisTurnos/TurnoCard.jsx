@@ -2,13 +2,14 @@ import { Avatar, Badge, Button, Group, Paper, Stack, Text } from '@mantine/core'
 import { Link } from 'react-router-dom'
 
 export function TurnoCard({ turno, estado }) {
+  const badgeColor = estado === 'activo' ? 'green' : estado === 'cancelado' ? 'red' : 'gray'
 
   return (
     <Paper withBorder radius="lg" p="md">
       <Stack gap="md">
         <Group justify="space-between" align="center" wrap="nowrap">
           <Text fw={700} fz="lg">{turno.fecha_turno} · {turno.hora_turno}</Text>
-          <Badge variant="dot" color={estado === 'activo' ? 'green' : 'red'} radius="xl" size="lg">
+          <Badge variant="dot" color={badgeColor} radius="xl" size="lg">
             {estado}
           </Badge>
         </Group>

@@ -36,7 +36,7 @@ export default function App() {
   const defaultLinks = [
     { label: "Buscar Doctores", path: "/buscar", element: <Buscar /> },
     { label: "Reservar Turno", path: "/reservar", element: <Reservar /> },
-    { label: "Mis Turnos", path: "/misturnos/*", element: <MisTurnos /> },
+    { label: "Mis Turnos", path: "/misturnos", element: <MisTurnos /> },
   ]
   const links = (rol === "profesional") ? linksForProfesional : defaultLinks
 

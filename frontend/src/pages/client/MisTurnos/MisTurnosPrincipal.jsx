@@ -3,8 +3,8 @@ import { PageHeader } from "../../../components/PageHeader.jsx"
 import { Text, Stack, Group, Avatar, SegmentedControl, Box, Alert, Loader } from "@mantine/core"
 import { TurnoCard } from "./TurnoCard.jsx"
 import TurnosTable from "./TurnosTable.jsx"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { getTurnosClienteByDni, cancelTurnoById } from "../../../services/clientes.js"
+import { useQuery } from "@tanstack/react-query"
+import { getTurnosClienteByDni } from "../../../services/clientes.js"
 
 
 const DNI = '25890123'
@@ -52,20 +52,6 @@ export default function MisTurnos() {
         [[], []]
       );
     }
-  });
-
-  const queryClient = useQueryClient();
-
-  const { mutate: cancelTurno, isPending: isSaving } = useMutation({
-    mutationFn: async () => {
-      await cancelTurnoById(activos.id_turno, DNI, 'cliente')
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['cancelados', DNI] })
-    },
-    onError: (err) => {
-      console.error('[Cancelacion] Error al cancelar:', err.message);
-    },
   });
 
   return (

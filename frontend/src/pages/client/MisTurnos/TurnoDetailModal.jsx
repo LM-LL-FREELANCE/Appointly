@@ -18,7 +18,7 @@ function DetailRow({ label, children }) {
   )
 }
 
-export function TurnoDetailModal({ opened, onClose, turno, dni }) {
+export function TurnoDetailModal({ opened, onClose, onCancelRequest, turno, dni }) {
   const { data: detail } = useQuery({
     queryKey: ['turno', turno.id_turno],
     queryFn: () => getTurnoById({ id_turno: turno.id_turno, dni, rol: 'cliente' }),
@@ -62,7 +62,7 @@ export function TurnoDetailModal({ opened, onClose, turno, dni }) {
           <Text fz="sm" fw={500}>{turno.hora_turno} hs</Text>
         </DetailRow>
         <DetailRow label="Estado">
-          <Badge variant={turno.estado === "completado" ? "light" : "dot"} color={badgeColor} size="md" radius="xl" tt="capitalize">
+          <Badge variant="dot" color={badgeColor} size="md" radius="xl" tt="capitalize">
             {turno.estado}
           </Badge>
         </DetailRow>
@@ -74,7 +74,9 @@ export function TurnoDetailModal({ opened, onClose, turno, dni }) {
       </Box>
       <Box px="lg" py="md">
         <Group justify="flex-end" gap="sm">
-          <Button variant="subtle" color="red">Cancelar turno</Button>
+          {turno.estado === 'activo' && (
+            <Button variant="subtle" color="red" onClick={onCancelRequest}>Cancelar turno</Button>
+          )}
           <Button variant="default" onClick={onClose}>Cerrar</Button>
         </Group>
       </Box>
