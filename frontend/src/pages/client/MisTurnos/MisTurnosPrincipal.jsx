@@ -90,12 +90,12 @@ export default function MisTurnos() {
             )}
           </Box>
 
-          {/* <Stack gap="sm" pb={10} hiddenFrom="md">
+          <Stack gap="sm" pb={10} hiddenFrom="md">
             <SegmentedControl fullWidth size="xl" radius="lg" value={estado} onChange={setEstado} data={[{ label: 'Próximos', value: 'activo' }, { label: 'Historial', value: 'cancelado' }]} />
-            {data.map((turno) => (
+            {(estado === 'activo' ? activos : pasados).map((turno) => (
               <TurnoCard key={turno.id_turno} turno={turno} estado={estado} />
             ))}
-          </Stack> */}
+          </Stack>
         </>
       )}
     </>

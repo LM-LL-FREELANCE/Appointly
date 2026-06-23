@@ -23,8 +23,8 @@ export function TurnoCard({ turno, estado }) {
         </Group>
 
         <Group grow gap="sm">
-          <Button variant="default" radius="md" component={Link} to="detalle" state={{ turno }} size="lg">Detalle</Button>
-          <Button variant="light" color="red" radius="md" component={Link} to="cancelar" state={{ turno }} size="lg">Cancelar</Button>
+          <Button variant="default" radius="md" component={Link} to="/misturnos/detalle" state={{ turno }} size="lg">Detalle</Button>
+          <Button variant="light" color="red" radius="md" component={Link} to="/misturnos/detalle" state={{ turno, openCancel: true }} size="lg">Cancelar</Button>
         </Group>
       </Stack>
     </Paper>
