@@ -103,4 +103,28 @@ export class TurnosController {
     }
   }
 
+  static async getAgenda(req, res, next) {
+    const { profesional, desde, hasta, estado } = req.query
+
+    if (!profesional || !desde || !hasta) {
+      return res.status(400).json({ error: '"profesional", "desde" y "hasta" son obligatorios', code: 'VALIDATION_FAILED' })
+    }
+    if (!esFecha(desde) || !esFecha(hasta)) {
+      return res.status(400).json({ error: 'las fechas deben tener formato YYYY-MM-DD', code: 'VALIDATION_FAILED' })
+    }
+    if (desde > hasta) {
+      return res.status(400).json({ error: '"desde" no puede ser posterior a "hasta"', code: 'VALIDATION_FAILED' })
+    }
+    if (String(profesional) !== req.user.dni) {
+      return res.status(403).json({ error: 'No podés ver la agenda de otro profesional', code: 'FORBIDDEN' })
+    }
+
+    try {
+      const agenda = await TurnosModel.getAgenda({ dni_profesional: profesional, desde, hasta, estado })
+      return res.status(200).json(agenda)
+    } catch (err) {
+      next(err)
+    }
+  }
+
 }

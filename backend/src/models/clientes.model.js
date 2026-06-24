@@ -55,4 +55,13 @@ export class ClientesModel {
 
     return rows.length > 0
   }
+
+  static async getClienteByDni({ dni }) {
+    const [rows] = await pool.query(`
+        SELECT c.dni_cliente, c.nombre, c.apellido, o.nombre_obra_social AS "obra_social" FROM 
+        cliente c LEFT JOIN obra_social o ON c.id_obra_social = o.id_obra_social WHERE c.dni_cliente = ?
+        `, [dni])
+
+    return rows[0] ?? null
+  }
 }

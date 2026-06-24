@@ -61,4 +61,20 @@ export class TurnosModel {
     const [rows] = await pool.query(`SELECT * FROM turno WHERE id_turno = ?`, [id])
     return rows[0]
   }
+
+  static async getAgenda({ dni_profesional, desde, hasta, estado }) {
+    let query = `SELECT t.id_turno, t.fecha_turno, t.hora_turno, t.estado, t.cancelado_en, 
+    c.dni_cliente AS "dni", c.nombre, c.apellido FROM turno t INNER JOIN cliente c ON t.dni_cliente = c.dni_cliente 
+    WHERE t.dni_profesional = ? AND t.fecha_turno BETWEEN ? AND ?
+    `
+
+    const params = [dni_profesional, desde, hasta]
+    if (estado) {
+      query += `AND t.estado = ?`
+      params.push(estado)
+    }
+    query += ` ORDER BY t.fecha_turno, t.hora_turno`
+    const [rows] = await pool.query(query, params)
+    return rows
+  }
 }
