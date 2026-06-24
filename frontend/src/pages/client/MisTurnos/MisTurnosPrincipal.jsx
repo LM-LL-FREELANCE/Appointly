@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useLocation } from "react-router-dom"
 import { PageHeader } from "../../../components/PageHeader.jsx"
 import { Text, Stack, Group, Avatar, SegmentedControl, Box, Alert, Loader } from "@mantine/core"
 import { TurnoCard } from "./TurnoCard.jsx"
@@ -13,7 +14,8 @@ const DNI = '25890123'
 
 export default function MisTurnos() {
 
-  const [estado, setEstado] = useState('activo')
+  const { state } = useLocation()
+  const [estado, setEstado] = useState(state?.tab ?? 'activo')
 
   const { data: [activos, pasados] = [[], []], isPending, isError } = useQuery({
     queryKey: ['turnos', DNI],
