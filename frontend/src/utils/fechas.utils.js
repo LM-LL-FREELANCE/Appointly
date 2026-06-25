@@ -10,3 +10,10 @@ export function rangoSemana(fechaBase) {
   domingo.setDate(lunes.getDate() + 6);
   return { desde: aISO(lunes), hasta: aISO(domingo) };
 }
+
+export function rangoMes(fechaBase = new Date()) {
+  const d = new Date(fechaBase);
+  const primero = new Date(d.getFullYear(), d.getMonth(), 1);
+  const ultimo = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+  return { desde: aISO(primero), hasta: aISO(ultimo) };
+}

@@ -63,9 +63,10 @@ const Reservar = () => {
   const confirmTurno = () => {
     mutate({
       dni_profesional: doctor.dni_profesional,
-      dni_cliente: userClient,
       fecha_turno: aISO(fechaSeleccionada),
       hora_turno: slotSeleccionado,
+      userDni: userClient,
+      userRol: 'cliente',
     }, {
       onSuccess: () => {
         setTurnoConfirmado(true)

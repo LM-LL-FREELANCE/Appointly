@@ -35,8 +35,8 @@ export class TurnosController {
     const requesterRol = req.user.rol
 
     try {
-      await TurnosService.cancelTurnoById(id, requesterDni, requesterRol)
-      res.status(204).send()
+      const turno = await TurnosService.cancelTurnoById(id, requesterDni, requesterRol)
+      res.status(200).json(turno)
     } catch (err) {
       next(err)
     }
@@ -75,7 +75,15 @@ export class TurnosController {
       if (!parsedSchema.success) {
         return res.status(400).json({ error: 'invalid', detalles: parsedSchema.error.flatten().fieldErrors });
       }
-      const { dni_profesional, dni_cliente, fecha_turno, hora_turno } = parsedSchema.data
+      const { dni_profesional, fecha_turno, hora_turno } = parsedSchema.data
+
+      const dni_cliente = req.user.rol === 'cliente'
+        ? Number(req.user.dni)
+        : parsedSchema.data.dni_cliente
+
+      if (!dni_cliente) {
+        return res.status(400).json({ error: 'dni_cliente es requerido cuando el rol es profesional', code: 'VALIDATION_FAILED' })
+      }
 
       const [existeProf, existeCli] = await Promise.all([
         ProfesionalesModel.existe({ dni: dni_profesional }),

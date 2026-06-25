@@ -31,7 +31,7 @@ export class TurnosModel {
   static async cancelTurno(id) {
     await pool.query(`
         UPDATE turno SET estado = 'cancelado', cancelado_en = NOW()
-        WHERE turno.id_turno = ?
+        WHERE turno.id_turno = ? 
         `, [id])
 
     return this.getTurnoById(id)
