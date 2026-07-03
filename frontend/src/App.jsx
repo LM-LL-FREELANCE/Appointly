@@ -8,7 +8,7 @@ import Login from './pages/Login.jsx'
 import SignUp from './pages/SignUp.jsx'
 
 /*Other components */
-import Dashboard from './pages/Dashboard.jsx'
+import Dashboard from './pages/professional/Dashboard/Dashboard.jsx'
 import Agenda from './pages/Agenda.jsx'
 import Turnos from './pages/Turnos.jsx'
 import Horarios from './pages/Horarios.jsx'
