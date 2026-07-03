@@ -28,7 +28,7 @@ export default function App() {
   const [rol, setRol] = useState("profesional") // This is just for testing, in a real app you would get the role from the user context or auth state
 
   const linksForProfesional = [
-    { label: "Dashboard", path: "/", element: <Dashboard /> },
+    { label: "Dashboard", path: "/dashboard", element: <Dashboard /> },
     { label: "Agenda", path: "/agenda", element: <Agenda /> },
     { label: "Turnos", path: "/turnos", element: <Turnos /> },
     { label: "Horarios de Atencion", path: "/horarios", element: <Horarios /> },
