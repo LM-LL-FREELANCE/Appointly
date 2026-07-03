@@ -1,5 +1,5 @@
 import { PageHeader } from '../../../components/PageHeader.jsx'
-import { Group, Text, Stack, Avatar, Paper } from "@mantine/core"
+import { Group, Text, Stack, Avatar, Paper, Box, SimpleGrid } from "@mantine/core"
 import { BarChart } from '@mantine/charts'
 import { StatCard } from './StatCard.jsx'
 import { ProximoTurno } from './ProximoTurno.jsx'
@@ -62,34 +62,47 @@ export default function Dashboard() {
               })}
             </Text>
           </Stack>
-          <Group>
+          <Group visibleFrom="sm">
             <Avatar radius="xl" alt="" />
           </Group>
         </Group>
       </PageHeader>
 
-      <div style={{
-        flex: 1,
-        display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
-        gridTemplateRows: 'auto 1fr',
-        gap: 8,
-        minHeight: 0,
-      }}>
+      {/* Mobile layout */}
+      <Stack hiddenFrom="sm" gap="sm" p="xs" style={{ flex: 1, overflowY: 'auto' }}>
+        <SimpleGrid cols={2}>
+          <StatCard label="Turnos hoy" value={6} color="brand" />
+          <StatCard label="Slots libres" value={4} color="cyan" />
+        </SimpleGrid>
+        <TurnosDeHoy />
+      </Stack>
+
+      {/* Desktop layout */}
+      <Box
+        visibleFrom="sm"
+        style={{
+          flex: 1,
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, 1fr)',
+          gridTemplateRows: 'auto 1fr',
+          gap: 8,
+          minHeight: 0,
+        }}
+      >
         <StatCard label="Turnos hoy" value={6} color="brand" />
         <StatCard label="Esta semana" value={23} color="accent" />
         <StatCard label="Cancelados (7d)" value={3} color="red" />
         <StatCard label="Slots libres hoy" value={4} color="cyan" />
 
-        {/* col 1–3: fill remaining height, scroll interno sin scrollbar */}
+        {/* col 1–3: fill remaining height, internal scroll */}
         <TurnosDeHoy />
 
-        {/* col 4: ProximoTurno + TurnosPorDia apilados, TurnosPorDia crece */}
+        {/* col 4: ProximoTurno + TurnosPorDia stacked */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, minHeight: 0 }}>
           <ProximoTurno />
           <TurnosPorDia />
         </div>
-      </div>
+      </Box>
     </div>
   )
 }

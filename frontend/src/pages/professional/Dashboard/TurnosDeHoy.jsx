@@ -32,6 +32,7 @@ export function TurnosDeHoy() {
           to="/agenda"
           fz="sm"
           fw={500}
+          visibleFrom="sm"
           style={{ width: 120, textAlign: 'center' }}
         >
           Ver agenda →
@@ -50,18 +51,19 @@ export function TurnosDeHoy() {
                   </Table.Td>
                   <Table.Td>
                     <Group gap="sm" wrap="nowrap">
-                      <Avatar radius="xl" size="sm" />
+                      <Avatar radius="xl" size="sm" visibleFrom="sm" />
                       <Text fz="sm">{t.paciente ?? '—'}</Text>
                     </Group>
                   </Table.Td>
                   {/* v2: reserved (e.g. specialty / reason) */}
-                  <Table.Td />
+                  <Table.Td visibleFrom="sm" />
                   <Table.Td w={120} ta="center">
                     <Badge
                       variant="dot"
                       color={color}
                       radius="xl"
-                      style={{ textTransform: 'none', minWidth: 90, justifyContent: 'center' }}
+                      tt="uppercase"
+                      style={{ minWidth: 90, justifyContent: 'center' }}
                     >
                       {label}
                     </Badge>
