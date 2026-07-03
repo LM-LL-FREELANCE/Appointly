@@ -20,11 +20,11 @@ const turnosPorDia = [
 
 function TurnosPorDia() {
   return (
-    <Paper withBorder radius="lg" p="lg" style={{ flex: 2 }}>
-      <Stack gap="xl">
-        <Text fw={700} fz="lg">Turnos por día</Text>
+    <Paper withBorder radius="lg" p="lg" style={{ flex: 2, display: 'flex', flexDirection: 'column' }}>
+      <Text fw={700} fz="lg" mb="md">Turnos por día</Text>
+      <div style={{ flex: 1, minHeight: 0 }}>
         <BarChart
-          h={120}
+          h="100%"
           data={turnosPorDia}
           dataKey="dia"
           series={[{ name: 'turnos', color: 'brand.6' }]}
@@ -36,7 +36,7 @@ function TurnosPorDia() {
           withLegend={false}
           barProps={{ radius: 4 }}
         />
-      </Stack>
+      </div>
     </Paper>
   )
 }
