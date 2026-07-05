@@ -1,9 +1,10 @@
 import { PageHeader } from '../../../components/PageHeader.jsx'
-import { Group, Text, Stack, Avatar, Paper, Box, SimpleGrid } from "@mantine/core"
+import { Group, Text, Stack, Avatar, Paper, Box, SimpleGrid, Menu } from "@mantine/core"
 import { BarChart } from '@mantine/charts'
 import { StatCard } from './StatCard.jsx'
 import { ProximoTurno } from './ProximoTurno.jsx'
 import { TurnosDeHoy } from './TurnosDeHoy.jsx'
+import { Link } from 'react-router-dom';
 
 const turnosPorDia = [
   { dia: 'L', turnos: 8 },
@@ -63,7 +64,24 @@ export default function Dashboard() {
             </Text>
           </Stack>
           <Group visibleFrom="sm">
-            <Avatar radius="xl" alt="" />
+            <Menu shadow="md" width={200} position="bottom-end">
+              <Menu.Target>
+                <Avatar radius="xl" style={{ cursor: 'pointer' }} />
+              </Menu.Target>
+
+              <Menu.Dropdown>
+                <Menu.Label>Mi Perfil</Menu.Label>
+                <Menu.Item
+                  component={Link}
+                  to="/miperfil"
+                >
+                  Configuración
+                </Menu.Item>
+              </Menu.Dropdown>
+            </Menu>
+
+
+            {/* <Avatar radius="xl" alt="" /> */}
           </Group>
         </Group>
       </PageHeader>

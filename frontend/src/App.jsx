@@ -16,6 +16,7 @@ import Buscar from './pages/Buscar.jsx'
 import Reservar from './pages/Reservar.jsx'
 import MisTurnos from './pages/client/MisTurnos/MisTurnos.jsx'
 import User from './pages/User.jsx'
+import MiPerfil from './pages/MiPerfil.jsx'
 
 /*Hook and some buttons */
 import { UserButton } from './components/UserButton.jsx'
@@ -81,6 +82,7 @@ export default function App() {
             <Route path="/signup" element={<Login />} />
             <Route path="/login" element={<SignUp />} />
             <Route path="/user" element={<User />} />
+            <Route path="/miperfil" element={<MiPerfil />} />
           </Routes>
         </AppShell.Main>
       </AppShell>
