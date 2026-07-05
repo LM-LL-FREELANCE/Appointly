@@ -21,6 +21,45 @@ export default function MiPerfil() {
         </Group>
       </PageHeader>
 
+      {/* Mobile layout */}
+      <Stack gap="md" px="md" pb="xl" hiddenFrom="md">
+        <Stack align="center" gap="sm">
+          <Avatar size={120} radius="50%" />
+          <Button variant="outline" size="sm" color="dark">Cambiar foto</Button>
+        </Stack>
+
+        <TextInput
+          label="Nombre"
+          value="Marta"
+          readOnly
+          rightSection={<IconLock size={16} color="var(--mantine-color-yellow-6)" />}
+        />
+        <TextInput
+          label="Apellido"
+          value="Pérez"
+          readOnly
+          rightSection={<IconLock size={16} color="var(--mantine-color-yellow-6)" />}
+        />
+        <TextInput label="DNI" value="27890123" readOnly />
+        <TextInput label="Correo" required value="m.perez@appointly.app" />
+
+        <TagsInput
+          label="Especialidades"
+          value={especialidades}
+          onChange={setEspecialidades}
+          placeholder="+ agregar..."
+        />
+        <TagsInput
+          label="Obras sociales"
+          value={obrasSociales}
+          onChange={setObrasSociales}
+          placeholder="+ agregar..."
+        />
+
+        <Button fullWidth mt="sm">Guardar</Button>
+      </Stack>
+
+      {/* Desktop layout */}
       <Group align="flex-start" gap="lg" p="md" wrap="nowrap" visibleFrom="md">
         <Stack align="center" w={220} gap="md">
           <Avatar size={120} radius="50%" />
