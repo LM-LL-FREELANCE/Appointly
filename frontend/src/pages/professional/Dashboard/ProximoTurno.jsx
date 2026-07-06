@@ -50,8 +50,8 @@ export function ProximoTurno({ turno }) {
   const turnoParaCancelar = turno ? {
     fecha_turno: turno.fecha_turno?.slice(0, 10),
     hora_turno:  turno.hora_turno?.slice(0, 5),
-    p_nombre:    turno.c_nombre,
-    p_apellido:  turno.c_apellido,
+    p_nombre:    turno.nombre,
+    p_apellido:  turno.apellido,
   } : null
 
   return (
@@ -64,7 +64,7 @@ export function ProximoTurno({ turno }) {
             <Group gap="lg">
               <Avatar radius="xl" size="xl" />
               <Stack gap={4}>
-                <Text fw={700} fz="md">{turno.c_apellido}, {turno.c_nombre}</Text>
+                <Text fw={700} fz="md">{turno.apellido}, {turno.nombre}</Text>
                 <Text c="dimmed" fz="sm">{turno.hora_turno?.slice(0, 5)}</Text>
               </Stack>
             </Group>

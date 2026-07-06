@@ -13,7 +13,7 @@ export function TurnosDeHoy({ turnos = [] }) {
       withBorder
       radius="lg"
       p="lg"
-      style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}
+      style={{ display: 'flex', flexDirection: 'column' }}
     >
       <Group mb="md" align="center">
         <Text fw={700} fz="lg" style={{ flex: 1 }}>Turnos de hoy</Text>
@@ -32,7 +32,7 @@ export function TurnosDeHoy({ turnos = [] }) {
       {turnos.length === 0 ? (
         <Text c="dimmed" fz="sm" ta="center" py="xl">No hay turnos para hoy</Text>
       ) : (
-        <div style={{ flex: 1, overflowY: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+        <div style={{ overflowY: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           <Table verticalSpacing="sm">
             <Table.Tbody>
               {turnos.map((t) => {

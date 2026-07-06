@@ -49,7 +49,7 @@ export function TurnoProDetailModal({ opened, onClose, onCancelRequest, turno, d
         <Divider />
         <DetailRow label="Paciente">
           <Text fz="sm" fw={500}>
-            {detail ? `${detail.c_nombre} ${detail.c_apellido}` : `${turno.c_nombre} ${turno.c_apellido}`}
+            {detail ? `${detail.c_nombre} ${detail.c_apellido}` : `${turno.nombre} ${turno.apellido}`}
           </Text>
         </DetailRow>
         {detail?.tipo && (

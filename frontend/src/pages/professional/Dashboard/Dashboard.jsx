@@ -30,7 +30,7 @@ function TurnosPorDia({ data }) {
   return (
     <Paper withBorder radius="lg" p="lg" style={{ flex: 2, display: 'flex', flexDirection: 'column' }}>
       <Text fw={700} fz="lg" mb="md">Turnos por día</Text>
-      <div style={{ flex: 1, minHeight: 0 }}>
+      <div style={{ flex: 1, minHeight: 180 }}>
         <BarChart
           h="100%"
           data={data}
@@ -55,12 +55,14 @@ export default function Dashboard() {
     queryFn: () => getProfesionalByDni({ dni: CURRENT_DNI }),
   })
 
+  const hoy   = aISO(new Date())
+  const hasta = aISO(new Date(Date.now() + 6 * 86_400_000))
+
   const { data: turnos = [] } = useQuery({
-    queryKey: ['turnos-profesional', CURRENT_DNI],
-    queryFn: () => getTurnosProfesional({ dni: CURRENT_DNI }),
+    queryKey: ['turnos-profesional', CURRENT_DNI, hoy],
+    queryFn: () => getTurnosProfesional({ dni: CURRENT_DNI, desde: hoy, hasta }),
   })
 
-  const hoy = aISO(new Date())
   const turnosHoy    = turnos.filter(t => t.fecha_turno?.slice(0, 10) === hoy && t.estado === 'activo').length
   const estaSemana   = turnos.filter(t => t.estado === 'activo').length
   const cancelados7d = turnos.filter(t => t.estado === 'cancelado').length
@@ -71,7 +73,7 @@ export default function Dashboard() {
     .map(t => ({
       id:       t.id_turno,
       hora:     t.hora_turno?.slice(0, 5),
-      paciente: `${t.c_nombre} ${t.c_apellido}`,
+      paciente: `${t.nombre} ${t.apellido}`,
       estado:   t.estado,
     }))
 
@@ -125,12 +127,16 @@ export default function Dashboard() {
       </PageHeader>
 
       {/* Mobile layout */}
-      <Stack hiddenFrom="sm" gap="sm" p="xs" style={{ flex: 1, overflowY: 'auto' }}>
+      <Stack hiddenFrom="sm" gap="sm" p="xs" pb="xl" style={{ flex: 1, overflowY: 'auto' }}>
         <SimpleGrid cols={2}>
-          <StatCard label="Turnos hoy" value={turnosHoy} color="brand" />
-          <StatCard label="Slots libres" value={0} color="cyan" />
+          <StatCard label="Turnos hoy"      value={turnosHoy}    color="brand"  />
+          <StatCard label="Esta semana"     value={estaSemana}   color="accent" />
+          <StatCard label="Cancelados (7d)" value={cancelados7d} color="red"    />
+          <StatCard label="Slots libres"    value={0}            color="cyan"   />
         </SimpleGrid>
+        <ProximoTurno turno={proximoTurno} />
         <TurnosDeHoy turnos={turnosDeHoy} />
+        <TurnosPorDia data={barData} />
       </Stack>
 
       {/* Desktop layout */}
