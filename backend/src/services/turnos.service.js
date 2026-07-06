@@ -1,5 +1,6 @@
 import { AppError } from "../utils/AppError.js"
 import { TurnosModel } from "../models/turnos.model.js"
+import { EmailService } from "./email.service.js"
 
 export class TurnosService {
 
@@ -24,7 +25,7 @@ export class TurnosService {
     return turno
   }
 
-  static async cancelTurnoById(id, requesterDni, requesterRol) {
+  static async cancelTurnoById(id, requesterDni, requesterRol, motivo) {
 
     const turno = await TurnosModel.getTurnoById(id)
 
@@ -38,7 +39,21 @@ export class TurnosService {
       throw new AppError("El turno ya fue cancelado.", 409, "ALREADY_CANCELLED")
     }
 
-    return TurnosModel.cancelTurno(id)
+    const turnoCancelado = await TurnosModel.cancelTurno(id)
+
+    // Aviso por email (hoy es un stub; ver EmailService). No bloquea la
+    // respuesta: si fallara el envío, la cancelación ya quedó hecha igual.
+    try {
+      if (requesterRol === "profesional") {
+        await EmailService.turnoCanceladoPorProfesional({ turno: turnoCancelado, motivo })
+      } else {
+        await EmailService.turnoCanceladoPorCliente({ turno: turnoCancelado })
+      }
+    } catch (err) {
+      console.error("[email] Error al enviar aviso de cancelación:", err)
+    }
+
+    return turnoCancelado
   }
 
 }

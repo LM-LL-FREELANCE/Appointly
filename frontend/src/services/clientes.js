@@ -42,14 +42,17 @@ export const getTurnoById = async ({ id_turno, dni, rol }) => {
   })
 }
 
-export const cancelTurnoById = async (id, requesterDni, requesterRol) => {
+export const cancelTurnoById = async (id, requesterDni, requesterRol, motivo) => {
   const r = await fetch(`${BASE_URL}/api/turnos/${id}/cancelacion`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'x-user-dni': requesterDni,
       'x-user-rol': requesterRol,
-    }
+    },
+    // El motivo es opcional (lo usa el profesional al cancelar). El backend
+    // lo pasa al email que se le envía al cliente.
+    body: JSON.stringify(motivo ? { motivo } : {}),
   })
   if (!r.ok) {
     const body = await r.json().catch(() => ({}))

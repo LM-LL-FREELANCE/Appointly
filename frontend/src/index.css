@@ -6,3 +6,18 @@
     font-size: 16px !important;
   }
 }
+
+/* Pinta de azul el día seleccionado en el calendario mensual (Schedule) */
+.dia-seleccionado span {
+  background-color: var(--mantine-primary-color-filled);
+  color: var(--mantine-primary-color-contrast);
+}
+
+/* Días pasados: se ven apagados/grises y no se pueden elegir */
+.dia-pasado {
+  background-color: var(--mantine-color-gray-1);
+  cursor: not-allowed;
+}
+.dia-pasado span {
+  color: var(--mantine-color-gray-5);
+}

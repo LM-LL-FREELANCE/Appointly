@@ -17,3 +17,16 @@ export function rangoMes(fechaBase = new Date()) {
   const ultimo = new Date(d.getFullYear(), d.getMonth() + 1, 0);
   return { desde: aISO(primero), hasta: aISO(ultimo) };
 }
+
+// fecha_turno viene como ISO completo ("2026-07-03T03:00:00.000Z"); la mostramos
+// corta y en UTC para que no se corra de día por la zona horaria.
+export const fechaCorta = (iso) =>
+  new Date(iso).toLocaleDateString('es-AR', {
+    timeZone: 'UTC',
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+  });
+
+// hora_turno viene con segundos ("09:00:00"); nos quedamos con HH:MM.
+export const horaCorta = (hora) => hora?.slice(0, 5);

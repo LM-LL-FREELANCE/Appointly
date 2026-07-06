@@ -45,11 +45,12 @@ const Reservar = () => {
     return new Intl.DateTimeFormat("es-AR", { weekday: "short", day: "numeric", month: "short" }).format(date);
   };
 
-  const handleFechaChange = (date) => {
-    if (date) {
-      const newDate = new Date(date);
-      newDate.setDate(newDate.getDate() + 1);
-      newDate.setHours(12, 0, 0, 0);
+  const handleFechaChange = (value) => {
+    if (value) {
+      // Mantine v9 entrega un string 'YYYY-MM-DD'. Lo construimos como fecha
+      // LOCAL (no con new Date(string), que lo interpreta en UTC y corre el día).
+      const [anio, mes, dia] = value.split('-').map(Number);
+      const newDate = new Date(anio, mes - 1, dia, 12, 0, 0, 0);
 
       setFechaSeleccionada(newDate);
       setSlotSeleccionado(null);

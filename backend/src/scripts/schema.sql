@@ -46,6 +46,7 @@ CREATE TABLE cliente (
     dni_cliente INT UNSIGNED PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
     apellido VARCHAR(100) NOT NULL,
+    correo VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     fecha_nacimiento DATE NOT NULL,
     genero ENUM('M', 'F', 'X') NOT NULL,

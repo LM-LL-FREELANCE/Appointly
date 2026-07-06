@@ -33,9 +33,10 @@ export class TurnosController {
     const { id } = req.params
     const requesterDni = req.user.dni
     const requesterRol = req.user.rol
+    const { motivo } = req.body ?? {}
 
     try {
-      const turno = await TurnosService.cancelTurnoById(id, requesterDni, requesterRol)
+      const turno = await TurnosService.cancelTurnoById(id, requesterDni, requesterRol, motivo)
       res.status(200).json(turno)
     } catch (err) {
       next(err)
