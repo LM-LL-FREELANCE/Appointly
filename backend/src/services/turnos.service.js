@@ -25,9 +25,6 @@ export class TurnosService {
     return turno
   }
 
-<<<<<<< HEAD
-  static async cancelTurnoById(id, requesterDni, requesterRol, motivo) {
-=======
   static async getTurnosByProfesional({ dni, desde, hasta, estado, requesterDni, requesterRol }) {
     if (requesterRol !== 'profesional' || String(requesterDni) !== String(dni)) {
       throw new AppError('Acceso denegado.', 403, 'FORBIDDEN')
@@ -36,7 +33,6 @@ export class TurnosService {
   }
 
   static async cancelTurnoById(id, requesterDni, requesterRol) {
->>>>>>> 6c68bbb (chore: fetchind data to Dashboard.jsx)
 
     const turno = await TurnosModel.getTurnoById(id)
 
