@@ -1,32 +1,39 @@
-import { PageHeader } from '../../../components/PageHeader.jsx'
+import { useQuery } from '@tanstack/react-query'
+import { useMediaQuery } from '@mantine/hooks'
 import { Group, Text, Stack, Avatar, Paper, Box, SimpleGrid, Menu } from "@mantine/core"
 import { BarChart } from '@mantine/charts'
+import { Link } from 'react-router-dom'
+import { PageHeader } from '../../../components/PageHeader.jsx'
 import { StatCard } from './StatCard.jsx'
 import { ProximoTurno } from './ProximoTurno.jsx'
 import { TurnosDeHoy } from './TurnosDeHoy.jsx'
-import { Link } from 'react-router-dom';
+import { getProfesionalByDni } from '../../../services/profesionales.js'
+import { getTurnosProfesional } from '../../../services/turnos.service.js'
+import { aISO } from '../../../utils/fechas.utils.js'
 
-const turnosPorDia = [
-  { dia: 'L', turnos: 8 },
-  { dia: 'M', turnos: 5 },
-  { dia: 'X', turnos: 10 },
-  { dia: 'J', turnos: 7 },
-  { dia: 'V', turnos: 12 },
-  { dia: 'L', turnos: 6 },
-  { dia: 'M', turnos: 9 },
-  { dia: 'X', turnos: 4 },
-  { dia: 'J', turnos: 11 },
-  { dia: 'V', turnos: 8 },
-]
+const CURRENT_DNI = '27845123'
+const DIA_LABEL = ['D', 'L', 'M', 'X', 'J', 'V', 'S']
 
-function TurnosPorDia() {
+function buildBarData(turnos) {
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date()
+    d.setDate(d.getDate() + i)
+    const fecha = aISO(d)
+    return {
+      dia: DIA_LABEL[d.getDay()],
+      turnos: turnos.filter(t => t.fecha_turno?.slice(0, 10) === fecha && t.estado === 'activo').length,
+    }
+  })
+}
+
+function TurnosPorDia({ data }) {
   return (
     <Paper withBorder radius="lg" p="lg" style={{ flex: 2, display: 'flex', flexDirection: 'column' }}>
       <Text fw={700} fz="lg" mb="md">Turnos por día</Text>
       <div style={{ flex: 1, minHeight: 0 }}>
         <BarChart
           h="100%"
-          data={turnosPorDia}
+          data={data}
           dataKey="dia"
           series={[{ name: 'turnos', color: 'brand.6' }]}
           tickLine="none"
@@ -43,6 +50,46 @@ function TurnosPorDia() {
 }
 
 export default function Dashboard() {
+  const { data: perfil } = useQuery({
+    queryKey: ['perfil', CURRENT_DNI],
+    queryFn: () => getProfesionalByDni({ dni: CURRENT_DNI }),
+  })
+
+  const { data: turnos = [] } = useQuery({
+    queryKey: ['turnos-profesional', CURRENT_DNI],
+    queryFn: () => getTurnosProfesional({ dni: CURRENT_DNI }),
+  })
+
+  const hoy = aISO(new Date())
+  const turnosHoy    = turnos.filter(t => t.fecha_turno?.slice(0, 10) === hoy && t.estado === 'activo').length
+  const estaSemana   = turnos.filter(t => t.estado === 'activo').length
+  const cancelados7d = turnos.filter(t => t.estado === 'cancelado').length
+  const barData      = buildBarData(turnos)
+
+  const turnosDeHoy = turnos
+    .filter(t => t.fecha_turno?.slice(0, 10) === hoy)
+    .map(t => ({
+      id:       t.id_turno,
+      hora:     t.hora_turno?.slice(0, 5),
+      paciente: `${t.c_nombre} ${t.c_apellido}`,
+      estado:   t.estado,
+    }))
+
+  const minAhora = new Date().getHours() * 60 + new Date().getMinutes()
+  const proximoTurno = turnos.find(t => {
+    if (t.estado !== 'activo') return false
+    const fecha = t.fecha_turno?.slice(0, 10)
+    if (fecha > hoy) return true
+    if (fecha === hoy) {
+      const [h, m] = (t.hora_turno ?? '').split(':').map(Number)
+      return h * 60 + m >= minAhora
+    }
+    return false
+  }) ?? null
+
+  const isDesktop = useMediaQuery('(min-width: 48em)')
+  const saludo = perfil ? `Hola, ${perfil.nombre} ${perfil.apellido}` : 'Hola'
+
   return (
     <div style={{
       height: 'calc(100dvh - var(--app-shell-padding) * 2)',
@@ -53,7 +100,7 @@ export default function Dashboard() {
       <PageHeader>
         <Group justify="space-between" style={{ flex: 1 }}>
           <Stack gap={0}>
-            <Text fw={600} fz={{ base: 'xl', sm: 'lg' }}>Hola, Dra. Pérez</Text>
+            <Text fw={600} fz={{ base: 'xl', sm: 'lg' }}>{saludo}</Text>
             <Text c="dimmed" visibleFrom="md" fz={{ base: 'md', sm: 'sm' }}>
               {new Date().toLocaleDateString('es-AR', {
                 timeZone: 'UTC',
@@ -68,20 +115,11 @@ export default function Dashboard() {
               <Menu.Target>
                 <Avatar radius="xl" style={{ cursor: 'pointer' }} />
               </Menu.Target>
-
               <Menu.Dropdown>
                 <Menu.Label>Mi Perfil</Menu.Label>
-                <Menu.Item
-                  component={Link}
-                  to="/miperfil"
-                >
-                  Configuración
-                </Menu.Item>
+                <Menu.Item component={Link} to="/miperfil">Configuración</Menu.Item>
               </Menu.Dropdown>
             </Menu>
-
-
-            {/* <Avatar radius="xl" alt="" /> */}
           </Group>
         </Group>
       </PageHeader>
@@ -89,10 +127,10 @@ export default function Dashboard() {
       {/* Mobile layout */}
       <Stack hiddenFrom="sm" gap="sm" p="xs" style={{ flex: 1, overflowY: 'auto' }}>
         <SimpleGrid cols={2}>
-          <StatCard label="Turnos hoy" value={6} color="brand" />
-          <StatCard label="Slots libres" value={4} color="cyan" />
+          <StatCard label="Turnos hoy" value={turnosHoy} color="brand" />
+          <StatCard label="Slots libres" value={0} color="cyan" />
         </SimpleGrid>
-        <TurnosDeHoy />
+        <TurnosDeHoy turnos={turnosDeHoy} />
       </Stack>
 
       {/* Desktop layout */}
@@ -107,18 +145,16 @@ export default function Dashboard() {
           minHeight: 0,
         }}
       >
-        <StatCard label="Turnos hoy" value={6} color="brand" />
-        <StatCard label="Esta semana" value={23} color="accent" />
-        <StatCard label="Cancelados (7d)" value={3} color="red" />
-        <StatCard label="Slots libres hoy" value={4} color="cyan" />
+        <StatCard label="Turnos hoy"      value={turnosHoy}    color="brand"  />
+        <StatCard label="Esta semana"     value={estaSemana}   color="accent" />
+        <StatCard label="Cancelados (7d)" value={cancelados7d} color="red"    />
+        <StatCard label="Slots libres hoy" value={0}           color="cyan"   />
 
-        {/* col 1–3: fill remaining height, internal scroll */}
-        <TurnosDeHoy />
+        <TurnosDeHoy turnos={turnosDeHoy} />
 
-        {/* col 4: ProximoTurno + TurnosPorDia stacked */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, minHeight: 0 }}>
-          <ProximoTurno />
-          <TurnosPorDia />
+          <ProximoTurno turno={proximoTurno} />
+          {isDesktop && <TurnosPorDia data={barData} />}
         </div>
       </Box>
     </div>
