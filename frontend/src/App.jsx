@@ -8,7 +8,7 @@ import Login from './pages/Login.jsx'
 import SignUp from './pages/SignUp.jsx'
 
 /*Other components */
-import Dashboard from './pages/Dashboard.jsx'
+import Dashboard from './pages/professional/Dashboard/Dashboard.jsx'
 import Agenda from './pages/Agenda.jsx'
 import Turnos from './pages/Turnos.jsx'
 import Horarios from './pages/Horarios.jsx'
@@ -16,6 +16,7 @@ import Buscar from './pages/Buscar.jsx'
 import Reservar from './pages/Reservar.jsx'
 import MisTurnos from './pages/client/MisTurnos/MisTurnos.jsx'
 import User from './pages/User.jsx'
+import MiPerfil from './pages/MiPerfil.jsx'
 
 /*Hook and some buttons */
 import { UserButton } from './components/UserButton.jsx'
@@ -28,7 +29,7 @@ export default function App() {
   const [rol, setRol] = useState("profesional") // This is just for testing, in a real app you would get the role from the user context or auth state
 
   const linksForProfesional = [
-    { label: "Dashboard", path: "/", element: <Dashboard /> },
+    { label: "Dashboard", path: "/dashboard", element: <Dashboard /> },
     { label: "Agenda", path: "/agenda", element: <Agenda /> },
     { label: "Turnos", path: "/turnos", element: <Turnos /> },
     { label: "Horarios de Atencion", path: "/horarios", element: <Horarios /> },
@@ -81,6 +82,7 @@ export default function App() {
             <Route path="/signup" element={<Login />} />
             <Route path="/login" element={<SignUp />} />
             <Route path="/user" element={<User />} />
+            <Route path="/miperfil" element={<MiPerfil />} />
           </Routes>
         </AppShell.Main>
       </AppShell>

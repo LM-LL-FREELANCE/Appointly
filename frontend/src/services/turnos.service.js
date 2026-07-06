@@ -15,6 +15,21 @@ export const getProfesionalesSlots = async ({ dni, desde, hasta }) => {
   return data
 }
 
+export const getTurnosProfesional = async ({ dni, desde, hasta } = {}) => {
+  const params = new URLSearchParams({ profesional: String(dni) })
+  if (desde) params.append('desde', desde)
+  if (hasta) params.append('hasta', hasta)
+
+  const r = await fetch(`${BASE_URL}/api/turnos?${params}`, {
+    headers: {
+      'x-user-dni': String(dni),
+      'x-user-rol': 'profesional',
+    },
+  })
+  if (!r.ok) throw new Error('Error al obtener los turnos')
+  return r.json()
+}
+
 export const createNewTurno = async ({ userDni, userRol, ...turno }) => {
   const response = await fetch(`${BASE_URL}/api/turnos`, {
     method: 'POST',

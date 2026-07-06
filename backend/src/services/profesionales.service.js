@@ -8,22 +8,22 @@ export class ProfesionalesService {
     return horarios
   }
 
-  static async checkOverlap(dni, {dia_semana, hora_inicio, hora_fin}, excludeId = null) {
-    const [result] = await ProfesionalesModel.checkOverlap(dni, {dia_semana, hora_inicio, hora_fin}, excludeId)
+  static async checkOverlap(dni, { dia_semana, hora_inicio, hora_fin }, excludeId = null) {
+    const [result] = await ProfesionalesModel.checkOverlap(dni, { dia_semana, hora_inicio, hora_fin }, excludeId)
 
     if (result.count > 0) {
       throw new AppError("Este rango horario ya no está disponible.", 409, "SCHEDULE_OVERLAP")
     }
   }
 
-  static async createHorario(dni, {dia_semana, hora_inicio, hora_fin}) {
+  static async createHorario(dni, { dia_semana, hora_inicio, hora_fin }) {
 
     await ProfesionalesService.checkOverlap(dni, { dia_semana, hora_inicio, hora_fin })
-    
+
     return await ProfesionalesModel.createHorario(dni, { dia_semana, hora_inicio, hora_fin })
   }
 
-  static async updateHorario(id, {dia_semana, hora_inicio, hora_fin}) {
+  static async updateHorario(id, { dia_semana, hora_inicio, hora_fin }) {
     const horario = await ProfesionalesModel.getHorarioById(id)
     if (!horario) throw new AppError("El horario no existe.", 404, "NOT_FOUND")
 
@@ -38,5 +38,12 @@ export class ProfesionalesService {
     if (affectedRows === 0) {
       throw new AppError("El horario no existe.", 404, "NOT_FOUND")
     }
+  }
+
+  static async updateByDni({ dni, nombre, apellido, correo, foto_url }) {
+    const profesional = await ProfesionalesModel.getByDni({ dni })
+    if (!profesional) throw new AppError("El profesional no existe.", 404, "NOT_FOUND")
+
+    return await ProfesionalesModel.updateByDni({ dni, nombre, apellido, correo, foto_url })
   }
 }

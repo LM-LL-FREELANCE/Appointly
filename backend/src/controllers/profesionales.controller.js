@@ -78,6 +78,18 @@ export class ProfesionalesController {
 
     return res.json(existeProfesional)
   }
+
+  static async updateByDni(req, res, next) {
+    const { dni } = req.params
+    const { nombre, apellido, correo, foto_url } = req.body
+
+    try {
+      const profesional = await ProfesionalesService.updateByDni({ dni, nombre, apellido, correo, foto_url })
+      res.status(200).json(profesional)
+    } catch (err) {
+      next(err)
+    }
+  }
 }
 
 

@@ -25,7 +25,14 @@ export class TurnosService {
     return turno
   }
 
-  static async cancelTurnoById(id, requesterDni, requesterRol, motivo) {
+  static async getTurnosByProfesional({ dni, desde, hasta, estado, requesterDni, requesterRol }) {
+    if (requesterRol !== 'profesional' || String(requesterDni) !== String(dni)) {
+      throw new AppError('Acceso denegado.', 403, 'FORBIDDEN')
+    }
+    return TurnosModel.getTurnosByProfesional({ dni, desde, hasta, estado })
+  }
+
+  static async cancelTurnoById(id, requesterDni, requesterRol) {
 
     const turno = await TurnosModel.getTurnoById(id)
 

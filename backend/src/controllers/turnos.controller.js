@@ -14,7 +14,51 @@ const diffDias = (desde, hasta) => Math.round((new Date(hasta + 'T00:00:00') - n
 
 
 
+const hoy = () => new Date().toISOString().slice(0, 10)
+const enDias = (n) => new Date(Date.now() + n * 86_400_000).toISOString().slice(0, 10)
+const ESTADOS_VALIDOS = new Set(['activo', 'cancelado'])
+
 export class TurnosController {
+
+  static async getTurnos(req, res, next) {
+    try {
+      const { profesional, desde, hasta, estado } = req.query
+
+      if (!profesional) {
+        return res.status(400).json({ error: '"profesional" query param is required' })
+      }
+      const dni = Number(profesional)
+      if (!Number.isFinite(dni) || dni <= 0) {
+        return res.status(400).json({ error: '"profesional" must be a valid DNI' })
+      }
+
+      const resolvedDesde = desde ?? hoy()
+      const resolvedHasta = hasta ?? enDias(6)
+
+      if (!esFecha(resolvedDesde) || !esFecha(resolvedHasta)) {
+        return res.status(400).json({ error: '"desde" and "hasta" must be valid dates (YYYY-MM-DD)' })
+      }
+      if (resolvedDesde > resolvedHasta) {
+        return res.status(400).json({ error: '"desde" cannot be later than "hasta"' })
+      }
+      if (estado && !ESTADOS_VALIDOS.has(estado)) {
+        return res.status(400).json({ error: '"estado" must be "activo" or "cancelado"' })
+      }
+
+      const turnos = await TurnosService.getTurnosByProfesional({
+        dni,
+        desde: resolvedDesde,
+        hasta: resolvedHasta,
+        estado: estado ?? null,
+        requesterDni: req.user.dni,
+        requesterRol: req.user.rol,
+      })
+
+      res.status(200).json(turnos)
+    } catch (err) {
+      next(err)
+    }
+  }
 
   static async getTurnoById(req, res, next) {
     const { id } = req.params

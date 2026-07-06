@@ -153,4 +153,35 @@ export class ProfesionalesModel {
     );
     return rows.length > 0;
   }
+
+  static async updateByDni({ dni, ...fields }) {
+    const keys = Object.keys(fields).filter(key => fields[key] !==
+      undefined);
+
+    if (keys.length === 0) {
+      const [rows] = await pool.query(`                                  
+            SELECT nombre, apellido, correo, foto_url                        
+            FROM profesional WHERE dni_profesional = ?                       
+          `, [dni]);
+      return rows[0];
+    }
+
+    const setClause = keys.map(key => `${key} = ?`).join(', ');
+    const values = keys.map(key => fields[key]);
+    values.push(dni);
+
+    await pool.query(`                                                   
+          UPDATE profesional                                                 
+          SET ${setClause}                                                   
+          WHERE dni_profesional = ?                                          
+        `, values);
+
+    const [rows] = await pool.query(`
+          SELECT nombre, apellido, correo, foto_url 
+          FROM profesional WHERE dni_profesional = ?
+        `, [dni]);
+
+    return rows[0]
+  }
+
 }

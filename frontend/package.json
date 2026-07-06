@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@mantine/charts": "^9.4.0",
     "@mantine/core": "^9.3.1",
     "@mantine/dates": "^9.3.1",
     "@mantine/form": "^9.3.1",
@@ -25,6 +26,7 @@
     "react-dom": "^19.2.6",
     "react-icons": "^5.6.0",
     "react-router-dom": "^7.17.0",
+    "recharts": "^3.9.0",
     "tailwindcss": "^4.3.0",
     "tslib": "^2.8.1"
   },
