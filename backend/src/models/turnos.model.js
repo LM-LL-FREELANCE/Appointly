@@ -11,7 +11,9 @@ export class TurnosModel {
         especialidad.tipo,
         cliente.apellido AS "c_apellido",
         cliente.nombre AS "c_nombre",
+        cliente.correo AS "c_correo",
         cliente.dni_cliente,
+        profesional.correo AS "p_correo",
         turno.fecha_turno,
         turno.hora_turno,
         turno.estado,
@@ -31,7 +33,7 @@ export class TurnosModel {
   static async cancelTurno(id) {
     await pool.query(`
         UPDATE turno SET estado = 'cancelado', cancelado_en = NOW()
-        WHERE turno.id_turno = ?
+        WHERE turno.id_turno = ? 
         `, [id])
 
     return this.getTurnoById(id)
@@ -60,5 +62,21 @@ export class TurnosModel {
   static async getById({ id }) {
     const [rows] = await pool.query(`SELECT * FROM turno WHERE id_turno = ?`, [id])
     return rows[0]
+  }
+
+  static async getAgenda({ dni_profesional, desde, hasta, estado }) {
+    let query = `SELECT t.id_turno, t.fecha_turno, t.hora_turno, t.estado, t.cancelado_en, 
+    c.dni_cliente AS "dni", c.nombre, c.apellido FROM turno t INNER JOIN cliente c ON t.dni_cliente = c.dni_cliente 
+    WHERE t.dni_profesional = ? AND t.fecha_turno BETWEEN ? AND ?
+    `
+
+    const params = [dni_profesional, desde, hasta]
+    if (estado) {
+      query += `AND t.estado = ?`
+      params.push(estado)
+    }
+    query += ` ORDER BY t.fecha_turno, t.hora_turno`
+    const [rows] = await pool.query(query, params)
+    return rows
   }
 }

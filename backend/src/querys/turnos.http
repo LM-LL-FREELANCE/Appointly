@@ -19,3 +19,8 @@ Content-Type: application/json
   "fecha_turno": "2026-06-23",
   "hora_turno": "11:00"
 }
+
+###get agenda
+GET http://localhost:4000/api/turnos?profesional=27845123&desde=2026-06-01&hasta=2026-06-30&estado=activo
+x-user-dni: 27845123
+x-user-rol: profesional

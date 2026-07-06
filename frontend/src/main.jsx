@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import '@mantine/core/styles.css'
 import '@mantine/dates/styles.css'
+import '@mantine/schedule/styles.css'
 import './index.css'
 import App from './App.jsx'
 import { appTheme, cssVariablesResolver } from './theme.js'

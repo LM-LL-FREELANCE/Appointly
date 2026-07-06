@@ -15,10 +15,14 @@ export const getProfesionalesSlots = async ({ dni, desde, hasta }) => {
   return data
 }
 
-export const createNewTurno = async (turno) => {
+export const createNewTurno = async ({ userDni, userRol, ...turno }) => {
   const response = await fetch(`${BASE_URL}/api/turnos`, {
     method: 'POST',
-    headers: { 'Content-type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'x-user-dni': String(userDni),
+      'x-user-rol': userRol,
+    },
     body: JSON.stringify(turno)
   })
   const data = await response.json();

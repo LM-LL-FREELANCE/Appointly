@@ -99,3 +99,21 @@ export const deleteHorario = async ({ id, dni }) => {
     throw new Error(err.message || 'Error al eliminar el horario')
   }
 }
+
+//GET /api/turnos?profesionales=&desde=&hasta=&estado=
+export const getAgendaByProfesional = async ({ dni_profesional, desde, hasta, estado, rol }) => {
+  const params = new URLSearchParams({ profesional: dni_profesional, desde, hasta })
+  if (estado) params.append('estado', estado)
+
+  const response = await fetch(`${BASE_URL}/api/turnos?${params}`, {
+    headers: {
+      'Content-Type': 'application/json',
+      'x-user-dni': String(dni_profesional),
+      'x-user-rol': rol
+    }
+  })
+
+  const data = await response.json()
+  if (!response.ok) throw { status: response.status, ...data }
+  return data
+}
