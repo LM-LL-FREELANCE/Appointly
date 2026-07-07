@@ -2,4 +2,4 @@ packages:
   - "backend"
   - "frontend"
 allowBuilds:
-  bcrypt: set this to true or false
+  bcrypt: false
