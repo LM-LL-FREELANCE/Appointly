@@ -1,5 +1,7 @@
 import express from "express"
 import cors from "cors"
+import cookieParser from "cookie-parser"
+import { authRouter } from "./routes/auth.routes.js"
 import errorHandler from "./middlewares/error.middleware.js"
 import { profesionalesRouter } from "./routes/profesionales.routes.js"
 import { obraSocialesRouter } from "./routes/obra-sociales.routes.js"
@@ -26,9 +28,13 @@ app.use(cors({
     }
 
     return callback(new Error('Not allowed by CORS'))
-  }
+  },
+  credentials: true,
 }))
 
+app.use(cookieParser())
+
+app.use("/api/auth", authRouter)
 
 /*Routers */
 app.use("/api/profesionales", profesionalesRouter)

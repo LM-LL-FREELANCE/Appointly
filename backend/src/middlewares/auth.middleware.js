@@ -1,6 +1,7 @@
 // src/middlewares/auth.middleware.js
 
 import { AppError } from "../utils/AppError.js";
+import { z } from 'zod'
 
 /**
  * Middleware Stand-in para simular identidad mediante Headers
@@ -31,3 +32,14 @@ export const grantAccess = (allowedRoles) => {
     next();
   };
 };
+
+export const validate = (schema) => (req, res, next) => {
+  const result = schema.safeParse(req.body)
+
+  if (!result.success) {
+    throw new AppError("Datos de entrada inválidos.", 400, "BAD_REQUEST")
+  }
+
+  req.body = result.data
+  next()
+}
