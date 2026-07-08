@@ -6,3 +6,4 @@ export const loginSchema = z.strictObject({
   dni: dniSchema,
   password: z.string().min(1, "Password is required")
 })
+
