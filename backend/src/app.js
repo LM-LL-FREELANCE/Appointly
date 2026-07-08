@@ -14,6 +14,7 @@ export const app = express()
 
 app.disable("x-powered-by")
 app.use(express.json())
+app.use(cookieParser())
 
 
 /*CORS middleware */
@@ -32,11 +33,9 @@ app.use(cors({
   credentials: true,
 }))
 
-app.use(cookieParser())
-
-app.use("/api/auth", authRouter)
 
 /*Routers */
+app.use("/api/auth", authRouter)
 app.use("/api/profesionales", profesionalesRouter)
 app.use("/api/obra-sociales", obraSocialesRouter)
 app.use("/api/especialidades", especialidadesRouter)

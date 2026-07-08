@@ -4,7 +4,7 @@ import { HorariosModel } from "../models/horarios.model.js"
 import { ProfesionalesModel } from "../models/profesionales.model.js"
 import { calcularSlotsDisponibles, slotsDelDia } from "../utils/helperSlots.js"
 import { MAX_RANGE_DAYS, SLOT_DURATION_MIN } from "../config/constants.js"
-import { crearTurnoSchema } from "../schema/turno.schema.js"
+import { crearTurnoSchema } from "../schemas/turno.schema.js"
 import { ClientesModel } from "../models/clientes.model.js"
 
 

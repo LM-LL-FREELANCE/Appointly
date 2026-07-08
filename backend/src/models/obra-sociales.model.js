@@ -1,9 +1,9 @@
 import { pool } from "../config/db.js";
 
-export class obraSocialesModel {
+export class ObraSocialesModel {
   static async getAll() {
     const [obrasociales] = await pool.query(`
-           SELECT id_obra_social AS "id", nombre_obra_social AS "obra_social" FROM  obra_social `)
+      SELECT id_obra_social AS "id", nombre_obra_social AS "obra_social" FROM  obra_social `)
     return obrasociales
   }
   static async existe({ id_obra_social }) {

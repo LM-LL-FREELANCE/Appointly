@@ -1,0 +1,30 @@
+###register a new cliente
+POST http://localhost:4000/api/auth/registro
+Content-Type: application/json
+
+{
+  "dni": "12345678",
+  "nombre": "John",
+  "apellido": "Doe",
+  "correo": "john.doe@example.com",
+  "password": "password123",
+  "confirm": "password123",
+  "fecha_nacimiento": "1990-01-01",
+  "genero": "M",
+  "id_obra_social": 1
+}
+
+### crear cuenta nueva
+POST http://localhost:4000/api/auth/registro
+Content-Type: application/json
+
+{
+  "dni": "40777888",
+  "nombre": "Pedro",
+  "apellido": "Ruiz",
+  "correo": "pedro.ruiz@mail.com",
+  "password": "miclave123",
+  "confirm": "miclave123",
+  "fecha_nacimiento": "1995-11-02",
+  "genero": "M"
+}
