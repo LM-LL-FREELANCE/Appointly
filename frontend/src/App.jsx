@@ -26,7 +26,7 @@ import { SidebarContext } from './hooks/useSidebar.js'
 export default function App() {
   const [mobileOpened, { toggle: toggleMobile, close: closeMobile }] = useDisclosure()
   const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true)
-  const [rol, setRol] = useState("profesional") // This is just for testing, in a real app you would get the role from the user context or auth state
+  const [rol, setRol] = useState("g") // This is just for testing, in a real app you would get the role from the user context or auth state
 
   const linksForProfesional = [
     { label: "Dashboard", path: "/dashboard", element: <Dashboard /> },
