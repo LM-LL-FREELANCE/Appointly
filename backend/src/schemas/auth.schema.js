@@ -4,6 +4,7 @@ const dniSchema = z.string().trim().regex(/^\d{7,8}$/, 'DNI inválido')
 
 export const loginSchema = z.strictObject({
   dni: dniSchema,
+<<<<<<< HEAD
   password: z.string().min(1, "Password is required")
 })
 
@@ -24,3 +25,8 @@ export const registerSchema = z.object({
 
 
 
+=======
+  password: z.string().min(1, "Password is required"),
+  role: z.enum(['cliente', 'profesional'])
+})
+>>>>>>> 05b9af1 (feat: implementing auth with jwt)

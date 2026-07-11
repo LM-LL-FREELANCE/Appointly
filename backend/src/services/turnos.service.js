@@ -5,8 +5,8 @@ import { EmailService } from "./email.service.js"
 export class TurnosService {
 
   static #assertOwnership(turno, requesterDni, requesterRol) {
-    const isCliente = requesterRol === "cliente" && String(turno.dni_cliente) === requesterDni
-    const isProfesional = requesterRol === "profesional" && String(turno.dni_profesional) === requesterDni
+    const isCliente = requesterRol === "cliente" && String(turno.dni_cliente) === String(requesterDni)
+    const isProfesional = requesterRol === "profesional" && String(turno.dni_profesional) === String(requesterDni)
     if (!isCliente && !isProfesional) {
       throw new AppError("Acceso denegado.", 403, "FORBIDDEN")
     }
