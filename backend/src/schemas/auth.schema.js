@@ -4,8 +4,8 @@ const dniSchema = z.string().trim().regex(/^\d{7,8}$/, 'DNI inválido')
 
 export const loginSchema = z.strictObject({
   dni: dniSchema,
-<<<<<<< HEAD
-  password: z.string().min(1, "Password is required")
+  password: z.string().min(1, "Password is required"),
+  role: z.enum(['cliente', 'profesional'])
 })
 
 export const registerSchema = z.object({
@@ -22,11 +22,3 @@ export const registerSchema = z.object({
   error: "Las contraseñas no coinciden",
   path: ["confirm"], // pone el error en el campo confirm
 })
-
-
-
-=======
-  password: z.string().min(1, "Password is required"),
-  role: z.enum(['cliente', 'profesional'])
-})
->>>>>>> 05b9af1 (feat: implementing auth with jwt)
