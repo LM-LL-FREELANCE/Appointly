@@ -63,3 +63,20 @@ export const cancelTurnoById = async (id, requesterDni, requesterRol, motivo) =>
   }
   return r.json()
 }
+
+export const createAccount = async (data) => {
+  const response = await fetch(`${BASE_URL}/api/auth/registro`, {
+    method: "POST",
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  })
+  
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}))
+    throw body // Lanzamos el error para que React Query (y errorAcc) lo atrapen
+  }
+  
+  return response.json()
+}

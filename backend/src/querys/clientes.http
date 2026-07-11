@@ -1,2 +1,8 @@
 ###get cliente by dni
 GET http://localhost:4000/api/clientes/22456789
+
+
+###mi cuenta
+GET http://localhost:4000/api/clientes/46668814
+x-user-dni: 27845123
+x-user-rol: profesional
