@@ -1,5 +1,3 @@
-import { AppShell, Group, Text, Drawer } from '@mantine/core'
-import { useDisclosure } from '@mantine/hooks'
 import { Route, Routes } from 'react-router-dom'
 import { useState } from 'react'
 
@@ -18,14 +16,9 @@ import MisTurnos from './pages/client/MisTurnos/MisTurnos.jsx'
 import User from './pages/User.jsx'
 import MiPerfil from './pages/MiPerfil.jsx'
 
-/*Hook and some buttons */
-import { UserButton } from './components/UserButton.jsx'
-import { NavLinks } from './components/NavLinks.jsx'
-import { SidebarContext } from './hooks/useSidebar.js'
+import MainLayout from './MainLayout.jsx'
 
 export default function App() {
-  const [mobileOpened, { toggle: toggleMobile, close: closeMobile }] = useDisclosure()
-  const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true)
   const [rol, setRol] = useState("g") // This is just for testing, in a real app you would get the role from the user context or auth state
 
   const linksForProfesional = [
@@ -42,50 +35,16 @@ export default function App() {
   const links = (rol === "profesional") ? linksForProfesional : defaultLinks
 
   return (
-    <SidebarContext.Provider value={{ mobileOpened, toggleMobile, desktopOpened, toggleDesktop }}>
-      <AppShell
-        navbar={{
-          width: 230,
-          breakpoint: 'md',
-          collapsed: { mobile: true, desktop: !desktopOpened },
-        }}
-        padding="md">
-        <AppShell.Navbar p="sm" visibleFrom="md">
-          <AppShell.Section>
-            <Group px="xs" py="sm">
-              <Text fw={700} size="lg">Appointly</Text>
-            </Group>
-          </AppShell.Section>
-          <AppShell.Section grow>
-            <NavLinks links={links} />
-          </AppShell.Section>
-          <AppShell.Section>
-            <UserButton />
-          </AppShell.Section>
-        </AppShell.Navbar>
-
-        <Drawer
-          opened={mobileOpened}
-          onClose={closeMobile}
-          size={230}
-          padding="sm"
-          title="Appointly"
-          hiddenFrom="md">
-          <NavLinks links={links} onNavigate={closeMobile} />
-        </Drawer>
-
-        <AppShell.Main>
-          <Routes>
-            {links.map(link => (
-              <Route key={link.path} path={link.path} element={link.element} />
-            ))}
-            <Route path="/signup" element={<Login />} />
-            <Route path="/login" element={<SignUp />} />
-            <Route path="/user" element={<User />} />
-            <Route path="/miperfil" element={<MiPerfil />} />
-          </Routes>
-        </AppShell.Main>
-      </AppShell>
-    </SidebarContext.Provider>
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route path="/registrarse" element={<SignUp />} />
+      <Route path="/" element={<MainLayout links={links} rol={rol} />}>
+        {links.map(link => (
+          <Route key={link.path} path={link.path} element={link.element} />
+        ))}
+        <Route path="/user" element={<User />} />
+        <Route path="/miperfil" element={<MiPerfil />} />
+      </Route>
+    </Routes>
   )
 }
