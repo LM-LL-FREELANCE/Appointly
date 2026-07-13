@@ -19,7 +19,7 @@ import MiPerfil from './pages/MiPerfil.jsx'
 import MainLayout from './MainLayout.jsx'
 
 export default function App() {
-  const [rol, setRol] = useState("g") // This is just for testing, in a real app you would get the role from the user context or auth state
+  const [rol, setRol] = useState("cliente") // This is just for testing, in a real app you would get the role from the user context or auth state
 
   const linksForProfesional = [
     { label: "Dashboard", path: "/dashboard", element: <Dashboard /> },
