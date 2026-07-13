@@ -59,10 +59,10 @@ export class AuthController {
   }
 
   static async me(req, res, next) {
-    const { sub, role } = req.user
+    const { dni, role } = req.user
 
     try {
-      const user = await AuthService.getMe(sub, role)
+      const user = await AuthService.getMe(dni, role)
       res.json(user)
 
     } catch (error) {
