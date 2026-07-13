@@ -8,6 +8,6 @@ x-user-dni: 27845123
 x-user-rol: profesional
 
 ###cuenta de lean
-GET http://localhost:4000/api/clientes/46543674
+GET http://localhost:4000/api/clientes/22146269
 x-user-dni: 27845123
 x-user-rol: profesional

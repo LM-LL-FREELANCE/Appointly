@@ -1,14 +1,18 @@
 import { useNavigate } from "react-router-dom"
-import { TextInput, Title, Button, Loader, Stack, Paper, SimpleGrid, Select, PasswordInput, Group, Alert } from "@mantine/core"
+import { TextInput, Title, Button, Loader, Stack, Paper, SimpleGrid, Select, PasswordInput, Alert, Group } from "@mantine/core"
 import { DatePickerInput } from "@mantine/dates"
+import { useMediaQuery } from "@mantine/hooks"
 import { useState } from "react"
 import { IconCalendar, IconAlertCircle, IconCheck } from '@tabler/icons-react';
 import useObrasSociales from "../hooks/useObraSociales";
 import useCreateAccount from "../hooks/useRegisterAccount";
+import useLoginSession from "../hooks/useLoginSession";
 import 'dayjs/locale/es';
 
 export default function SignUp() {
   const navigate = useNavigate()
+  const isMobile = useMediaQuery('(max-width: 768px)')
+  const inputSize = isMobile ? 'xs' : 'sm'
   const [dni, setDni] = useState("")
   const [name, setName] = useState("")
   const [lastName, setLastName] = useState("")
@@ -36,6 +40,7 @@ export default function SignUp() {
   const emailInvalido = email.length > 0 && !regexEmail.test(email);
 
   const { mutate, isPending, error: errorAcc } = useCreateAccount()
+  const { mutate: mutateLogin, isPending: isLoginIn, error: isErrorLoginIn } = useLoginSession()
   const [accConfirm, setAccConfirm] = useState(false)
 
   const getGeneroFormateado = () => {
@@ -57,9 +62,18 @@ export default function SignUp() {
       id_obra_social: obraSocial ? Number(obraSocial) : null
     }, {
       onSuccess: () => {
-
-
         setAccConfirm(true)
+        mutateLogin({
+          dni: dni,
+          password: password,
+          role: "cliente"
+        }, {
+          onSuccess: () => {
+            setTimeout(() => {
+              navigate("/")
+            }, 1000)
+          },
+        })
       }
     })
   }
@@ -71,26 +85,11 @@ export default function SignUp() {
           <Stack px="sm" gap="md">
             <Title order={2} size="h3">Registrarse</Title>
 
-            {/* Mensajes de feedback (Opcional, pero muy recomendado) */}
-            {accConfirm && (
-              <Alert icon={<IconCheck size={16} />} color="green" title="¡Cuenta Creada!">
-                Tu cuenta fue registrada exitosamente. Ya puedes iniciar sesión.
-              </Alert>
-            )}
-
-            {errorAcc && (
-              <Alert icon={<IconAlertCircle size={16} />} color="red" title="Error">
-                {JSON.stringify(errorAcc).includes("DUPLICATE_DNI")
-                  ? "Ya existe una cuenta registrada con este DNI. Si es tuyo, intenta iniciar sesión."
-                  : "Hubo un problema al registrar la cuenta. Por favor, intenta de nuevo."}
-              </Alert>
-            )}
-
             <Stack>
               <TextInput
-                error={errorAcc && JSON.stringify(errorAcc).includes("DUPLICATE_DNI") ? "DNI ya registrado" : null}
+                error={errorAcc?.code === "DUPLICATE_DNI" ? "DNI ya registrado" : null}
                 label="DNI"
-                size="sm"
+                size={inputSize}
                 placeholder="Ej: 12345678"
                 required
                 value={dni}
@@ -100,20 +99,22 @@ export default function SignUp() {
 
             <SimpleGrid cols={{ base: 1, sm: 2 }}>
               {/* Le quité los style={{flex: 1}} porque dentro de SimpleGrid no hacen falta */}
-              <TextInput label="Nombre" size="sm" placeholder="Ej: Juan" required value={name} onChange={(e) => setName(e.target.value)} />
-              <TextInput label="Apellido" size="sm" placeholder="Ej: Perez" required value={lastName} onChange={(e) => setLastName(e.target.value)} />
+              <TextInput label="Nombre" size={inputSize} placeholder="Ej: Juan" required value={name} onChange={(e) => setName(e.target.value)} />
+              <TextInput label="Apellido" size={inputSize} placeholder="Ej: Perez" required value={lastName} onChange={(e) => setLastName(e.target.value)} />
             </SimpleGrid>
 
             <SimpleGrid cols={{ base: 1, sm: 2 }}>
               <DatePickerInput
                 placeholder="Seleccione una fecha"
                 label="Selecciona tu fecha de nacimiento"
+                size={inputSize}
                 value={fecha}
                 onChange={setFecha} // Forma más corta y limpia
                 rightSection={<IconCalendar size={20} stroke={1.5} color="gray" />}
                 locale="es"
+                maxDate={new Date()}
               />
-              <Select data={opcionesDeGenero} label="Género" size="sm" placeholder="Ej: Masculino" required value={genero} onChange={setGenero} />
+              <Select data={opcionesDeGenero} label="Género" size={inputSize} placeholder="Ej: Masculino" required value={genero} onChange={setGenero} />
             </SimpleGrid>
 
             <Stack>
@@ -121,6 +122,7 @@ export default function SignUp() {
                 label="Seleccione una obra social (opcional)"
                 value={obraSocial}
                 onChange={setObraSocial}
+                size={inputSize}
                 placeholder={isLoadingObraSociales ? "Cargando obras sociales..." : "Elija una"}
                 data={opcionesMantine}
                 disabled={isLoadingObraSociales}
@@ -133,7 +135,7 @@ export default function SignUp() {
                 error={emailInvalido ? "Formato de email incorrecto" : null}
                 label="Email (recibirás notificaciones)"
                 required
-                size="sm"
+                size={inputSize}
                 placeholder="Ej: juanperez@gmail.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -143,6 +145,7 @@ export default function SignUp() {
             <SimpleGrid cols={{ base: 1, sm: 2 }}>
               <PasswordInput
                 label="Contraseña"
+                size={inputSize}
                 placeholder="Escribe tu contraseña"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -150,6 +153,7 @@ export default function SignUp() {
               <PasswordInput
                 error={contrasenasNoCoinciden ? "Las contraseñas no coinciden" : null}
                 label="Confirma tu contraseña"
+                size={inputSize}
                 placeholder="Escribe de nuevo tu contraseña"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
@@ -161,12 +165,35 @@ export default function SignUp() {
               <Button onClick={() => navigate("/login")} >Ya tengo una cuenta</Button>
               <Button
                 disabled={contrasenasNoCoinciden || emailInvalido || !dni || !name || !email || !password}
-                loading={isPending} // Mantine te pone un loader automáticamente en el botón
+                loading={isPending || isLoginIn} // Mantine te pone un loader automáticamente en el botón
                 onClick={confirmarAcc}
               >
                 Registrarse
               </Button>
             </SimpleGrid>
+            <Group align="center">
+              {accConfirm && (
+                <Alert style={{ flex: 1 }} icon={<IconCheck size={16} />} color="green" title="¡Cuenta Creada!">
+                  Tu cuenta fue registrada exitosamente. Ya puedes iniciar sesión.
+                </Alert>
+              )}
+
+              {errorAcc && (
+                <Alert style={{ flex: 1 }} icon={<IconAlertCircle size={16} />} color="red" title="Error">
+                  {errorAcc?.code === "DUPLICATE_DNI"
+                    ? "Ya existe una cuenta registrada con este DNI. Si es tuyo, intenta iniciar sesión."
+                    : "Hubo un problema al registrar la cuenta. Por favor, intenta de nuevo."}
+                </Alert>
+              )}
+              {isErrorLoginIn && (
+                <>
+                  <Alert style={{ flex: 1 }} icon={<IconAlertCircle size={16} />} color="red" title="Error">
+                    A ocurrido un error al querer iniciar su sesion, porfavor aprete el siguiente boton para iniciar sesion con su cuenta.
+                  </Alert>
+                  <Button onClick={() => navigate("/login")}>Iniciar Sesion</Button>
+                </>
+              )}
+            </Group>
           </Stack>
         </Paper>
       </Stack>
