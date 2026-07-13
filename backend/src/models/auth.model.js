@@ -2,16 +2,17 @@ import { pool } from "../config/db.js"
 
 export class AuthModel {
 
-  static async findCredentialsByDni(dni) {
-    const [result] = await pool.query(`
-      SELECT profesional.dni_profesional, profesional.password_hash, 'profesional' AS role
-      FROM profesional WHERE dni_profesional = ?
-      UNION ALL
-      SELECT cliente.dni_cliente, cliente.password_hash, 'cliente' AS role
-      FROM cliente WHERE dni_cliente = ?
-      `, [dni, dni])
+  static async findCredentialsByDniAndRole(dni, role) {
 
-    return result ?? null
+    const table = role === 'profesional' ? 'profesional' : 'cliente'
+    const col = role === 'profesional' ? 'dni_profesional' : 'dni_cliente'
+
+    const [rows] = await pool.query(
+      `SELECT ${col} AS dni, nombre, apellido, password_hash FROM ${table} WHERE ${col} = ?`,
+      [dni]
+    )
+
+    return rows[0] ? { ...rows[0], role } : null
   }
 
   static async existeDni(dni) {

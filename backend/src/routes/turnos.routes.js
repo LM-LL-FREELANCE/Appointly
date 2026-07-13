@@ -1,12 +1,12 @@
 import { Router } from "express"
 import { TurnosController } from "../controllers/turnos.controller.js"
-import { identityStandIn } from "../middlewares/auth.middleware.js";
 import { grantAccess } from "../middlewares/auth.middleware.js";
+import { requireAuth } from "../middlewares/auth.middleware.js"
 
 export const turnosRouter = Router();
 
-turnosRouter.get("/", identityStandIn, grantAccess(["profesional"]), TurnosController.getAgenda)
-turnosRouter.get("/", identityStandIn, grantAccess(["profesional"]), TurnosController.getTurnos)
-turnosRouter.get("/:id", identityStandIn, grantAccess(["cliente", "profesional"]), TurnosController.getTurnoById)
-turnosRouter.post("/:id/cancelacion", identityStandIn, grantAccess(["cliente", "profesional"]), TurnosController.cancelTurnoById)
-turnosRouter.post("/", identityStandIn, grantAccess(["cliente", "profesional"]), TurnosController.crearTurno)
+turnosRouter.get("/", requireAuth, grantAccess(["profesional"]), TurnosController.getAgenda) //working
+turnosRouter.get("/", requireAuth, grantAccess(["profesional"]), TurnosController.getTurnos)
+turnosRouter.get("/:id", requireAuth, grantAccess(["cliente", "profesional"]), TurnosController.getTurnoById) //working
+turnosRouter.post("/:id/cancelacion", requireAuth, grantAccess(["cliente", "profesional"]), TurnosController.cancelTurnoById) //working
+turnosRouter.post("/", requireAuth, grantAccess(["cliente", "profesional"]), TurnosController.crearTurno)

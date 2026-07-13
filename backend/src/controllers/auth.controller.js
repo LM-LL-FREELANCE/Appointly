@@ -4,6 +4,8 @@ import { AppError } from "../utils/AppError.js"
 import bcrypt from "bcrypt"
 import { SALT_ROUNDS } from "../config/constants.js"
 import { registerSchema } from "../schemas/auth.schema.js"
+import { AuthService } from "../services/auth.service.js"
+import { cookieOptions } from "../validators/cookieOptions.js"
 
 export class AuthController {
   static async register(req, res, next) {
@@ -36,4 +38,36 @@ export class AuthController {
       next(error)
     }
   }
+
+  static async login(req, res, next) {
+    const { dni, password, role } = req.body
+
+    try {
+      const { user, token } = await AuthService.login(dni, password, role)
+      res.cookie("access_token", token, cookieOptions)
+      res.json(user)
+
+    } catch (error) {
+      next(error)
+    }
+  }
+
+
+  static async logout(req, res) {
+    res.clearCookie("access_token", cookieOptions)
+    res.status(204).end()
+  }
+
+  static async me(req, res, next) {
+    const { sub, role } = req.user
+
+    try {
+      const user = await AuthService.getMe(sub, role)
+      res.json(user)
+
+    } catch (error) {
+      next(error)
+    }
+  }
+
 }

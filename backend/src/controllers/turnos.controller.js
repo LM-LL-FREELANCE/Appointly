@@ -63,7 +63,7 @@ export class TurnosController {
   static async getTurnoById(req, res, next) {
     const { id } = req.params
     const requesterDni = req.user.dni
-    const requesterRol = req.user.rol
+    const requesterRol = req.user.role
 
     try {
       const turno = await TurnosService.getTurnoById(id, requesterDni, requesterRol)
@@ -76,7 +76,7 @@ export class TurnosController {
   static async cancelTurnoById(req, res, next) {
     const { id } = req.params
     const requesterDni = req.user.dni
-    const requesterRol = req.user.rol
+    const requesterRol = req.user.role
     const { motivo } = req.body ?? {}
 
     try {
@@ -168,7 +168,7 @@ export class TurnosController {
     if (desde > hasta) {
       return res.status(400).json({ error: '"desde" no puede ser posterior a "hasta"', code: 'VALIDATION_FAILED' })
     }
-    if (String(profesional) !== req.user.dni) {
+    if (String(profesional) !== String(req.user.dni)) {
       return res.status(403).json({ error: 'No podés ver la agenda de otro profesional', code: 'FORBIDDEN' })
     }
 
