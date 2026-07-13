@@ -5,7 +5,7 @@ import { useState } from "react"
 import { IconCalendar, IconAlertCircle, IconCheck } from '@tabler/icons-react';
 import useObrasSociales from "../hooks/useObraSociales";
 import useCreateAccount from "../hooks/useRegisterAccount";
-import 'dayjs/locale/es'; // Importante para que funcione locale="es"
+import 'dayjs/locale/es';
 
 export default function SignUp() {
   const navigate = useNavigate()
@@ -41,7 +41,7 @@ export default function SignUp() {
   const getGeneroFormateado = () => {
     if (genero === "Masculino") return "M";
     if (genero === "Femenino") return "F";
-    return "X"; // Aplica para "Otro" o si está vacío
+    return "X";
   }
 
   const confirmarAcc = () => {
@@ -57,8 +57,9 @@ export default function SignUp() {
       id_obra_social: obraSocial ? Number(obraSocial) : null
     }, {
       onSuccess: () => {
-        setAccConfirm(true)
 
+
+        setAccConfirm(true)
       }
     })
   }
@@ -155,21 +156,17 @@ export default function SignUp() {
               />
             </SimpleGrid>
 
-            <Group justify="space-between" mt="md">
+            <SimpleGrid cols={{ base: 1, sm: 3 }} mt="md">
               <Button onClick={() => navigate("/")} variant="subtle" color="gray">Volver a la página de inicio</Button>
-              <Group gap="md">
-                <Button onClick={() => navigate("/login")} variant="subtle" color="gray">Ya tengo una cuenta</Button>
-
-                {/* Deshabilitamos el botón si hay errores, si faltan datos o si está cargando */}
-                <Button
-                  disabled={contrasenasNoCoinciden || emailInvalido || !dni || !name || !email || !password}
-                  loading={isPending} // Mantine te pone un loader automáticamente en el botón
-                  onClick={confirmarAcc}
-                >
-                  Registrarse
-                </Button>
-              </Group>
-            </Group>
+              <Button onClick={() => navigate("/login")} >Ya tengo una cuenta</Button>
+              <Button
+                disabled={contrasenasNoCoinciden || emailInvalido || !dni || !name || !email || !password}
+                loading={isPending} // Mantine te pone un loader automáticamente en el botón
+                onClick={confirmarAcc}
+              >
+                Registrarse
+              </Button>
+            </SimpleGrid>
           </Stack>
         </Paper>
       </Stack>
