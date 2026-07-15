@@ -1,4 +1,3 @@
-@host = http://localhost:4000/api
 
 
 ### Get horarios availables for profesionales by dni

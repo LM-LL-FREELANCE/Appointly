@@ -17,11 +17,12 @@ import Reservar from './pages/Reservar.jsx'
 import MisTurnos from './pages/client/MisTurnos/MisTurnos.jsx'
 import User from './pages/User.jsx'
 import MiPerfil from './pages/MiPerfil.jsx'
-
 import MainLayout from './MainLayout.jsx'
+import Inicio from './pages/Inicio.jsx'
 
 export default function App() {
   const { user } = useAuth()
+
 
   const linksForProfesional = [
     { label: "Dashboard", path: "/dashboard", element: <Dashboard /> },
@@ -31,6 +32,7 @@ export default function App() {
   ]
 
   const defaultLinks = [
+    { label: "Inicio", path: "/inicio", element: <Inicio /> },
     { label: "Buscar Doctores", path: "/buscar", element: <Buscar /> },
     { label: "Reservar Turno", path: "/reservar", element: <Reservar /> },
     { label: "Mis Turnos", path: "/misturnos/*", element: <MisTurnos /> },

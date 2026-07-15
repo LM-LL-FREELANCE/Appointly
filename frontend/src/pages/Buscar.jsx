@@ -10,6 +10,7 @@ import DoctorTable from '../components/DoctorTable'
 import { getFilteredProfesional, getAllEspecialidades, getAllObraSociales } from '../services/profesionales'
 import { useQuery, keepPreviousData } from "@tanstack/react-query"
 import { Link, useNavigate } from 'react-router-dom'
+import useObrasSociales from '../hooks/useObraSociales'
 
 export default function Buscar() {
   const navigate = useNavigate()
@@ -29,10 +30,7 @@ export default function Buscar() {
     queryFn: getAllEspecialidades,
   })
 
-  const { data: obraSociales = [], isLoading: isLoadingObraSociales } = useQuery({
-    queryKey: ["obrasociales"],
-    queryFn: getAllObraSociales,
-  })
+  const { data: obraSociales = [], isLoading: isLoadingObraSociales } = useObrasSociales()
 
   const doctoresFiltrados = profesionales.filter(doc =>
     `${doc.nombre} ${doc.apellido}`.toLowerCase().includes(busqueda.toLowerCase())

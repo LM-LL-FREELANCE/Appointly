@@ -28,3 +28,16 @@ Content-Type: application/json
   "fecha_nacimiento": "1995-11-02",
   "genero": "M"
 }
+### crear cuenta nueva
+POST http://localhost:4000/api/auth/registro
+Content-Type: application/json
+
+{
+  "dni": "40777886",
+  "nombre": "Pedro",
+  "apellido": "Ruiz",
+  "password": "miclave123",
+  "confirm": "miclave123",
+  "fecha_nacimiento": "1995-11-02",
+  "genero": "M"
+}

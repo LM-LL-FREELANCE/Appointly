@@ -38,6 +38,20 @@ export class TurnosModel {
 
     return this.getTurnoById(id)
   }
+  static async getTurnosByProfesional({ dni, desde, hasta, estado }) {
+    let query = `SELECT * FROM turno WHERE dni_profesional = ? AND fecha_turno BETWEEN ? AND ?`;
+    const params = [dni, desde, hasta];
+    
+    if (estado) {
+      query += ` AND estado = ?`;
+      params.push(estado);
+    }
+    
+    query += ` ORDER BY fecha_turno, hora_turno`;
+    const [rows] = await pool.query(query, params);
+    return rows;
+  }
+
   static async getTurnosActivos({ dni, desde, hasta }) {
     const [rows] = await pool.query(`SELECT fecha_turno, hora_turno FROM turno 
       WHERE dni_profesional = ? AND estado = 'activo' AND fecha_turno BETWEEN ? AND ?`

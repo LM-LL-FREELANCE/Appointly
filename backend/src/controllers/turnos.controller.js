@@ -21,13 +21,16 @@ const ESTADOS_VALIDOS = new Set(['activo', 'cancelado'])
 export class TurnosController {
 
   static async getTurnos(req, res, next) {
+
     try {
       const { profesional, desde, hasta, estado } = req.query
 
       if (!profesional) {
         return res.status(400).json({ error: '"profesional" query param is required' })
       }
+
       const dni = Number(profesional)
+
       if (!Number.isFinite(dni) || dni <= 0) {
         return res.status(400).json({ error: '"profesional" must be a valid DNI' })
       }
@@ -38,9 +41,11 @@ export class TurnosController {
       if (!esFecha(resolvedDesde) || !esFecha(resolvedHasta)) {
         return res.status(400).json({ error: '"desde" and "hasta" must be valid dates (YYYY-MM-DD)' })
       }
+
       if (resolvedDesde > resolvedHasta) {
         return res.status(400).json({ error: '"desde" cannot be later than "hasta"' })
       }
+
       if (estado && !ESTADOS_VALIDOS.has(estado)) {
         return res.status(400).json({ error: '"estado" must be "activo" or "cancelado"' })
       }
@@ -51,10 +56,11 @@ export class TurnosController {
         hasta: resolvedHasta,
         estado: estado ?? null,
         requesterDni: req.user.dni,
-        requesterRol: req.user.rol,
+        requesterRol: req.user.role,
       })
 
       res.status(200).json(turnos)
+
     } catch (err) {
       next(err)
     }
@@ -88,27 +94,34 @@ export class TurnosController {
   }
 
   static async getSlots(req, res) {
+
     try {
       const dni = Number(req.params.dni)
       const { desde, hasta } = req.query
+
       if (!esFecha(desde) || !esFecha(hasta)) {
         return res.status(400).json({ error: 'the dates "desde" and "hasta" must be valid dates (YYYY-MM-DD)' });
       }
+
       if (desde > hasta) {
         return res.status(400).json({ error: 'the date "desde" cannot be later than "hasta"' });
       }
+
       if (diffDias(desde, hasta) > MAX_RANGE_DAYS) {
         return res.status(400).json({ error: `the range cannot exceed ${MAX_RANGE_DAYS} days` });
       }
+
       if (!(await ProfesionalesModel.existe({ dni }))) {
         return res.status(404).json({ error: 'profesional not found' });
       }
+
       const [horarios, turnos] = await Promise.all([
         HorariosModel.getHorariosByProfesional({ dni }),
         TurnosModel.getTurnosActivos({ dni, desde, hasta }),
       ])
       const dias = calcularSlotsDisponibles({ horarios, turnos, desde, hasta });
       return res.json({ dni_profesional: dni, desde, hasta, duracion_min: SLOT_DURATION_MIN, dias });
+
     } catch (err) {
       return res.status(500).json({ err: 'We could not get your slots in turnos', error: err.message });
     }
@@ -116,13 +129,15 @@ export class TurnosController {
 
   static async crearTurno(req, res) {
     try {
+
       const parsedSchema = crearTurnoSchema.safeParse(req.body)
+
       if (!parsedSchema.success) {
         return res.status(400).json({ error: 'invalid', detalles: parsedSchema.error.flatten().fieldErrors });
       }
       const { dni_profesional, fecha_turno, hora_turno } = parsedSchema.data
 
-      const dni_cliente = req.user.rol === 'cliente'
+      const dni_cliente = req.user.role === 'cliente'
         ? Number(req.user.dni)
         : parsedSchema.data.dni_cliente
 
@@ -134,6 +149,7 @@ export class TurnosController {
         ProfesionalesModel.existe({ dni: dni_profesional }),
         ClientesModel.existe({ dni: dni_cliente })
       ])
+
       if (!existeProf || !existeCli) {
         return res.status(422).json({ error: 'profesional o cliente inexistente', code: 'REFERENCE_NOT_FOUND' });
       }
@@ -151,6 +167,7 @@ export class TurnosController {
       const idTurno = await TurnosModel.crearTurno({ dni_profesional, dni_cliente, fecha_turno, hora_turno })
       const turno = await TurnosModel.getById({ id: idTurno })
       return res.status(201).json({ status: "success", data: turno });
+
     } catch (err) {
       return res.status(500).json({ err: 'We could not arrange your turno', error: err.message });
     }
@@ -162,12 +179,15 @@ export class TurnosController {
     if (!profesional || !desde || !hasta) {
       return res.status(400).json({ error: '"profesional", "desde" y "hasta" son obligatorios', code: 'VALIDATION_FAILED' })
     }
+
     if (!esFecha(desde) || !esFecha(hasta)) {
       return res.status(400).json({ error: 'las fechas deben tener formato YYYY-MM-DD', code: 'VALIDATION_FAILED' })
     }
+
     if (desde > hasta) {
       return res.status(400).json({ error: '"desde" no puede ser posterior a "hasta"', code: 'VALIDATION_FAILED' })
     }
+
     if (String(profesional) !== String(req.user.dni)) {
       return res.status(403).json({ error: 'No podés ver la agenda de otro profesional', code: 'FORBIDDEN' })
     }

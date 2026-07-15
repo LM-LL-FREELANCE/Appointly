@@ -1,0 +1,87 @@
+###iniciar sesion con un profesional
+POST http://localhost:4000/api/auth/login
+Content-Type: application/json
+
+{
+  "dni": "27845123",
+  "password": "password123",
+  "role": "profesional"
+}
+
+###get me 
+GET http://localhost:4000/api/auth/me
+
+###log out
+POST http://localhost:4000/api/auth/logout
+
+
+###de aca en adelante profesionales
+
+### 2. Probar obtener la agenda del profesional
+# Requiere obligatoriamente profesional, desde y hasta
+GET http://localhost:4000/api/turnos/agenda?profesional=27845123&desde=2026-07-14&hasta=2026-07-21
+
+### 3. Probar obtener todos los turnos del profesional
+# Requiere obligatoriamente el profesional (desde y hasta son opcionales)
+GET http://localhost:4000/api/turnos?profesional=27845123
+
+###primer endpoint get horarios 
+GET http://localhost:4000/api/profesionales/27845123/horarios
+
+###post a new horario for a profesional
+POST http://localhost:4000/api/profesionales/27845123/horarios
+Content-Type: application/json
+
+{
+  "dia_semana": 3,
+  "hora_inicio": "08:00",
+  "hora_fin": "13:00"
+}
+
+###update data for the profesional
+PATCH http://localhost:4000/api/profesionales/27845123
+Content-Type: application/json
+
+{
+  "nombre": "Martin"
+}
+
+###udpate a horario
+PUT http://localhost:4000/api/horarios/23
+Content-Type: application/json
+
+{
+  "dia_semana": 2,
+  "hora_inicio": "09:00",
+  "hora_fin": "12:00"
+}
+
+###delete a horario
+DELETE http://localhost:4000/api/horarios/22
+
+###Clientes
+###inciar sesion con un cliente
+POST http://localhost:4000/api/auth/login
+Content-Type: application/json
+
+{
+  "dni": "20232778",
+  "password": "hola123",
+  "role": "cliente"
+}
+###get cliente by dni
+GET http://localhost:4000/api/clientes/20232778
+
+###get for a cliente by their dni
+GET http://localhost:4000/api/clientes/20232778/turnos
+
+###creating a turno
+POST http://localhost:4000/api/turnos/
+Content-Type: application/json
+
+{
+  "dni_profesional": "27845123",
+  "dni_cliente": "20232778",
+  "fecha_turno": "2026-07-15",
+  "hora_turno": "10:30"
+}
