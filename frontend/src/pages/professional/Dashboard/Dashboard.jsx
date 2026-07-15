@@ -55,11 +55,11 @@ function TurnosPorDia({ data }) {
 export default function Dashboard() {
 
   const { user } = useAuth()
-  const CURRENT_DNI = user?.dni || "27845123"
+  /* const CURRENT_DNI = user?.dni || "27845123" */
 
   const { data: perfil } = useQuery({
-    queryKey: ['perfil', CURRENT_DNI],
-    queryFn: () => getProfesionalByDni({ dni: CURRENT_DNI }),
+    queryKey: ['perfil', user?.dni],
+    queryFn: () => getProfesionalByDni({ dni: user?.dni }),
   })
 
   const startDate = new Date()
@@ -72,17 +72,17 @@ export default function Dashboard() {
   /* const hasta = aISO(hoy.getDate() + 7) */
 
   const { data: turnos = [] } = useQuery({
-    queryKey: ['turnos-profesional', CURRENT_DNI, hoy],
-    queryFn: () => getTurnosProfesional({ dni: CURRENT_DNI, desde: hoy, hasta: hasta }),
+    queryKey: ['turnos-profesional', user?.dni, startDateISO],
+    queryFn: () => getTurnosProfesional({ dni: user?.dni, desde: startDateISO, hasta: endDateISO }),
   })
 
-  const turnosHoy = turnos.filter(t => t.fecha_turno?.slice(0, 10) === hoy && t.estado === 'activo').length
+  const turnosHoy = turnos.filter(t => t.fecha_turno?.slice(0, 10) === startDateISO && t.estado === 'activo').length
   const estaSemana = turnos.filter(t => t.estado === 'activo').length
   const cancelados7d = turnos.filter(t => t.estado === 'cancelado').length
   const barData = buildBarData(turnos)
 
   const turnosDeHoy = turnos
-    .filter(t => t.fecha_turno?.slice(0, 10) === hoy)
+    .filter(t => t.fecha_turno?.slice(0, 10) === startDateISO)
     .map(t => ({
       id: t.id_turno,
       hora: t.hora_turno?.slice(0, 5),
@@ -94,8 +94,8 @@ export default function Dashboard() {
   const proximoTurno = turnos.find(t => {
     if (t.estado !== 'activo') return false
     const fecha = t.fecha_turno?.slice(0, 10)
-    if (fecha > hoy) return true
-    if (fecha === hoy) {
+    if (fecha > startDateISO) return true
+    if (fecha === startDateISO) {
       const [h, m] = (t.hora_turno ?? '').split(':').map(Number)
       return h * 60 + m >= minAhora
     }
