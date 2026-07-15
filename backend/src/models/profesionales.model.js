@@ -155,8 +155,7 @@ export class ProfesionalesModel {
   }
 
   static async updateByDni({ dni, ...fields }) {
-    const keys = Object.keys(fields).filter(key => fields[key] !==
-      undefined);
+    const keys = Object.keys(fields).filter(key => fields[key] !== undefined);
 
     if (keys.length === 0) {
       const [rows] = await pool.query(`                                  

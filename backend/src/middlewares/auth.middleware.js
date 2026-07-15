@@ -41,7 +41,7 @@ export const requireAuth = (req, res, next) => {
     const payload = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] })
 
     req.user = {
-      dni: payload.sub,
+      dni: String(payload.sub),
       role: payload.role
     }
 

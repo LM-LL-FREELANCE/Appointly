@@ -19,7 +19,7 @@ import MainLayout from './MainLayout.jsx'
 import Inicio from './pages/Inicio.jsx'
 
 export default function App() {
-  const [rol, setRol] = useState("profesional") // This is just for testing, in a real app you would get the role from the user context or auth state
+  const [rol, setRol] = useState("guest") // This is just for testing, in a real app you would get the role from the user context or auth state
 
   const linksForProfesional = [
     { label: "Dashboard", path: "/dashboard", element: <Dashboard /> },
