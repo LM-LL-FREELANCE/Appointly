@@ -1,7 +1,7 @@
 const BASE_URL = import.meta.env.VITE_API_URL
+import { request } from '../api/api.js'
 
-
-export const getProfesionalesSlots = async ({ dni, desde, hasta }) => {
+/* export const getProfesionalesSlots = async ({ dni, desde, hasta }) => {
   const params = new URLSearchParams({ desde, hasta })
   const response = await fetch(`${BASE_URL}/api/profesionales/${dni}/slots?${params}`, {
     cache: 'no-store'
@@ -13,9 +13,14 @@ export const getProfesionalesSlots = async ({ dni, desde, hasta }) => {
   }
 
   return data
+} */
+
+export const getProfesionalesSlots = ({ dni, desde, hasta }) => {
+  const params = new URLSearchParams({ desde, hasta })
+  return request(`/profesionales/${dni}/slots?${params}`, { cache: 'no-store' })
 }
 
-export const getTurnosProfesional = async ({ dni, desde, hasta } = {}) => {
+/* export const getTurnosProfesional = async ({ dni, desde, hasta } = {}) => {
   const params = new URLSearchParams({ profesional: String(dni) })
   if (desde) params.append('desde', desde)
   if (hasta) params.append('hasta', hasta)
@@ -28,7 +33,16 @@ export const getTurnosProfesional = async ({ dni, desde, hasta } = {}) => {
   })
   if (!r.ok) throw new Error('Error al obtener los turnos')
   return r.json()
+} */
+
+export const getTurnosProfesional = async ({ dni, desde, hasta }) => {
+  const params = new URLSearchParams({ profesional: String(dni) })
+  if (desde) params.append('desde', desde)
+  if (hasta) params.append('hasta', hasta)
+
+  return request(`/profesionales/${dni}/slots?${params}`)
 }
+
 
 export const createNewTurno = async ({ userDni, userRol, ...turno }) => {
   const response = await fetch(`${BASE_URL}/api/turnos`, {
