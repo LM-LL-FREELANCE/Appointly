@@ -6,20 +6,18 @@ import { TurnoCard } from "./TurnoCard.jsx"
 import TurnosTable from "./TurnosTable.jsx"
 import { useQuery } from "@tanstack/react-query"
 import { getTurnosClienteByDni } from "../../../services/clientes.js"
-
-
-const DNI = '25890123'
-/* 25890123 activo */
-/* 22456789 cancelado */
+import { useAuth } from "../../../hooks/useAuth.js"
 
 export default function MisTurnos() {
+
+  const { user } = useAuth
 
   const { state } = useLocation()
   const [estado, setEstado] = useState(state?.tab ?? 'activo')
 
   const { data: [activos, pasados] = [[], []], isPending, isError } = useQuery({
-    queryKey: ['turnos', DNI],
-    queryFn: () => getTurnosClienteByDni({ dni: DNI, rol: 'cliente', estado: estado }),
+    queryKey: ['turnos', user?.dni],
+    queryFn: () => getTurnosClienteByDni({ dni: user?.dni, estado: estado }),
     select: (data) => {
       const now = new Date();
       return data.reduce(
@@ -86,9 +84,9 @@ export default function MisTurnos() {
         <>
           <Box px={{ base: 0, md: 'xl' }} visibleFrom="md">
             {estado === 'activo' ? (
-              <TurnosTable turno={activos} dni={DNI} />
+              <TurnosTable turno={activos} dni={user?.dni} />
             ) : (
-              <TurnosTable turno={pasados} dni={DNI} />
+              <TurnosTable turno={pasados} dni={user?.dni} />
             )}
           </Box>
 

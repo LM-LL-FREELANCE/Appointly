@@ -1,3 +1,5 @@
+import { request } from "../api/api.js"
+
 const BASE_URL = import.meta.env.VITE_API_URL
 
 export const getFilteredProfesional = async ({ especialidad, obraSocial } = {}) => {
@@ -17,20 +19,22 @@ export const getFilteredProfesional = async ({ especialidad, obraSocial } = {}) 
   const data = await response.json();
   return Array.isArray(data) ? data : []
 }
+
 export const getAllEspecialidades = async () => {
   const response = await fetch(`${BASE_URL}/api/especialidades/`)
   const data = await response.json()
   return data
 }
+
 export const getAllObraSociales = async () => {
   const response = await fetch(`${BASE_URL}/api/obra-sociales/`)
   const data = await response.json()
   return data
 }
+
 export const getProfesionalByDni = async ({ dni }) => {
-  const response = await fetch(`${BASE_URL}/api/profesionales/${dni}`)
-  const data = await response.json();
-  return data
+
+  return await request(`/api/profesionales/${dni}`)
 }
 
 // GET /api/profesionales/:dni/horarios
@@ -101,19 +105,12 @@ export const deleteHorario = async ({ id, dni }) => {
 }
 
 //GET /api/turnos?profesionales=&desde=&hasta=&estado=
-export const getAgendaByProfesional = async ({ dni_profesional, desde, hasta, estado, rol }) => {
-  const params = new URLSearchParams({ profesional: dni_profesional, desde, hasta })
+//ex: getAgendaByProfesional
+export const getTurnosByProfesional = async ({ dni_profesional, desde, hasta, estado }) => {
+  const params = new URLSearchParams({ profesional: dni_profesional, desde })
+
+  if (hasta) params.append('hasta', hasta)
   if (estado) params.append('estado', estado)
 
-  const response = await fetch(`${BASE_URL}/api/turnos?${params}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      'x-user-dni': String(dni_profesional),
-      'x-user-rol': rol
-    }
-  })
-
-  const data = await response.json()
-  if (!response.ok) throw { status: response.status, ...data }
-  return data
+  return request(`/api/turnos?${params}`)
 }

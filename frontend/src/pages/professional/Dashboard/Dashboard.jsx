@@ -8,12 +8,9 @@ import { StatCard } from './StatCard.jsx'
 import { ProximoTurno } from './ProximoTurno.jsx'
 import { TurnosDeHoy } from './TurnosDeHoy.jsx'
 import { getProfesionalByDni } from '../../../services/profesionales.js'
-import { getTurnosProfesional } from '../../../services/turnos.service.js'
+import { getTurnosByProfesional } from '../../../services/profesionales.js'
 import { aISO } from '../../../utils/fechas.utils.js'
 import { useAuth } from '../../../hooks/useAuth.js'
-
-/* const { user } = useAuth()
-const CURRENT_DNI = user?.dni || '27845123' */
 
 const DIA_LABEL = ['D', 'L', 'M', 'X', 'J', 'V', 'S']
 
@@ -55,7 +52,6 @@ function TurnosPorDia({ data }) {
 export default function Dashboard() {
 
   const { user } = useAuth()
-  /* const CURRENT_DNI = user?.dni || "27845123" */
 
   const { data: perfil } = useQuery({
     queryKey: ['perfil', user?.dni],
@@ -64,16 +60,15 @@ export default function Dashboard() {
 
   const startDate = new Date()
   const endDate = new Date(startDate)
-  endDate.setDate(startDate.getDate() + 7)
+
+  endDate.setDate(startDate.getDate() + 6)
 
   const startDateISO = aISO(startDate)
   const endDateISO = aISO(endDate)
 
-  /* const hasta = aISO(hoy.getDate() + 7) */
-
   const { data: turnos = [] } = useQuery({
-    queryKey: ['turnos-profesional', user?.dni, startDateISO],
-    queryFn: () => getTurnosProfesional({ dni: user?.dni, desde: startDateISO, hasta: endDateISO }),
+    queryKey: ['turnos-profesional', user?.dni, startDateISO, endDateISO],
+    queryFn: () => getTurnosByProfesional({ dni_profesional: user?.dni, desde: startDateISO, hasta: endDateISO, estado: 'activo' })
   })
 
   const turnosHoy = turnos.filter(t => t.fecha_turno?.slice(0, 10) === startDateISO && t.estado === 'activo').length

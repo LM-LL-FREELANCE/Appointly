@@ -4,17 +4,18 @@ import { IconLock } from '@tabler/icons-react'
 import { useQuery } from '@tanstack/react-query'
 import { PageHeader } from '../components/PageHeader.jsx'
 import { getProfesionalByDni } from '../services/profesionales.js'
-
-const CURRENT_DNI = '27845123'
+import { useAuth } from '../hooks/useAuth.js'
 
 export default function MiPerfil() {
+  const { user } = useAuth()
+
   const [correo, setCorreo] = useState('')
   const [foto, setFoto] = useState(null)
   const resetRef = useRef(null)
 
   const { data: perfil } = useQuery({
-    queryKey: ['perfil', CURRENT_DNI],
-    queryFn: () => getProfesionalByDni({ dni: CURRENT_DNI }),
+    queryKey: ['perfil', user?.dni],
+    queryFn: () => getProfesionalByDni({ dni: user?.dni }),
   })
 
   const especialidades = perfil?.especialidad?.map(e => e.especialidad) ?? []
@@ -79,19 +80,19 @@ export default function MiPerfil() {
           readOnly
           rightSection={<IconLock size={16} color="var(--mantine-color-yellow-6)" />}
         />
-        <TextInput label="DNI" value={CURRENT_DNI} readOnly />
+        <TextInput label="DNI" value={user?.dni} readOnly />
         <TextInput label="Correo" required value={correo} onChange={(e) => setCorreo(e.target.value)} />
 
         <TagsInput
           label="Especialidades"
           value={especialidades}
-          onChange={() => {}}
+          onChange={() => { }}
           placeholder="+ agregar..."
         />
         <TagsInput
           label="Obras sociales"
           value={obrasSociales}
-          onChange={() => {}}
+          onChange={() => { }}
           placeholder="+ agregar..."
         />
 
@@ -104,7 +105,7 @@ export default function MiPerfil() {
           {photoSection}
           <Stack w="100%" gap={4}>
             <Text size="sm" c="dimmed">DNI</Text>
-            <TextInput value={CURRENT_DNI} readOnly />
+            <TextInput value={user?.dni} readOnly />
           </Stack>
         </Stack>
 
@@ -141,14 +142,14 @@ export default function MiPerfil() {
           <TagsInput
             label="Especialidades"
             value={especialidades}
-            onChange={() => {}}
+            onChange={() => { }}
             placeholder="+ agregar..."
           />
 
           <TagsInput
             label="Obras sociales"
             value={obrasSociales}
-            onChange={() => {}}
+            onChange={() => { }}
             placeholder="+ agregar..."
             mt="sm"
           />

@@ -6,13 +6,11 @@ import { calcularSlotsDisponibles, slotsDelDia } from "../utils/helperSlots.js"
 import { MAX_RANGE_DAYS, SLOT_DURATION_MIN } from "../config/constants.js"
 import { crearTurnoSchema } from "../schemas/turno.schema.js"
 import { ClientesModel } from "../models/clientes.model.js"
-
+import { AppError } from "../utils/AppError.js"
 
 const esFecha = (s) => /^\d{4}-\d{2}-\d{2}$/.test(s) && !Number.isNaN(Date.parse(s));
 
 const diffDias = (desde, hasta) => Math.round((new Date(hasta + 'T00:00:00') - new Date(desde + 'T00:00:00')) / 86400000) + 1;
-
-
 
 const hoy = () => new Date().toISOString().slice(0, 10)
 const enDias = (n) => new Date(Date.now() + n * 86_400_000).toISOString().slice(0, 10)
@@ -54,7 +52,7 @@ export class TurnosController {
         dni,
         desde: resolvedDesde,
         hasta: resolvedHasta,
-        estado: estado ?? null,
+        estado: estado,
         requesterDni: req.user.dni,
         requesterRol: req.user.role,
       })
