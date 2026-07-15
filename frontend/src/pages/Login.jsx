@@ -23,8 +23,8 @@ export default function Login() {
     try {
       await login(values)
       navigate("/buscar")
-    } catch {
-
+    } catch (error) {
+      console.error('Login fallido:', error)
     }
 
   }
