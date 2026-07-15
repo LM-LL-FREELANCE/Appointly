@@ -42,4 +42,8 @@ export class ClientesController {
       next(err)
     }
   }
+
+  static async getTurnosMes() {
+
+  }
 }
