@@ -52,3 +52,20 @@ export const requireAuth = (req, res, next) => {
   }
 
 }
+
+export const attachUser = (req, res, next) => {
+  const token = req.cookies?.access_token
+  if (!token) {
+    req.user = null
+    return next()
+  }
+
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] })
+    req.user = { dni: payload.sub, role: payload.role }
+  } catch {
+    req.user = null
+  }
+
+  next()
+}

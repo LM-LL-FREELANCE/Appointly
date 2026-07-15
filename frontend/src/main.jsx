@@ -16,12 +16,14 @@ createRoot(document.getElementById('root')).render(
   <StrictMode>
     <MantineProvider theme={appTheme} cssVariablesResolver={cssVariablesResolver}
       defaultColorScheme="light">
+
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <App />
         </BrowserRouter>
         <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
+
     </MantineProvider>
-  </StrictMode>,
+  </StrictMode>
 )
