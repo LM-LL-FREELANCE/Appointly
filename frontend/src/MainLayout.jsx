@@ -7,7 +7,7 @@ import { UserButton } from './components/UserButton.jsx'
 import { NavLinks } from './components/NavLinks.jsx'
 import { SidebarContext } from './hooks/useSidebar.js'
 
-export default function MainLayout({ links, rol }) {
+export default function MainLayout({ links, role }) {
   const [mobileOpened, { toggle: toggleMobile, close: closeMobile }] = useDisclosure()
   const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true)
   return (

@@ -59,6 +59,9 @@ export class AuthController {
   }
 
   static async me(req, res, next) {
+
+    if (!req.user) return res.json(null)
+
     const { dni, role } = req.user
 
     try {
