@@ -1,21 +1,22 @@
-import { Avatar, Badge, Box, Button, Drawer, Group, Paper, Stack, Text } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { IconAlertCircle } from '@tabler/icons-react';
-import { Link } from 'react-router-dom';
-import { cancelTurnoById } from '../../../services/clientes.js';
-
-const DNI = '25890123';
+import { Avatar, Badge, Box, Button, Drawer, Group, Paper, Stack, Text } from '@mantine/core'
+import { useDisclosure } from '@mantine/hooks'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { IconAlertCircle } from '@tabler/icons-react'
+import { Link } from 'react-router-dom'
+import { cancelTurnoById } from '../../../api/clientes.js'
+import { useAuth } from '../../../hooks/useAuth.js'
 
 export function TurnoCard({ turno, estado }) {
+  const { user } = useAuth()
+
   const badgeColor = estado === 'activo' ? 'green' : estado === 'cancelado' ? 'red' : 'gray';
   const [drawerOpened, { open: openDrawer, close: closeDrawer }] = useDisclosure(false);
 
   const queryClient = useQueryClient();
   const { mutate: cancelar, isPending } = useMutation({
-    mutationFn: () => cancelTurnoById(turno.id_turno, DNI, 'cliente'),
+    mutationFn: () => cancelTurnoById(turno.id_turno),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['turnos', DNI] });
+      queryClient.invalidateQueries({ queryKey: ['turnos', user?.dni] });
       closeDrawer();
     },
   });

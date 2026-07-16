@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createNewTurno } from "../services/turnos.service.js";
+import { createNewTurno } from "../api/turnos.js";
 
 
 export default function useCreateTurno() {

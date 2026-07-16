@@ -24,8 +24,8 @@ export default function ProfessionalLogin() {
     try {
       await login(values)
       navigate("/dashboard")
-    } catch {
-
+    } catch (error) {
+      console.error('Login fallido:', error)
     }
 
   }

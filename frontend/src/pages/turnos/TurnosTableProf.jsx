@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Avatar, Badge, Box, Button, Group, Table, Text } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { cancelTurnoById } from '../../services/clientes.js'
+import { cancelTurnoById } from '../../api/clientes.js'
 import { fechaCorta, horaCorta } from '../../utils/fechas.utils.js'
 import { CancelarTurnoProfModal } from './CancelarTurnoProfModal.jsx'
 

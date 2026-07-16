@@ -1,6 +1,6 @@
 import { Badge, Box, Button, Divider, Grid, Group, Modal, Text } from '@mantine/core'
 import { useQuery } from "@tanstack/react-query"
-import { getTurnoById } from "../../../services/clientes.js"
+import { getTurnoById } from "../../../api/clientes.js"
 
 function DetailRow({ label, children }) {
   return (
@@ -18,10 +18,10 @@ function DetailRow({ label, children }) {
   )
 }
 
-export function TurnoDetailModal({ opened, onClose, onCancelRequest, turno, dni }) {
+export function TurnoDetailModal({ opened, onClose, onCancelRequest, turno }) {
   const { data: detail } = useQuery({
     queryKey: ['turno', turno.id_turno],
-    queryFn: () => getTurnoById({ id_turno: turno.id_turno, dni, rol: 'cliente' }),
+    queryFn: () => getTurnoById(turno.id_turno),
   })
 
   const badgeColor = turno.estado === 'activo' ? 'green' : turno.estado === 'cancelado' ? 'red' : 'gray'

@@ -1,15 +1,17 @@
-import { useState, useMemo } from "react";
-import { PageHeader } from "../components/PageHeader.jsx";
-import { Alert, Avatar, Box, Button, Group, Loader, Paper, SimpleGrid, Stack, Switch, Text } from "@mantine/core";
-import { Link } from "react-router-dom";
-import TimeSlot from "../components/TimeSlot.jsx";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getHorariosByDni, createHorario, updateHorario, deleteHorario } from "../services/profesionales.js";
+import { useState, useMemo } from "react"
+import { PageHeader } from "../components/PageHeader.jsx"
+import { Alert, Avatar, Box, Button, Group, Loader, Paper, SimpleGrid, Stack, Switch, Text } from "@mantine/core"
+import { Link } from "react-router-dom"
+import TimeSlot from "../components/TimeSlot.jsx"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { getHorariosByDni, createHorario, updateHorario, deleteHorario } from "../api/profesionales.js"
+import { useAuth } from "../hooks/useAuth.js"
 
 const DIAS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-const DNI = '27845123';
 
 export default function Horarios() {
+  const { user } = useAuth()
+
   // Local mutations
   const [added, setAdded] = useState([])
   const [deleted, setDeleted] = useState([])
@@ -17,9 +19,10 @@ export default function Horarios() {
   const [dayToggled, setDayToggled] = useState({}) // overrides explícitos del switch por día
 
   const { data, isPending, isError } = useQuery({
-    queryKey: ['horarios', DNI],
-    queryFn: () => getHorariosByDni({ dni: DNI, rol: 'profesional' }),
-  });
+    queryKey: ['horarios', user?.dni],
+    queryFn: () => getHorariosByDni({ dni: user.dni }),
+    enabled: !!user?.dni
+  })
 
   // Asignar _localId estable a los slots del servidor
   const serverSlots = useMemo(
@@ -129,13 +132,13 @@ export default function Horarios() {
     mutationFn: async () => {
       const { toDelete, toPost, toPut } = buildSavePayload();
       await Promise.all([
-        ...toDelete.map(id => deleteHorario({ id, dni: DNI })),
-        ...toPut.map(slot => updateHorario({ ...slot, dni: DNI })),
-        ...toPost.map(slot => createHorario({ ...slot, dni: DNI })),
+        ...toDelete.map(id => deleteHorario({ id })),
+        ...toPut.map(slot => updateHorario({ ...slot })),
+        ...toPost.map(slot => createHorario({ ...slot, dni: user.dni })),
       ]);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['horarios', DNI] });
+      queryClient.invalidateQueries({ queryKey: ['horarios', user.dni] });
       setAdded([]);
       setDeleted([]);
       setEdited({});

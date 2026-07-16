@@ -39,17 +39,38 @@ export class TurnosModel {
     return this.getTurnoById(id)
   }
   static async getTurnosByProfesional({ dni, desde, hasta, estado }) {
-    let query = `SELECT * FROM turno WHERE dni_profesional = ? AND fecha_turno BETWEEN ? AND ?`;
+    /* let query = `SELECT * FROM turno WHERE dni_profesional = ? AND fecha_turno BETWEEN ? AND ?`;
     const params = [dni, desde, hasta];
-    
+
     if (estado) {
       query += ` AND estado = ?`;
       params.push(estado);
     }
-    
+
     query += ` ORDER BY fecha_turno, hora_turno`;
     const [rows] = await pool.query(query, params);
-    return rows;
+    return rows; */
+
+    let query = `
+      SELECT
+        t.id_turno, t.fecha_turno, t.hora_turno, t.estado, t.cancelado_en,
+        c.dni_cliente AS "dni", c.nombre, c.apellido
+      FROM turno t
+      INNER JOIN cliente c ON t.dni_cliente = c.dni_cliente
+      WHERE t.dni_profesional = ? AND t.fecha_turno BETWEEN ? AND ?
+    `
+    const params = [dni, desde, hasta]
+
+    if (estado) {
+      query += ` AND t.estado = ?`
+      params.push(estado)
+    }
+
+    query += ` ORDER BY t.fecha_turno, t.hora_turno`
+
+    const [rows] = await pool.query(query, params)
+
+    return rows
   }
 
   static async getTurnosActivos({ dni, desde, hasta }) {
@@ -58,6 +79,7 @@ export class TurnosModel {
       , [dni, desde, hasta])
     return rows
   }
+
   static async existeActivo({ dni, fecha, hora }) {
     const [rows] = await pool.query(`
       SELECT 1 FROM turno WHERE dni_profesional = ? AND fecha_turno = ? AND hora_turno = ? AND estado = 'activo'
@@ -66,6 +88,7 @@ export class TurnosModel {
 
     return rows.length > 0
   }
+
   static async crearTurno({ dni_profesional, dni_cliente, fecha_turno, hora_turno }) {
     const [result] = await pool.query(`
       INSERT INTO turno (fecha_turno,hora_turno,dni_profesional,dni_cliente) VALUES (?,?,?,?)
@@ -73,12 +96,13 @@ export class TurnosModel {
 
     return result.insertId
   }
+
   static async getById({ id }) {
     const [rows] = await pool.query(`SELECT * FROM turno WHERE id_turno = ?`, [id])
     return rows[0]
   }
 
-  static async getAgenda({ dni_profesional, desde, hasta, estado }) {
+  /* static async getAgenda({ dni_profesional, desde, hasta, estado }) {
     let query = `
       SELECT t.id_turno, t.fecha_turno, t.hora_turno, t.estado, t.cancelado_en,
              c.dni_cliente AS "dni", c.nombre, c.apellido
@@ -94,5 +118,5 @@ export class TurnosModel {
     query += ` ORDER BY t.fecha_turno, t.hora_turno`
     const [rows] = await pool.query(query, params)
     return rows
-  }
+  } */
 }

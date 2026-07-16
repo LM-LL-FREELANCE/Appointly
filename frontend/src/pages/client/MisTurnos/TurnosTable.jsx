@@ -4,7 +4,7 @@ import { useDisclosure } from '@mantine/hooks'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { TurnoDetailModal } from './TurnoDetailModal.jsx'
 import { CancelarTurnoModal } from './CancelarTurnoModal.jsx'
-import { cancelTurnoById } from '../../../services/clientes.js'
+import { cancelTurnoById } from '../../../api/clientes.js'
 
 const COLUMNS = ['Fecha', 'Hora', 'Profesional', 'Especialidad', 'Estado', 'Acciones'];
 
@@ -124,7 +124,6 @@ export default function TurnosTable({ turno, dni }) {
             onClose={handleCloseDetail}
             onCancelRequest={handleCancelRequestFromDetail}
             turno={selectedItem}
-            dni={dni}
           />
           <CancelarTurnoModal
             opened={cancelOpened}

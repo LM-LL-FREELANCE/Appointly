@@ -3,7 +3,7 @@ import { Badge, Box, Button, Divider, Drawer, Grid, Group, Paper, Stack, Text, T
 import { useDisclosure } from '@mantine/hooks'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { IconAlertCircle } from '@tabler/icons-react'
-import { cancelTurnoById } from '../../services/clientes.js'
+import { cancelTurnoById } from '../../api/clientes.js'
 import { fechaCorta, horaCorta } from '../../utils/fechas.utils.js'
 
 function DetailRow({ label, children }) {

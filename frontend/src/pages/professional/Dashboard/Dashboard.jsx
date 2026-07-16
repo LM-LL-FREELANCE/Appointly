@@ -7,11 +7,11 @@ import { PageHeader } from '../../../components/PageHeader.jsx'
 import { StatCard } from './StatCard.jsx'
 import { ProximoTurno } from './ProximoTurno.jsx'
 import { TurnosDeHoy } from './TurnosDeHoy.jsx'
-import { getProfesionalByDni } from '../../../services/profesionales.js'
-import { getTurnosProfesional } from '../../../services/turnos.service.js'
+import { getProfesionalByDni, getTurnosByProfesional } from '../../../api/profesionales.js'
 import { aISO } from '../../../utils/fechas.utils.js'
+import { useAuth } from '../../../hooks/useAuth.js'
+import useSlots from '../../../hooks/useSlots.jsx'
 
-const CURRENT_DNI = '27845123'
 const DIA_LABEL = ['D', 'L', 'M', 'X', 'J', 'V', 'S']
 
 function buildBarData(turnos) {
@@ -50,39 +50,54 @@ function TurnosPorDia({ data }) {
 }
 
 export default function Dashboard() {
+
+  const { user } = useAuth()
+
   const { data: perfil } = useQuery({
-    queryKey: ['perfil', CURRENT_DNI],
-    queryFn: () => getProfesionalByDni({ dni: CURRENT_DNI }),
+    queryKey: ['perfil', user?.dni],
+    queryFn: () => getProfesionalByDni({ dni: user?.dni }),
   })
 
-  const hoy   = aISO(new Date())
-  const hasta = aISO(new Date(Date.now() + 6 * 86_400_000))
+  const startDate = new Date()
+  const endDate = new Date(startDate)
+
+  endDate.setDate(startDate.getDate() + 6)
+
+  const startDateISO = aISO(startDate)
+  const endDateISO = aISO(endDate)
+
+  const { data: slotData } = useSlots({
+    dni: user?.dni,
+    desde: startDateISO,
+    hasta: startDateISO
+  })
 
   const { data: turnos = [] } = useQuery({
-    queryKey: ['turnos-profesional', CURRENT_DNI, hoy],
-    queryFn: () => getTurnosProfesional({ dni: CURRENT_DNI, desde: hoy, hasta }),
+    queryKey: ['turnos-profesional', user?.dni, startDateISO],
+    queryFn: () => getTurnosByProfesional({ dni_profesional: user?.dni, desde: startDateISO })
   })
 
-  const turnosHoy    = turnos.filter(t => t.fecha_turno?.slice(0, 10) === hoy && t.estado === 'activo').length
-  const estaSemana   = turnos.filter(t => t.estado === 'activo').length
+  const turnosHoy = turnos.filter(t => t.fecha_turno?.slice(0, 10) === startDateISO && t.estado === 'activo').length
+  const estaSemana = turnos.filter(t => t.estado === 'activo').length
   const cancelados7d = turnos.filter(t => t.estado === 'cancelado').length
-  const barData      = buildBarData(turnos)
+  const barData = buildBarData(turnos)
+  const freeSlotsToday = slotData?.dias[0].slots.length ?? 0
 
   const turnosDeHoy = turnos
-    .filter(t => t.fecha_turno?.slice(0, 10) === hoy)
+    .filter(t => t.fecha_turno?.slice(0, 10) === startDateISO)
     .map(t => ({
-      id:       t.id_turno,
-      hora:     t.hora_turno?.slice(0, 5),
+      id: t.id_turno,
+      hora: t.hora_turno?.slice(0, 5),
       paciente: `${t.nombre} ${t.apellido}`,
-      estado:   t.estado,
+      estado: t.estado,
     }))
 
   const minAhora = new Date().getHours() * 60 + new Date().getMinutes()
   const proximoTurno = turnos.find(t => {
     if (t.estado !== 'activo') return false
     const fecha = t.fecha_turno?.slice(0, 10)
-    if (fecha > hoy) return true
-    if (fecha === hoy) {
+    if (fecha > startDateISO) return true
+    if (fecha === startDateISO) {
       const [h, m] = (t.hora_turno ?? '').split(':').map(Number)
       return h * 60 + m >= minAhora
     }
@@ -129,14 +144,14 @@ export default function Dashboard() {
       {/* Mobile layout */}
       <Stack hiddenFrom="sm" gap="sm" p="xs" pb="xl" style={{ flex: 1, overflowY: 'auto' }}>
         <SimpleGrid cols={2}>
-          <StatCard label="Turnos hoy"      value={turnosHoy}    color="brand"  />
-          <StatCard label="Esta semana"     value={estaSemana}   color="accent" />
-          <StatCard label="Cancelados (7d)" value={cancelados7d} color="red"    />
-          <StatCard label="Slots libres"    value={0}            color="cyan"   />
+          <StatCard label="Turnos hoy" value={turnosHoy} color="brand" />
+          <StatCard label="Esta semana" value={estaSemana} color="accent" />
+          <StatCard label="Cancelados (7d)" value={cancelados7d} color="red" />
+          <StatCard label="Slots libres" value={freeSlotsToday} color="cyan" />
         </SimpleGrid>
         <ProximoTurno turno={proximoTurno} />
         <TurnosDeHoy turnos={turnosDeHoy} />
-        <TurnosPorDia data={barData} />
+        {!isDesktop && <TurnosPorDia data={barData} />}
       </Stack>
 
       {/* Desktop layout */}
@@ -151,10 +166,10 @@ export default function Dashboard() {
           minHeight: 0,
         }}
       >
-        <StatCard label="Turnos hoy"      value={turnosHoy}    color="brand"  />
-        <StatCard label="Esta semana"     value={estaSemana}   color="accent" />
-        <StatCard label="Cancelados (7d)" value={cancelados7d} color="red"    />
-        <StatCard label="Slots libres hoy" value={0}           color="cyan"   />
+        <StatCard label="Turnos hoy" value={turnosHoy} color="brand" />
+        <StatCard label="Esta semana" value={estaSemana} color="accent" />
+        <StatCard label="Cancelados (7d)" value={cancelados7d} color="red" />
+        <StatCard label="Slots libres hoy" value={freeSlotsToday} color="cyan" />
 
         <TurnosDeHoy turnos={turnosDeHoy} />
 

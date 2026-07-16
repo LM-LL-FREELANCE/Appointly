@@ -1,6 +1,6 @@
 import { Badge, Box, Button, Divider, Grid, Group, Modal, Text } from '@mantine/core'
 import { useQuery } from '@tanstack/react-query'
-import { getTurnoById } from '../../../services/clientes.js'
+import { getTurnoById } from '../../../api/clientes.js'
 
 function DetailRow({ label, children }) {
   return (
@@ -18,20 +18,20 @@ function DetailRow({ label, children }) {
   )
 }
 
-export function TurnoProDetailModal({ opened, onClose, onCancelRequest, turno, dni }) {
+export function TurnoProDetailModal({ opened, onClose, onCancelRequest, turno }) {
   const { data: detail } = useQuery({
     queryKey: ['turno', turno.id_turno],
-    queryFn: () => getTurnoById({ id_turno: turno.id_turno, dni, rol: 'profesional' }),
-    enabled: opened,
+    queryFn: () => getTurnoById(turno.id_turno),
+    enabled: opened
   })
 
   const badgeColor = turno.estado === 'activo' ? 'green' : 'red'
 
   const reservadoEl = detail?.creado_en
     ? new Date(detail.creado_en).toLocaleString('es-AR', {
-        day: '2-digit', month: 'short', year: 'numeric',
-        hour: '2-digit', minute: '2-digit',
-      }).replace(',', ' ·')
+      day: '2-digit', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit',
+    }).replace(',', ' ·')
     : null
 
   return (

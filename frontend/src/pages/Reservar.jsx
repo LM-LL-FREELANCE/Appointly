@@ -59,15 +59,15 @@ const Reservar = () => {
   };
 
   const [turnoConfirmado, setTurnoConfirmado] = useState(false)
-  const [userClient, setUserClient] = useState(25890123)
+  /* const [userClient, setUserClient] = useState(25890123) */
   const { mutate, isPending, error: errorTurno, reset } = useCreateTurno()
   const confirmTurno = () => {
     mutate({
       dni_profesional: doctor.dni_profesional,
       fecha_turno: aISO(fechaSeleccionada),
       hora_turno: slotSeleccionado,
-      userDni: userClient,
-      userRol: 'cliente',
+      /* userDni: userClient,
+      userRol: 'cliente', */
     }, {
       onSuccess: () => {
         setTurnoConfirmado(true)

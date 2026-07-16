@@ -18,7 +18,7 @@ export class ClientesService {
 
   static async getTurnosClienteByDni(dni, requesterDni) {
 
-    if (requesterDni !== dni) {
+    if ((requesterDni) !== dni) {
       throw new AppError("No tienes permiso para realizar esta acción", 403, "FORBIDDEN")
     }
 

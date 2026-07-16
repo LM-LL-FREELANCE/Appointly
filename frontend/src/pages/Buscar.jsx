@@ -7,7 +7,7 @@ import { IconSearch } from '@tabler/icons-react'
 import { PageHeader } from '../components/PageHeader'
 import { DoctorCard } from '../components/DoctorCard'
 import DoctorTable from '../components/DoctorTable'
-import { getFilteredProfesional, getAllEspecialidades, getAllObraSociales } from '../services/profesionales'
+import { getFilteredProfesional, getAllEspecialidades, getAllObraSociales } from '../api/profesionales.js'
 import { useQuery, keepPreviousData } from "@tanstack/react-query"
 import { Link, useNavigate } from 'react-router-dom'
 import useObrasSociales from '../hooks/useObraSociales'

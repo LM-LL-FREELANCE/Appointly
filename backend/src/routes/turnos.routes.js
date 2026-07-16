@@ -5,7 +5,7 @@ import { requireAuth } from "../middlewares/auth.middleware.js"
 
 export const turnosRouter = Router();
 
-turnosRouter.get("/agenda", requireAuth, grantAccess(["profesional"]), TurnosController.getAgenda) //working
+/* turnosRouter.get("/", requireAuth, grantAccess(["profesional"]), TurnosController.getAgenda) */ //working
 turnosRouter.get("/", requireAuth, grantAccess(["profesional"]), TurnosController.getTurnos) //working
 turnosRouter.get("/:id", requireAuth, grantAccess(["cliente", "profesional"]), TurnosController.getTurnoById) //working
 turnosRouter.post("/:id/cancelacion", requireAuth, grantAccess(["cliente", "profesional"]), TurnosController.cancelTurnoById) //working
