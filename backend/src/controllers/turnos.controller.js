@@ -171,7 +171,7 @@ export class TurnosController {
     }
   }
 
-  static async getAgenda(req, res, next) {
+  /* static async getAgenda(req, res, next) {
     const { profesional, desde, hasta, estado } = req.query
 
     if (!profesional || !desde || !hasta) {
@@ -196,6 +196,6 @@ export class TurnosController {
     } catch (err) {
       next(err)
     }
-  }
+  } */
 
 }

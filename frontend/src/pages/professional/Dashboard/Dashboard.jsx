@@ -11,6 +11,7 @@ import { getProfesionalByDni } from '../../../services/profesionales.js'
 import { getTurnosByProfesional } from '../../../services/profesionales.js'
 import { aISO } from '../../../utils/fechas.utils.js'
 import { useAuth } from '../../../hooks/useAuth.js'
+import useSlots from '../../../hooks/useSlots.jsx'
 
 const DIA_LABEL = ['D', 'L', 'M', 'X', 'J', 'V', 'S']
 
@@ -66,15 +67,22 @@ export default function Dashboard() {
   const startDateISO = aISO(startDate)
   const endDateISO = aISO(endDate)
 
+  const { data: slotData } = useSlots({
+    dni: user?.dni,
+    desde: startDateISO,
+    hasta: startDateISO
+  })
+
   const { data: turnos = [] } = useQuery({
-    queryKey: ['turnos-profesional', user?.dni, startDateISO, endDateISO],
-    queryFn: () => getTurnosByProfesional({ dni_profesional: user?.dni, desde: startDateISO, hasta: endDateISO, estado: 'activo' })
+    queryKey: ['turnos-profesional', user?.dni, startDateISO],
+    queryFn: () => getTurnosByProfesional({ dni_profesional: user?.dni, desde: startDateISO })
   })
 
   const turnosHoy = turnos.filter(t => t.fecha_turno?.slice(0, 10) === startDateISO && t.estado === 'activo').length
   const estaSemana = turnos.filter(t => t.estado === 'activo').length
   const cancelados7d = turnos.filter(t => t.estado === 'cancelado').length
   const barData = buildBarData(turnos)
+  const freeSlotsToday = slotData?.dias[0].slots.length ?? 0
 
   const turnosDeHoy = turnos
     .filter(t => t.fecha_turno?.slice(0, 10) === startDateISO)
@@ -140,11 +148,11 @@ export default function Dashboard() {
           <StatCard label="Turnos hoy" value={turnosHoy} color="brand" />
           <StatCard label="Esta semana" value={estaSemana} color="accent" />
           <StatCard label="Cancelados (7d)" value={cancelados7d} color="red" />
-          <StatCard label="Slots libres" value={0} color="cyan" />
+          <StatCard label="Slots libres" value={freeSlotsToday} color="cyan" />
         </SimpleGrid>
         <ProximoTurno turno={proximoTurno} />
         <TurnosDeHoy turnos={turnosDeHoy} />
-        <TurnosPorDia data={barData} />
+        {!isDesktop && <TurnosPorDia data={barData} />}
       </Stack>
 
       {/* Desktop layout */}
@@ -162,7 +170,7 @@ export default function Dashboard() {
         <StatCard label="Turnos hoy" value={turnosHoy} color="brand" />
         <StatCard label="Esta semana" value={estaSemana} color="accent" />
         <StatCard label="Cancelados (7d)" value={cancelados7d} color="red" />
-        <StatCard label="Slots libres hoy" value={0} color="cyan" />
+        <StatCard label="Slots libres hoy" value={freeSlotsToday} color="cyan" />
 
         <TurnosDeHoy turnos={turnosDeHoy} />
 
