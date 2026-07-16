@@ -23,7 +23,6 @@ import Inicio from './pages/Inicio.jsx'
 export default function App() {
   const { user } = useAuth()
 
-
   const linksForProfesional = [
     { label: "Dashboard", path: "/dashboard", element: <Dashboard /> },
     { label: "Agenda", path: "/agenda", element: <Agenda /> },

@@ -7,9 +7,10 @@ import { UserButton } from './components/UserButton.jsx'
 import { NavLinks } from './components/NavLinks.jsx'
 import { SidebarContext } from './hooks/useSidebar.js'
 
-export default function MainLayout({ links, role }) {
+export default function MainLayout({ links }) {
   const [mobileOpened, { toggle: toggleMobile, close: closeMobile }] = useDisclosure()
   const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true)
+
   return (
     <SidebarContext.Provider value={{ mobileOpened, toggleMobile, desktopOpened, toggleDesktop }}>
       <AppShell
