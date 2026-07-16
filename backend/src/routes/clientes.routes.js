@@ -6,4 +6,5 @@ export const clientesRouter = Router()
 
 clientesRouter.get("/:dni/turnos", requireAuth, grantAccess(["cliente"]), ClientesController.getTurnosClienteByDni) //working
 clientesRouter.get("/:dni", requireAuth, grantAccess(["profesional"]), ClientesController.getClienteByDni) //working
-clientesRouter.get("/:dni/turnos/mes", requireAuth, grantAccess(["cliente"]), ClientesController.getTurnosMes)
+clientesRouter.get("/:dni/mes", requireAuth, grantAccess(["cliente"]), ClientesController.getTurnosMes) //working
+clientesRouter.get("/:dni/turnos/activos", requireAuth, grantAccess(["cliente"]), ClientesController.getActivos) //working

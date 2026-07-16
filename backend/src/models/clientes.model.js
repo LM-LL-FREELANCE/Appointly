@@ -81,4 +81,23 @@ export class ClientesModel {
 
     return rows[0] ?? null
   }
+
+  static async getTurnosMes({ dni, month, year }) {
+    const [rows] = await pool.query(`
+      SELECT * FROM turno WHERE dni_cliente = ? AND MONTH(fecha_turno) = ? AND YEAR(fecha_turno) = ? 
+      ORDER BY fecha_turno ASC
+      `, [dni, month, year])
+
+    return rows
+  }
+
+  static async getActivos({ dni }) {
+    const [rows] = await pool.query(`
+      SELECT t.id_turno, t.fecha_turno, t.hora_turno, p.nombre, p.apellido 
+      FROM turno t INNER JOIN profesional p ON t.dni_profesional = p.dni_profesional
+      WHERE t.dni_cliente = ? AND t.estado = 'activo'
+      ORDER BY t.fecha_turno ASC, t.hora_turno ASC
+      `, [dni])
+    return rows;
+  }
 }
