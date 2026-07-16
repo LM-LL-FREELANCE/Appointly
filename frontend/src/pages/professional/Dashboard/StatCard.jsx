@@ -1,6 +1,6 @@
 import { Paper, Stack, Text } from '@mantine/core';
 
-export function StatCard({ label, value, color = 'brand' }) {
+export function StatCard({ label, value, color = 'brand', height = "100%" }) {
   return (
     <Paper
       withBorder
@@ -8,6 +8,7 @@ export function StatCard({ label, value, color = 'brand' }) {
       pt="2rem"
       pb="4rem"
       px="lg"
+      h={height}
       style={{
         backgroundColor: `var(--mantine-color-${color}-0)`,
         borderColor: `var(--mantine-color-${color}-2)`,
