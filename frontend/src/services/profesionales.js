@@ -51,5 +51,5 @@ export const getTurnosByProfesional = async ({ dni_profesional, desde, hasta, es
   if (hasta) params.append('hasta', hasta)
   if (estado) params.append('estado', estado)
 
-  return request(`/api/turnos?${params}`)
+  return request(`/api/turnos/agenda/?${params}`)
 }
