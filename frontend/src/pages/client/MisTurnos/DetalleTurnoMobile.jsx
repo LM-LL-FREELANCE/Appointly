@@ -4,7 +4,7 @@ import { useDisclosure } from '@mantine/hooks';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { IconAlertCircle } from '@tabler/icons-react';
 import { PageHeader } from '../../../components/PageHeader.jsx';
-import { cancelTurnoById } from '../../../services/clientes.js';
+import { cancelTurnoById } from '../../../api/clientes.js';
 
 const DNI = '25890123';
 

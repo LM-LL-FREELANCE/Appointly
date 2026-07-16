@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getProfesionalesSlots } from "../services/turnos";
+import { getProfesionalesSlots } from "../api/turnos";
 
 
 export default function useSlots({ dni, desde, hasta }) {

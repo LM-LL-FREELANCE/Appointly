@@ -4,7 +4,7 @@ import { Alert, Avatar, Box, Button, Group, Loader, Paper, SimpleGrid, Stack, Sw
 import { Link } from "react-router-dom"
 import TimeSlot from "../components/TimeSlot.jsx"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { getHorariosByDni, createHorario, updateHorario, deleteHorario } from "../services/profesionales.js"
+import { getHorariosByDni, createHorario, updateHorario, deleteHorario } from "../api/profesionales.js"
 import { useAuth } from "../hooks/useAuth.js"
 
 const DIAS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];

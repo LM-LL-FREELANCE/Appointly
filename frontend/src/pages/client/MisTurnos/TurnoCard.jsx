@@ -3,7 +3,7 @@ import { useDisclosure } from '@mantine/hooks'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { IconAlertCircle } from '@tabler/icons-react'
 import { Link } from 'react-router-dom'
-import { cancelTurnoById } from '../../../services/clientes.js'
+import { cancelTurnoById } from '../../../api/clientes.js'
 import { useAuth } from '../../../hooks/useAuth.js'
 
 export function TurnoCard({ turno, estado }) {

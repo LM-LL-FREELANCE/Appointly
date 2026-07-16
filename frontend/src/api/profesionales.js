@@ -1,4 +1,4 @@
-import { request } from "../api/api.js"
+import { request } from "./api.js"
 
 export const getFilteredProfesional = ({ especialidad, obraSocial }) => {
   const params = new URLSearchParams()

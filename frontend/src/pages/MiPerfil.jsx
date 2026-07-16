@@ -3,7 +3,7 @@ import { Group, Stack, Text, Avatar, Button, Paper, TextInput, Grid, TagsInput, 
 import { IconLock } from '@tabler/icons-react'
 import { useQuery } from '@tanstack/react-query'
 import { PageHeader } from '../components/PageHeader.jsx'
-import { getProfesionalByDni } from '../services/profesionales.js'
+import { getProfesionalByDni } from '../api/profesionales.js'
 import { useAuth } from '../hooks/useAuth.js'
 
 export default function MiPerfil() {

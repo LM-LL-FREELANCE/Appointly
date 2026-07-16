@@ -1,4 +1,4 @@
-import { request } from '../api/api.js'
+import { request } from './api.js'
 
 export const getProfesionalesSlots = ({ dni, desde, hasta }) => {
   const params = new URLSearchParams({ desde, hasta })

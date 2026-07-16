@@ -5,7 +5,7 @@ import { Text, Stack, Group, Avatar, SegmentedControl, Box, Alert, Loader } from
 import { TurnoCard } from "./TurnoCard.jsx"
 import TurnosTable from "./TurnosTable.jsx"
 import { useQuery } from "@tanstack/react-query"
-import { getTurnosClienteByDni } from "../../../services/clientes.js"
+import { getTurnosClienteByDni } from "../../../api/clientes.js"
 import { useAuth } from "../../../hooks/useAuth.js"
 
 export default function MisTurnos() {

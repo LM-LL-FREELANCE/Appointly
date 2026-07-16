@@ -4,7 +4,7 @@ import { useDisclosure } from '@mantine/hooks'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { TurnoProDetailModal } from './TurnoProDetailModal.jsx'
 import { CancelarTurnoProfesionalModal } from './CancelarTurnoProfesionalModal.jsx'
-import { cancelTurnoById } from '../../../services/clientes.js'
+import { cancelTurnoById } from '../../../api/clientes.js'
 import { useAuth } from '../../../hooks/useAuth.js'
 
 /* const CURRENT_DNI = '27845123' */

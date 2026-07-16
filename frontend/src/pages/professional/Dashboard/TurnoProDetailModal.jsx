@@ -1,6 +1,6 @@
 import { Badge, Box, Button, Divider, Grid, Group, Modal, Text } from '@mantine/core'
 import { useQuery } from '@tanstack/react-query'
-import { getTurnoById } from '../../../services/clientes.js'
+import { getTurnoById } from '../../../api/clientes.js'
 
 function DetailRow({ label, children }) {
   return (

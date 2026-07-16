@@ -1,4 +1,4 @@
-import { getTurnosByProfesional } from "../services/profesionales";
+import { getTurnosByProfesional } from "../api/profesionales.js";
 import { useQuery } from "@tanstack/react-query"
 
 
