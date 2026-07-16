@@ -124,7 +124,6 @@ export default function TurnosTable({ turno, dni }) {
             onClose={handleCloseDetail}
             onCancelRequest={handleCancelRequestFromDetail}
             turno={selectedItem}
-            dni={dni}
           />
           <CancelarTurnoModal
             opened={cancelOpened}

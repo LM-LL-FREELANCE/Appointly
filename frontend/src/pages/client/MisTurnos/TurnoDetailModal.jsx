@@ -18,10 +18,10 @@ function DetailRow({ label, children }) {
   )
 }
 
-export function TurnoDetailModal({ opened, onClose, onCancelRequest, turno, dni }) {
+export function TurnoDetailModal({ opened, onClose, onCancelRequest, turno }) {
   const { data: detail } = useQuery({
     queryKey: ['turno', turno.id_turno],
-    queryFn: () => getTurnoById({ id_turno: turno.id_turno, dni, rol: 'cliente' }),
+    queryFn: () => getTurnoById(turno.id_turno),
   })
 
   const badgeColor = turno.estado === 'activo' ? 'green' : turno.estado === 'cancelado' ? 'red' : 'gray'

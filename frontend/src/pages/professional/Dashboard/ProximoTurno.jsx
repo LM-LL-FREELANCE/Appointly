@@ -5,10 +5,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { TurnoProDetailModal } from './TurnoProDetailModal.jsx'
 import { CancelarTurnoProfesionalModal } from './CancelarTurnoProfesionalModal.jsx'
 import { cancelTurnoById } from '../../../services/clientes.js'
+import { useAuth } from '../../../hooks/useAuth.js'
 
-const CURRENT_DNI = '27845123'
+/* const CURRENT_DNI = '27845123' */
 
 export function ProximoTurno({ turno }) {
+  const { user } = useAuth()
+
   const [detailOpened, { open: openDetail, close: closeDetail }] = useDisclosure(false)
   const [cancelOpened, { open: openCancel, close: closeCancel }] = useDisclosure(false)
   const [cancelFromDetail, setCancelFromDetail] = useState(false)
@@ -16,15 +19,15 @@ export function ProximoTurno({ turno }) {
   const queryClient = useQueryClient()
 
   const { mutate: cancelTurno, isPending: isCancelling } = useMutation({
-    mutationFn: (id) => cancelTurnoById(id, CURRENT_DNI, 'profesional'),
+    mutationFn: (id) => cancelTurnoById(id, user?.dni),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['turnos-profesional', CURRENT_DNI] })
+      queryClient.invalidateQueries({ queryKey: ['turnos-profesional', user?.dni] })
       closeCancel()
       setCancelFromDetail(false)
     },
     onError: (err) => {
       if (err.status === 409 && err.code === 'ALREADY_CANCELLED') {
-        queryClient.invalidateQueries({ queryKey: ['turnos-profesional', CURRENT_DNI] })
+        queryClient.invalidateQueries({ queryKey: ['turnos-profesional', user?.dni] })
         closeCancel()
         setCancelFromDetail(false)
       }
@@ -49,9 +52,9 @@ export function ProximoTurno({ turno }) {
   // CancelarTurnoModal expects p_nombre/p_apellido — remap to show the patient's name
   const turnoParaCancelar = turno ? {
     fecha_turno: turno.fecha_turno?.slice(0, 10),
-    hora_turno:  turno.hora_turno?.slice(0, 5),
-    p_nombre:    turno.nombre,
-    p_apellido:  turno.apellido,
+    hora_turno: turno.hora_turno?.slice(0, 5),
+    p_nombre: turno.nombre,
+    p_apellido: turno.apellido,
   } : null
 
   return (
@@ -80,7 +83,7 @@ export function ProximoTurno({ turno }) {
               onClose={closeDetail}
               onCancelRequest={handleCancelRequestFromDetail}
               turno={turno}
-              dni={CURRENT_DNI}
+              dni={user?.dni}
             />
             <CancelarTurnoProfesionalModal
               opened={cancelOpened}
