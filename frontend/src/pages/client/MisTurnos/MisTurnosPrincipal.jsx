@@ -53,7 +53,7 @@ export default function MisTurnos() {
       )
     }
   })
-
+  console.log(activos)
   return (
     <>
       <PageHeader>

@@ -46,32 +46,35 @@ export class ClientesModel {
       `, [dni]) */
 
     const [rows] = await pool.query(`
-      SELECT
-        profesional.apellido AS "apellido",
-        profesional.nombre AS "nombre",
-        profesional.dni_profesional AS "dni",
-        profesional.genero AS genero,
-        GROUP_CONCAT(DISTINCT especialidad.tipo ORDER BY especialidad.tipo SEPARATOR '|') AS especialidades,
-        "" AS tipo,
-        turno.id_turno,
-        turno.fecha_turno,
-        turno.hora_turno,
-        turno.estado
-      FROM turno
-        INNER JOIN cliente ON turno.dni_cliente = cliente.dni_cliente
-        INNER JOIN profesional ON turno.dni_profesional = profesional.dni_profesional
-        LEFT JOIN profesional_especialidad pe ON profesional.dni_profesional = pe.dni_profesional
-        LEFT JOIN especialidad especialidad ON pe.id_especialidad = especialidad.id_especialidad
-      WHERE cliente.dni_cliente = ?
-      GROUP BY
-        turno.id_turno,
-        profesional.dni_profesional,
-        profesional.apellido,
-        profesional.nombre,
-        profesional.genero,
-        turno.fecha_turno,
-        turno.hora_turno,
-        turno.estado;
+        SELECT
+            profesional.apellido AS "apellido",
+            profesional.nombre AS "nombre",
+            profesional.dni_profesional AS "dni",
+            profesional.genero AS genero,
+            GROUP_CONCAT(DISTINCT especialidad.tipo ORDER BY especialidad.tipo SEPARATOR '|') AS especialidades,
+            "" AS tipo,
+            turno.id_turno,
+            turno.fecha_turno,
+            turno.hora_turno,
+            turno.estado
+          FROM turno
+            INNER JOIN cliente ON turno.dni_cliente = cliente.dni_cliente
+            INNER JOIN profesional ON turno.dni_profesional = profesional.dni_profesional
+            LEFT JOIN profesional_especialidad pe ON profesional.dni_profesional = pe.dni_profesional
+            LEFT JOIN especialidad especialidad ON pe.id_especialidad = especialidad.id_especialidad
+          WHERE cliente.dni_cliente = ?
+          GROUP BY
+            turno.id_turno,
+            profesional.dni_profesional,
+            profesional.apellido,
+            profesional.nombre,
+            profesional.genero,
+            turno.fecha_turno,
+            turno.hora_turno,
+            turno.estado
+          ORDER BY
+            turno.fecha_turno ASC,
+            turno.hora_turno ASC;
       `, [dni])
 
     return rows

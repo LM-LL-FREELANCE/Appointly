@@ -75,7 +75,7 @@ export default function TurnosTable({ turno, dni }) {
         <Table.Td>
           <Group gap="sm" wrap="nowrap">
             <Avatar size={32} radius="xl" src={item.avatarSrc ?? null} />
-            <Text fz="sm" fw={500}>{item.p_nombre} {item.p_apellido}</Text>
+            <Text fz="sm" fw={500}>{item.nombre} {item.apellido}</Text>
           </Group>
         </Table.Td>
         <Table.Td><Text fz="sm">{item.tipo}</Text></Table.Td>

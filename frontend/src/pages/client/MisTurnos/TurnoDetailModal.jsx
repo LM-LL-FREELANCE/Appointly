@@ -16,6 +16,7 @@ function DetailRow({ label, children }) {
       <Divider />
     </>
   )
+
 }
 
 export function TurnoDetailModal({ opened, onClose, onCancelRequest, turno }) {
@@ -50,7 +51,7 @@ export function TurnoDetailModal({ opened, onClose, onCancelRequest, turno }) {
         <Text fw={700} fz="lg" mb="lg">Detalle del turno</Text>
         <Divider />
         <DetailRow label="Profesional">
-          <Text fz="sm" fw={500}>{turno.p_nombre} {turno.p_apellido}</Text>
+          <Text fz="sm" fw={500}>{turno.nombre} {turno.apellido}</Text>
         </DetailRow>
         <DetailRow label="Especialidad">
           <Text fz="sm" fw={500}>{turno.tipo}</Text>
