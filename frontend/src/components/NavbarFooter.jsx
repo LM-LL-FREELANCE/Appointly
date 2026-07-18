@@ -2,7 +2,7 @@ import { NavLink, Divider, useMantineColorScheme } from '@mantine/core'
 import { IconSettings, IconLogout, IconMoon, IconSun } from '@tabler/icons-react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth.js'
-import { navLinkStyles } from './navLinkStyles.js'
+import { navLinkStyles, navLinkClassName, navLinkLogoutClassName } from './navLinkPresentation.js'
 
 export function NavbarFooter({ onNavigate }) {
   const { logout } = useAuth()
@@ -18,6 +18,7 @@ export function NavbarFooter({ onNavigate }) {
         component={Link}
         to="/miperfil"
         onClick={onNavigate}
+        className={navLinkClassName}
         styles={navLinkStyles}
       />
 
@@ -28,18 +29,17 @@ export function NavbarFooter({ onNavigate }) {
           : <IconSun size={20} stroke={1.5} />}
         component="button"
         onClick={toggleColorScheme}
+        className={navLinkClassName}
         styles={navLinkStyles}
       />
 
       <NavLink
         label="Cerrar sesión"
-        leftSection={<IconLogout size={20} stroke={1.5} color="var(--mantine-color-red-6)" />}
+        leftSection={<IconLogout size={20} stroke={1.5} />}
         component="button"
         onClick={logout}
-        styles={{
-          root: navLinkStyles.root,
-          label: { ...navLinkStyles.label, color: 'var(--mantine-color-red-6)' },
-        }}
+        className={`${navLinkClassName} ${navLinkLogoutClassName}`}
+        styles={navLinkStyles}
       />
     </>
   )

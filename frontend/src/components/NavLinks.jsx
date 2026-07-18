@@ -1,6 +1,6 @@
 import { NavLink } from '@mantine/core'
 import { Link, useLocation } from 'react-router-dom'
-import { navLinkStyles } from './navLinkStyles.js'
+import { navLinkStyles, navLinkClassName } from './navLinkPresentation.js'
 
 export function NavLinks({ links, onNavigate }) {
   const { pathname } = useLocation()
@@ -13,6 +13,7 @@ export function NavLinks({ links, onNavigate }) {
       to={link.path}
       active={pathname === link.path}
       onClick={onNavigate}
+      className={navLinkClassName}
       styles={navLinkStyles}
     />
   ))
