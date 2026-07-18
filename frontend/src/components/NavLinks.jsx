@@ -11,6 +11,10 @@ export function NavLinks({ links, onNavigate }) {
       to={link.path}
       active={pathname === link.path}
       onClick={onNavigate}
+      styles={{
+        root: { padding: '11px var(--mantine-spacing-sm)' },
+        label: { fontSize: 'var(--mantine-font-size-md)' },
+      }}
     />
   ))
 }

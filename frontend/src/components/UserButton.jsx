@@ -1,15 +1,17 @@
-import { Avatar, Group, Text, UnstyledButton, Menu, Button } from '@mantine/core'
+import { Avatar, Group, Text, UnstyledButton, Menu, useMantineColorScheme } from '@mantine/core'
 import { IconChevronRight } from "@tabler/icons-react"
-import classes from './UserButton.module.css'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth.js'
+import classes from './UserButton.module.css'
 
-import { IconSettings, IconBrandLine, IconPolaroid, IconZoom, IconArrowsLeftRight, IconTrash } from '@tabler/icons-react'
+import { IconSettings, IconLogout, IconMoon, IconSun } from '@tabler/icons-react'
 
 export function UserButton() {
-  const { user } = useAuth()
+  const { logout } = useAuth()
+  const { colorScheme, toggleColorScheme } = useMantineColorScheme()
 
   return (
-    <Menu shadow="md" width={200}>
+    <Menu shadow="md" width={140} position="left" trigger="click-hover" openDelay={100} closeDelay={300}>
       <Menu.Target>
 
         <UnstyledButton className={classes.user}>
@@ -17,8 +19,8 @@ export function UserButton() {
             <Group wrap="nowrap">
               <Avatar radius="xl" alt="" />
               <div>
-                <Text size="sm" fw={500}>{user?.name}</Text>
-                <Text c="dimmed" size="xs">{user?.role}</Text>
+                <Text size="sm" fw={500}></Text>
+                <Text c="dimmed" size="xs"></Text>
               </div>
             </Group>
             <IconChevronRight size={14} stroke={1.5} />
@@ -28,43 +30,27 @@ export function UserButton() {
       </Menu.Target>
 
       <Menu.Dropdown>
-        <Menu.Label>Application</Menu.Label>
-        <Menu.Item leftSection={<IconSettings size={14} />}>
-          Settings
-        </Menu.Item>
-        <Menu.Item leftSection={<IconBrandLine size={14} />}>
-          Brand
-        </Menu.Item>
-        <Menu.Item leftSection={<IconPolaroid size={14} />}>
-          Gallery
-        </Menu.Item>
-        <Menu.Item
-          leftSection={<IconZoom size={14} />}
-          rightSection={
-            <Text size="xs" c="dimmed">
-              ⌘K
-            </Text>
-          }
-        >
-          Search
+        {/* <Menu.Label>Application</Menu.Label> */}
+        <Menu.Item leftSection={<IconSettings size={14} />} component={Link} to="/miperfil">
+          Configuración
         </Menu.Item>
 
         <Menu.Divider />
 
-        <Menu.Label>Danger zone</Menu.Label>
         <Menu.Item
-          leftSection={<IconArrowsLeftRight size={14} />}
+          leftSection={colorScheme === 'light' ? <IconMoon size={14} /> : <IconSun size={14} />}
+          onClick={toggleColorScheme}
         >
-          Transfer my data
+          {colorScheme === 'light' ? 'Modo Oscuro' : 'Modo Claro'}
         </Menu.Item>
         <Menu.Item
           color="red"
-          leftSection={<IconTrash size={14} />}
+          leftSection={<IconLogout size={14} />}
+          onClick={logout}
         >
-          Delete my account
+          Cerrar sesión
         </Menu.Item>
       </Menu.Dropdown>
     </Menu>
   )
 }
-

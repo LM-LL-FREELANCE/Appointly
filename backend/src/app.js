@@ -24,6 +24,10 @@ app.use(cors({
       "http://localhost:5173"
     ]
 
+    if (process.env.NODE_ENV === 'development') {
+      return callback(null, true)
+    }
+
     if (!origin || ACCEPTED_ORIGINS.includes(origin)) {
       return callback(null, true)
     }

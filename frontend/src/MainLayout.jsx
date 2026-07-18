@@ -1,4 +1,4 @@
-import { AppShell, Group, Text, Drawer } from '@mantine/core'
+import { AppShell, Group, Text, Drawer, Stack } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import { Outlet } from 'react-router-dom'
 
@@ -9,7 +9,7 @@ import { SidebarContext } from './hooks/useSidebar.js'
 
 export default function MainLayout({ links }) {
   const [mobileOpened, { toggle: toggleMobile, close: closeMobile }] = useDisclosure()
-  const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true)
+  const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure()
 
   return (
     <SidebarContext.Provider value={{ mobileOpened, toggleMobile, desktopOpened, toggleDesktop }}>
@@ -41,8 +41,12 @@ export default function MainLayout({ links }) {
           size={230}
           padding="sm"
           title="Appointly"
-          hiddenFrom="md">
-          <NavLinks links={links} onNavigate={closeMobile} />
+          hiddenFrom="md"
+          closeButtonProps={{ size: 'xl' }}>
+          <Stack h="100%" justify="space-between">
+            <NavLinks links={links} onNavigate={closeMobile} />
+            <UserButton />
+          </Stack>
         </Drawer>
 
         <AppShell.Main>
