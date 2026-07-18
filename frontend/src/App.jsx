@@ -1,4 +1,14 @@
 import { Route, Routes } from 'react-router-dom'
+import {
+  IconLayoutDashboard,
+  IconCalendarWeek,
+  IconClipboardList,
+  IconClock,
+  IconHome2,
+  IconSearch,
+  IconCalendarPlus,
+  IconCalendarEvent,
+} from '@tabler/icons-react'
 import { useAuth } from './hooks/useAuth.js'
 import { ProtectedRoute } from './components/ProtectedRoute.jsx'
 
@@ -24,17 +34,17 @@ export default function App() {
   const { user } = useAuth()
 
   const linksForProfesional = [
-    { label: "Dashboard", path: "/dashboard", element: <Dashboard /> },
-    { label: "Agenda", path: "/agenda", element: <Agenda /> },
-    { label: "Turnos", path: "/turnos", element: <Turnos /> },
-    { label: "Horarios de Atencion", path: "/horarios", element: <Horarios /> },
+    { label: "Dashboard", path: "/dashboard", element: <Dashboard />, icon: IconLayoutDashboard },
+    { label: "Agenda", path: "/agenda", element: <Agenda />, icon: IconCalendarWeek },
+    { label: "Turnos", path: "/turnos", element: <Turnos />, icon: IconClipboardList },
+    { label: "Horarios de Atencion", path: "/horarios", element: <Horarios />, icon: IconClock },
   ]
 
   const defaultLinks = [
-    { label: "Inicio", path: "/inicio", element: <Inicio /> },
-    { label: "Buscar Doctores", path: "/buscar", element: <Buscar /> },
-    { label: "Reservar Turno", path: "/reservar", element: <Reservar /> },
-    { label: "Mis Turnos", path: "/misturnos/*", element: <MisTurnos /> },
+    { label: "Inicio", path: "/inicio", element: <Inicio />, icon: IconHome2 },
+    { label: "Buscar Doctores", path: "/buscar", element: <Buscar />, icon: IconSearch },
+    { label: "Reservar Turno", path: "/reservar", element: <Reservar />, icon: IconCalendarPlus },
+    { label: "Mis Turnos", path: "/misturnos/*", element: <MisTurnos />, icon: IconCalendarEvent },
   ]
 
   const links = (user?.role === "profesional") ? linksForProfesional : defaultLinks

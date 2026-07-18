@@ -1,9 +1,9 @@
-import { AppShell, Group, Text, Drawer, Stack } from '@mantine/core'
+import { AppShell, Group, Text } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import { Outlet } from 'react-router-dom'
 
 /*Hook and some buttons (Con las mismas rutas relativas) */
-import { UserButton } from './components/UserButton.jsx'
+import { NavbarFooter } from './components/NavbarFooter.jsx'
 import { NavLinks } from './components/NavLinks.jsx'
 import { SidebarContext } from './hooks/useSidebar.js'
 
@@ -17,37 +17,23 @@ export default function MainLayout({ links }) {
         navbar={{
           width: 230,
           breakpoint: 'md',
-          collapsed: { mobile: true, desktop: !desktopOpened },
+          collapsed: { mobile: !mobileOpened, desktop: !desktopOpened },
         }}
         padding="md">
 
-        <AppShell.Navbar p="sm" visibleFrom="md">
+        <AppShell.Navbar p="sm">
           <AppShell.Section>
             <Group px="xs" py="sm">
               <Text fw={700} size="lg">Appointly</Text>
             </Group>
           </AppShell.Section>
           <AppShell.Section grow>
-            <NavLinks links={links} />
+            <NavLinks links={links} onNavigate={closeMobile} />
           </AppShell.Section>
           <AppShell.Section>
-            <UserButton />
+            <NavbarFooter onNavigate={closeMobile} />
           </AppShell.Section>
         </AppShell.Navbar>
-
-        <Drawer
-          opened={mobileOpened}
-          onClose={closeMobile}
-          size={230}
-          padding="sm"
-          title="Appointly"
-          hiddenFrom="md"
-          closeButtonProps={{ size: 'xl' }}>
-          <Stack h="100%" justify="space-between">
-            <NavLinks links={links} onNavigate={closeMobile} />
-            <UserButton />
-          </Stack>
-        </Drawer>
 
         <AppShell.Main>
           <Outlet />
