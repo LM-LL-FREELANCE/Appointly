@@ -1,0 +1,36 @@
+import { Card, Badge, Avatar, Group, Stack, Title, Text } from "@mantine/core";
+import ButtonLay from "./Button";
+
+export default function TurnoCard({ data, openedModal, cancelarTurno }) {
+
+  return (
+    <>
+      <Card radius="md" padding="md" my="md">
+        <Stack gap="xl" align="center" justify="center">
+          <Avatar size="xl" radius="xl" alt="" />
+          <Stack gap="lg" align="center" mt="md">
+            <Title size="h2" ta="center">{data.genero === "M" ? "Dr. " : "Dra. "}{`${data.nombre}  ${data.apellido}`}</Title>
+            {data.especialidades ? (
+              <Stack gap="xs" align="center">
+                {data.especialidades.map(especialidad => (
+                  <Text key={especialidad} size="xl" fw={500} c="dimmed">{especialidad}</Text>
+                ))}
+              </Stack>
+            ) : (
+              <Text size="xl" c="dimmed">Sin especialidades</Text>
+            )}
+            <Group gap="lg" mt="sm">
+              <Badge variant="outline" color="gray" size="md" radius="md" p="md">{data.fecha}</Badge>
+              <Badge variant="outline" color="gray" size="md" radius="md" p="md">{data.hora_turno}</Badge>
+            </Group>
+            <Group gap="xl" mt="xl" >
+              <ButtonLay label={"Ver detalle"} type="light" link={openedModal} size="md" radius="md" px="md" />
+              <ButtonLay label={"Cancelar"} type="light" color="red" link={cancelarTurno} size="md" radius="md" px="md" />
+            </Group>
+          </Stack>
+        </Stack>
+
+      </Card>
+    </>
+  )
+}

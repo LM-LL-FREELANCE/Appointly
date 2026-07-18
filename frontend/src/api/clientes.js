@@ -1,6 +1,5 @@
 import { request } from './api.js'
 
-const BASE_URL = import.meta.env.VITE_API_URL
 
 export const getTurnosClienteByDni = ({ dni, estado }) => {
   /* const responseOld = await fetch(`${BASE_URL}/api/clientes/${dni}/turnos?estado=${estado}`, {
@@ -33,7 +32,7 @@ export const getTurnoById = (id_turno) => {
   return request(`/api/turnos/${id_turno}`)
 }
 
-export const cancelTurnoById = (id, motivo) => {
+export const cancelTurnoById = ({ id, motivo }) => {
   /* const r = await fetch(`${BASE_URL}/api/turnos/${id}/cancelacion`, {
     method: 'POST',
     headers: {
@@ -57,19 +56,29 @@ export const cancelTurnoById = (id, motivo) => {
   return request(`/api/turnos/${id}/cancelacion`, { method: 'POST', body: JSON.stringify(motivo ? { motivo } : {}) })
 }
 
-export const createAccount = async (data) => {
-  const response = await fetch(`${BASE_URL}/api/auth/registro`, {
-    method: "POST",
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(data)
-  })
+export const createAccount = (data) => {
+  return request("/api/auth/registro", { method: 'POST', body: JSON.stringify(data) })
+}
 
+/*export const getTurnosActivos = async ({ dni }) => {
+  const response = await fetch(`${BASE_URL}/api/clientes/${dni}/turnos/activos`)
   if (!response.ok) {
     const body = await response.json().catch(() => ({}))
-    throw body // Lanzamos el error para que React Query (y errorAcc) lo atrapen
+    throw body
+  }
+  return response.json()
+
+  return request(`/api/clientes`)
+}*/
+
+export const getTurnosMes = ({ dni }) => {
+  /*const response = await fetch(`${BASE_URL}/api/clientes/${dni}/mes`)
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}))
+    throw body
   }
 
-  return response.json()
+  return response.json()*/
+
+  return request(`/api/clientes/${dni}/mes`)
 }

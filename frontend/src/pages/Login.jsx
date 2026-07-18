@@ -22,7 +22,7 @@ export default function Login() {
   async function handleLogin(values) {
     try {
       await login(values)
-      navigate("/buscar")
+      navigate("/inicio")
     } catch (error) {
       console.error('Login fallido:', error)
     }
