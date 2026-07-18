@@ -27,8 +27,8 @@ export function TurnoDetailModal({ opened, onClose, onCancelRequest, turno }) {
 
   const badgeColor = turno.estado === 'activo' ? 'green' : turno.estado === 'cancelado' ? 'red' : 'gray'
 
-  const reservadoEl = detail?.creado_en
-    ? new Date(detail.creado_en).toLocaleString('es-AR', {
+  const reservadoEl = detail?.fecha_turno
+    ? new Date(detail.fecha_turno).toLocaleString('es-AR', {
       day: '2-digit',
       month: 'short',
       year: 'numeric',
@@ -37,6 +37,24 @@ export function TurnoDetailModal({ opened, onClose, onCancelRequest, turno }) {
     }).replace(',', ' ·')
     : null
 
+  const fechaFormateada = turno.fecha_turno
+    ? new Date(turno.fecha_turno).toLocaleDateString('es-AR', {
+      timeZone: 'UTC',
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+    })
+    : '';
+
+  const horaFormateada = turno.hora_turno
+    ? turno.hora_turno.slice(0, 5)
+    : '';
+
+  const especialidadText = turno.tipo ||
+    (typeof turno.especialidades === 'string'
+      ? turno.especialidades.replace(/\|/g, ', ')
+      : (Array.isArray(turno.especialidades) ? turno.especialidades.join(', ') : '')) ||
+    'Sin especificar';
   return (
     <Modal
       opened={opened}
@@ -54,13 +72,13 @@ export function TurnoDetailModal({ opened, onClose, onCancelRequest, turno }) {
           <Text fz="sm" fw={500}>{turno.nombre} {turno.apellido}</Text>
         </DetailRow>
         <DetailRow label="Especialidad">
-          <Text fz="sm" fw={500}>{turno.tipo}</Text>
+          <Text fz="sm" fw={500}>{especialidadText}</Text>
         </DetailRow>
         <DetailRow label="Fecha">
-          <Text fz="sm" fw={500}>{turno.fecha_turno}</Text>
+          <Text fz="sm" fw={500} tt="capitalize">{fechaFormateada}</Text>
         </DetailRow>
         <DetailRow label="Hora">
-          <Text fz="sm" fw={500}>{turno.hora_turno} hs</Text>
+          <Text fz="sm" fw={500}>{horaFormateada} hs</Text>
         </DetailRow>
         <DetailRow label="Estado">
           <Badge variant="dot" color={badgeColor} size="md" radius="xl" tt="capitalize">

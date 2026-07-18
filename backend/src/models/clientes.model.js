@@ -25,27 +25,8 @@ export class ClientesModel {
       return rows
     } */
 
-  static async getTurnosClienteByDni(dni) {
-    /* const [rows] = await pool.query(`
-      SELECT
-        profesional.apellido AS "p_apellido",
-        profesional.nombre AS "p_nombre",
-        profesional.dni_profesional,
-        especialidad.tipo,
-        turno.id_turno,
-        turno.fecha_turno,
-        turno.hora_turno,
-        turno.estado
-      FROM
-        turno
-        INNER JOIN cliente ON turno.dni_cliente = cliente.dni_cliente
-        INNER JOIN profesional ON turno.dni_profesional = profesional.dni_profesional
-        INNER JOIN profesional_especialidad ON profesional.dni_profesional = profesional_especialidad.dni_profesional
-        INNER JOIN especialidad ON especialidad.id_especialidad = profesional_especialidad.id_especialidad
-      WHERE cliente.dni_cliente = ?
-      `, [dni]) */
-
-    const [rows] = await pool.query(`
+  static async getTurnosClienteByDni(dni, estado) {
+    let query = `
         SELECT
             profesional.apellido AS "apellido",
             profesional.nombre AS "nombre",
@@ -63,6 +44,15 @@ export class ClientesModel {
             LEFT JOIN profesional_especialidad pe ON profesional.dni_profesional = pe.dni_profesional
             LEFT JOIN especialidad especialidad ON pe.id_especialidad = especialidad.id_especialidad
           WHERE cliente.dni_cliente = ?
+    `;
+    const params = [dni];
+    
+    if (estado) {
+        query += ` AND turno.estado = ?`;
+        params.push(estado);
+    }
+    
+    query += `
           GROUP BY
             turno.id_turno,
             profesional.dni_profesional,
@@ -75,7 +65,9 @@ export class ClientesModel {
           ORDER BY
             turno.fecha_turno ASC,
             turno.hora_turno ASC;
-      `, [dni])
+      `;
+
+    const [rows] = await pool.query(query, params)
 
     return rows
   }

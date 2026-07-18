@@ -32,7 +32,7 @@ export const getTurnoById = (id_turno) => {
   return request(`/api/turnos/${id_turno}`)
 }
 
-export const cancelTurnoById = (id, motivo) => {
+export const cancelTurnoById = ({ id, motivo }) => {
   /* const r = await fetch(`${BASE_URL}/api/turnos/${id}/cancelacion`, {
     method: 'POST',
     headers: {

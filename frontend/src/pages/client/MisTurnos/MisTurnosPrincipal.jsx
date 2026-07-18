@@ -15,8 +15,8 @@ export default function MisTurnos() {
   const [estado, setEstado] = useState(state?.tab ?? 'activo')
 
   const { data: [activos, pasados] = [[], []], isLoading, isError } = useQuery({
-    queryKey: ['turnos', user?.dni],
-    queryFn: () => getTurnosClienteByDni({ dni: user.dni, estado: estado }),
+    queryKey: ['turnos', user?.dni, ""],
+    queryFn: () => getTurnosClienteByDni({ dni: user.dni, estado: "" }),
     enabled: !!user?.dni,
     select: (data) => {
       const now = new Date()

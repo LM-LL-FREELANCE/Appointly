@@ -1,14 +1,14 @@
 import { useState } from 'react'
 import { Avatar, Badge, Box, Button, Group, Table, Text, Anchor } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { TurnoDetailModal } from './TurnoDetailModal.jsx'
 import { CancelarTurnoModal } from './CancelarTurnoModal.jsx'
-import { cancelTurnoById } from '../../../api/clientes.js'
+import useCancelTurno from '../../../hooks/useCancelTurno.jsx'
 
 const COLUMNS = ['Fecha', 'Hora', 'Profesional', 'Especialidad', 'Estado', 'Acciones'];
 
-export default function TurnosTable({ turno, dni }) {
+export default function TurnosTable({ turno }) {
   const [detailOpened, { open: openDetail, close: closeDetail }] = useDisclosure(false)
   const [cancelOpened, { open: openCancel, close: closeCancel }] = useDisclosure(false)
   const [selectedItem, setSelectedItem] = useState(null)
@@ -16,7 +16,29 @@ export default function TurnosTable({ turno, dni }) {
 
   const queryClient = useQueryClient()
 
-  const { mutate: cancelTurno, isPending: isCancelling } = useMutation({
+
+  const { mutate: mutateCancelTurno, isPending: isCancelling } = useCancelTurno()
+  const onConfirmCancel = () => {
+    mutateCancelTurno({
+      id: selectedItem.id_turno,
+      motivo: ""
+    }, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['turnos'] })
+        closeCancel()
+        setCancelFromDetail(false)
+        setSelectedItem(null)
+      },
+      onError: (err) => {
+        if (err.status === 409 && err.code === 'ALREADY_CANCELLED') {
+          queryClient.invalidateQueries({ queryKey: ['turnos'] })
+          closeCancel()
+          setCancelFromDetail(false)
+        }
+      }
+    })
+  }
+  /*const { mutate: cancelTurno, isPending: isCancelling } = useMutation({
     mutationFn: (id_turno) => cancelTurnoById(id_turno, dni, 'cliente'),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['turnos', dni] })
@@ -31,7 +53,7 @@ export default function TurnosTable({ turno, dni }) {
         setCancelFromDetail(false)
       }
     },
-  })
+  })*/
 
   const handleOpenDetail = (item) => {
     setSelectedItem(item)
@@ -62,6 +84,7 @@ export default function TurnosTable({ turno, dni }) {
       setCancelFromDetail(false)
       openDetail()
     } else {
+
       setSelectedItem(null)
     }
   }
@@ -128,7 +151,7 @@ export default function TurnosTable({ turno, dni }) {
           <CancelarTurnoModal
             opened={cancelOpened}
             onClose={handleCloseCancel}
-            onConfirm={() => cancelTurno(selectedItem.id_turno)}
+            onConfirm={onConfirmCancel}
             turno={selectedItem}
             isPending={isCancelling}
           />
