@@ -12,6 +12,7 @@ import App from './App.jsx'
 import { appTheme, cssVariablesResolver } from './theme.js'
 
 const queryClient = new QueryClient()
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <MantineProvider theme={appTheme} cssVariablesResolver={cssVariablesResolver}
