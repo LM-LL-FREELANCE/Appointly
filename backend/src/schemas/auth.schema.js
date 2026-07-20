@@ -20,5 +20,5 @@ export const registerSchema = z.object({
   id_obra_social: z.number().optional(),
 }).refine((data) => data.password === data.confirm, {
   error: "Las contraseñas no coinciden",
-  path: ["confirm"], // pone el error en el campo confirm
+  path: ["confirm"],
 })
