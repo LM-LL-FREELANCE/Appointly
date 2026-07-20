@@ -80,7 +80,7 @@ export default function Agenda() {
       <PageHeader>
         <Group justify="space-between" style={{ flex: 1 }}>
           <Text fw={600} size="lg">Agenda</Text>
-          <Avatar radius="xl" alt="" component={Link} to="/user" />
+          <Avatar radius="xl" alt="" component={Link} to="/miperfil" />
         </Group>
       </PageHeader>
       {error && (

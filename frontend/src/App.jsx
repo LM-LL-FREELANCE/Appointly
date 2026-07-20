@@ -41,7 +41,7 @@ export default function App() {
   ]
 
   const defaultLinks = [
-    { label: "Inicio", path: "/inicio", element: <Inicio />, icon: IconHome2 },
+    { label: "Inicio", path: "/", element: <Inicio />, icon: IconHome2 },
     { label: "Buscar Doctores", path: "/buscar", element: <Buscar />, icon: IconSearch },
     { label: "Reservar Turno", path: "/reservar", element: <Reservar />, icon: IconCalendarPlus },
     { label: "Mis Turnos", path: "/misturnos/*", element: <MisTurnos />, icon: IconCalendarEvent },

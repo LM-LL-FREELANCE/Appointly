@@ -22,7 +22,7 @@ export default function Login() {
   async function handleLogin(values) {
     try {
       await login(values)
-      navigate("/inicio")
+      navigate("/")
     } catch (error) {
       console.error('Login fallido:', error)
     }
@@ -43,17 +43,14 @@ export default function Login() {
 
 
   return (
-    <Container size={420} my={40}>
+    <Container size={420} my={100}>
       <Title
         ta="center"
         fw={500}
+        mb="lg"
       >
         ¡Bienvenido de nuevo!
       </Title>
-
-      <Text ta="center" c="dimmed" size="sm" mt={5}>
-        ¿No tienes una cuenta aún? <Anchor>Crear cuenta</Anchor>
-      </Text>
 
       <form onSubmit={form.onSubmit(handleLogin)}>
         <Paper withBorder shadow="sm" p={22} mt={30} radius="md">
@@ -88,8 +85,15 @@ export default function Login() {
           )}
 
           <Text ta="center" size="sm" mt="md">
+            ¿No tienes cuenta?{' '}
+            <Anchor component={Link} to="/registrarse" fw={500}>
+              Regístrate acá
+            </Anchor>
+          </Text>
+
+          <Text ta="center" size="sm" mt="sm">
             ¿Eres profesional?{' '}
-            <Anchor component={Link} to="/professional-login" size="sm">
+            <Anchor component={Link} to="/professional-login" fw={500}>
               Inicia sesión aquí
             </Anchor>
           </Text>

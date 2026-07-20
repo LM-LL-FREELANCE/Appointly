@@ -14,7 +14,7 @@ export class AuthController {
       const parsedSchema = registerSchema.safeParse(req.body)
 
       if (!parsedSchema.success) {
-        return res.status(400).json({ error: 'invalid', detalles: parsedSchema.error.flatten().fieldErrors });
+        throw new AppError('invalid', 400, 'VALIDATION_FAILED', parsedSchema.error.flatten().fieldErrors);
       }
 
       const { dni, password, correo, nombre, apellido, fecha_nacimiento, genero, id_obra_social } = parsedSchema.data

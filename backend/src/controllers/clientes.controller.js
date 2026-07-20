@@ -36,7 +36,7 @@ export class ClientesController {
     const { dni } = req.params
     try {
       const cliente = await ClientesModel.getClienteByDni({ dni })
-      if (!cliente) return res.status(404).json({ error: 'Cliente no encontrado', code: 'NOT_FOUND' })
+      if (!cliente) throw new AppError('Cliente no encontrado', 404, 'NOT_FOUND');
       return res.status(200).json(cliente)
     } catch (err) {
       next(err)
@@ -46,7 +46,7 @@ export class ClientesController {
   static async getTurnosMes(req, res, next) {
     try {
       const { dni } = req.params
-      if (!dni) return res.status(400).json({ error: "el dni del cliente es obligatorio", code: "NOT_FOUND" })
+      if (!dni) throw new AppError("el dni del cliente es obligatorio", 400, "NOT_FOUND");
       let { month, year } = req.query
       if (!month && !year) {
         const fecha_actual = new Date()
@@ -56,7 +56,7 @@ export class ClientesController {
 
       const data = await ClientesModel.getTurnosMes({ dni, month, year })
 
-      if (!data) return res.status(400).json({ error: "no encontramos turnos para ese cliente", code: "NOT_FOUND" })
+      if (!data) throw new AppError("no encontramos turnos para ese cliente", 400, "NOT_FOUND");
 
       return res.status(200).json({
         success: true,

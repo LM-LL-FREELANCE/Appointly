@@ -78,7 +78,7 @@ export default function Inicio() {
           <Group justify="space-between" style={{ flex: 1 }}>
             <Title order={2}>Hola, {userName}</Title>
             <Group>
-              <Avatar radius="xl" alt="" component={Link} to="/user" />
+              <Avatar radius="xl" alt="" component={Link} to="/miperfil" />
             </Group>
           </Group>
         </PageHeader>
@@ -86,16 +86,16 @@ export default function Inicio() {
       {!user && (
         <Center style={{ minHeight: '70vh' }}>
           <Stack align="center" gap="md">
-            <Alert variant="light" color="red" title="Inicia Sesion" icon={<IconAlertSquareRounded />}>
-              Debes iniciar sesion para poder ver la informacion de la pagina principal de Apointlly
+            <Alert variant="light" color="blue" title="Bienvenido a Appointly" icon={<IconAlertSquareRounded />}>
+              Debes iniciar sesion o registrarte para poder ver la informacion y poder sacar turnos en la pagina de Apointly
             </Alert>
-            <ButtonLay link={() => navigate("/login")} type="light" color="red" label={"Inicia sesion aqui"} />
+            <ButtonLay link={() => navigate("/login")} type="light" color="blue" label={"Inicia sesion aqui"} />
           </Stack>
         </Center>
       )}
       {user && (
         <>
-          <Container my="lg" maw={1200}>
+          <Container my="lg" maw={1500}>
             <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
               <Paper withBorder mah={PRIMARY_COL_HEIGHT} radius="lg" py="1rem" px="lg">
                 <Title size="h2">Proximo turno</Title>

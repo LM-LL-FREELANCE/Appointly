@@ -5,7 +5,7 @@ import { useAuth } from '../hooks/useAuth.js'
 import { navLinkStyles, navLinkClassName, navLinkLogoutClassName } from './navLinkPresentation.js'
 
 export function NavbarFooter({ onNavigate }) {
-  const { logout } = useAuth()
+  const { logout, user } = useAuth()
   const { colorScheme, toggleColorScheme } = useMantineColorScheme()
 
   return (
@@ -40,6 +40,7 @@ export function NavbarFooter({ onNavigate }) {
         onClick={logout}
         className={`${navLinkClassName} ${navLinkLogoutClassName}`}
         styles={navLinkStyles}
+        disabled={!user}
       />
     </>
   )

@@ -24,28 +24,28 @@ export class TurnosController {
       const { profesional, desde, hasta, estado } = req.query
 
       if (!profesional) {
-        return res.status(400).json({ error: '"profesional" query param is required' })
+        throw new AppError('"profesional" query param is required', 400, 'VALIDATION_FAILED');
       }
 
       const dni = Number(profesional)
 
       if (!Number.isFinite(dni) || dni <= 0) {
-        return res.status(400).json({ error: '"profesional" must be a valid DNI' })
+        throw new AppError('"profesional" must be a valid DNI', 400, 'VALIDATION_FAILED');
       }
 
       const resolvedDesde = desde ?? hoy()
       const resolvedHasta = hasta ?? enDias(6)
 
       if (!esFecha(resolvedDesde) || !esFecha(resolvedHasta)) {
-        return res.status(400).json({ error: '"desde" and "hasta" must be valid dates (YYYY-MM-DD)' })
+        throw new AppError('"desde" and "hasta" must be valid dates (YYYY-MM-DD)', 400, 'VALIDATION_FAILED');
       }
 
       if (resolvedDesde > resolvedHasta) {
-        return res.status(400).json({ error: '"desde" cannot be later than "hasta"' })
+        throw new AppError('"desde" cannot be later than "hasta"', 400, 'VALIDATION_FAILED');
       }
 
       if (estado && !ESTADOS_VALIDOS.has(estado)) {
-        return res.status(400).json({ error: '"estado" must be "activo" or "cancelado"' })
+        throw new AppError('"estado" must be "activo" or "cancelado"', 400, 'VALIDATION_FAILED');
       }
 
       const turnos = await TurnosService.getTurnosByProfesional({
@@ -91,26 +91,26 @@ export class TurnosController {
     }
   }
 
-  static async getSlots(req, res) {
+  static async getSlots(req, res, next) {
 
     try {
       const dni = Number(req.params.dni)
       const { desde, hasta } = req.query
 
       if (!esFecha(desde) || !esFecha(hasta)) {
-        return res.status(400).json({ error: 'the dates "desde" and "hasta" must be valid dates (YYYY-MM-DD)' });
+        throw new AppError('the dates "desde" and "hasta" must be valid dates (YYYY-MM-DD)', 400, 'VALIDATION_FAILED');
       }
 
       if (desde > hasta) {
-        return res.status(400).json({ error: 'the date "desde" cannot be later than "hasta"' });
+        throw new AppError('the date "desde" cannot be later than "hasta"', 400, 'VALIDATION_FAILED');
       }
 
       if (diffDias(desde, hasta) > MAX_RANGE_DAYS) {
-        return res.status(400).json({ error: `the range cannot exceed ${MAX_RANGE_DAYS} days` });
+        throw new AppError(`the range cannot exceed ${MAX_RANGE_DAYS} days`, 400, 'VALIDATION_FAILED');
       }
 
       if (!(await ProfesionalesModel.existe({ dni }))) {
-        return res.status(404).json({ error: 'profesional not found' });
+        throw new AppError('profesional not found', 404, 'NOT_FOUND');
       }
 
       const [horarios, turnos] = await Promise.all([
@@ -121,17 +121,17 @@ export class TurnosController {
       return res.json({ dni_profesional: dni, desde, hasta, duracion_min: SLOT_DURATION_MIN, dias });
 
     } catch (err) {
-      return res.status(500).json({ err: 'We could not get your slots in turnos', error: err.message });
+      next(err);
     }
   }
 
-  static async crearTurno(req, res) {
+  static async crearTurno(req, res, next) {
     try {
 
       const parsedSchema = crearTurnoSchema.safeParse(req.body)
 
       if (!parsedSchema.success) {
-        return res.status(400).json({ error: 'invalid', detalles: parsedSchema.error.flatten().fieldErrors });
+        throw new AppError('invalid', 400, 'VALIDATION_FAILED', parsedSchema.error.flatten().fieldErrors);
       }
       const { dni_profesional, fecha_turno, hora_turno } = parsedSchema.data
 
@@ -140,7 +140,7 @@ export class TurnosController {
         : parsedSchema.data.dni_cliente
 
       if (!dni_cliente) {
-        return res.status(400).json({ error: 'dni_cliente es requerido cuando el rol es profesional', code: 'VALIDATION_FAILED' })
+        throw new AppError('dni_cliente es requerido cuando el rol es profesional', 400, 'VALIDATION_FAILED');
       }
 
       const [existeProf, existeCli] = await Promise.all([
@@ -149,17 +149,17 @@ export class TurnosController {
       ])
 
       if (!existeProf || !existeCli) {
-        return res.status(422).json({ error: 'profesional o cliente inexistente', code: 'REFERENCE_NOT_FOUND' });
+        throw new AppError('profesional o cliente inexistente', 422, 'REFERENCE_NOT_FOUND');
       }
 
       const horarios = await HorariosModel.getHorariosByProfesional({ dni: dni_profesional })
 
       if (!slotsDelDia({ horarios: horarios, fecha: fecha_turno }).includes(hora_turno)) {
-        return res.status(409).json({ error: 'the horarios is out of the profesional', code: 'OUT_OF_SCHEDULE' });
+        throw new AppError('the horarios is out of the profesional', 409, 'OUT_OF_SCHEDULE');
       }
 
       if (await TurnosModel.existeActivo({ dni: dni_profesional, fecha: fecha_turno, hora: hora_turno })) {
-        return res.status(409).json({ error: 'that turno has just been taken', code: 'SLOT_TAKEN' });
+        throw new AppError('that turno has just been taken', 409, 'SLOT_TAKEN');
       }
 
       const idTurno = await TurnosModel.crearTurno({ dni_profesional, dni_cliente, fecha_turno, hora_turno })
@@ -167,7 +167,7 @@ export class TurnosController {
       return res.status(201).json({ status: "success", data: turno });
 
     } catch (err) {
-      return res.status(500).json({ err: 'We could not arrange your turno', error: err.message });
+      next(err);
     }
   }
 

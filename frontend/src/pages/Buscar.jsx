@@ -57,7 +57,7 @@ export default function Buscar() {
               onChange={(e) => setBusqueda(e.currentTarget.value)}
               w={{ base: '100%', sm: 240 }}
             />
-            <Avatar radius="xl" alt="" component={Link} to="/user" />
+            <Avatar radius="xl" alt="" component={Link} to="/miperfil" />
           </Group>
         </Group>
       </PageHeader>

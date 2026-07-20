@@ -81,7 +81,7 @@ export default function SignUp() {
   return (
     <>
       <Stack align="center" mx="md" justify="center" style={{ minHeight: "100vh" }}>
-        <Paper p="xl" shadow="md" radius="md" w="100%" maw={650}>
+        <Paper withBorder p="xl" shadow="md" radius="md" w="100%" maw={650}>
           <Stack px="sm" gap="md">
             <Title order={2} size="h3">Registrarse</Title>
 
@@ -161,7 +161,7 @@ export default function SignUp() {
             </SimpleGrid>
 
             <SimpleGrid cols={{ base: 1, sm: 3 }} mt="md">
-              <Button onClick={() => navigate("/")} variant="subtle" color="gray">Volver a la página de inicio</Button>
+              <Button onClick={() => navigate("/")} variant="subtle" color="gray">Volver al inicio</Button>
               <Button onClick={() => navigate("/login")} >Ya tengo una cuenta</Button>
               <Button
                 disabled={contrasenasNoCoinciden || emailInvalido || !dni || !name || !email || !password}

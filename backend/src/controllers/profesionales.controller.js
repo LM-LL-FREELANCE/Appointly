@@ -1,6 +1,6 @@
 import { ProfesionalesService } from "../services/profesionales.service.js"
 import { ProfesionalesModel } from "../models/profesionales.model.js"
-
+import { AppError } from "../utils/AppError.js"
 export class ProfesionalesController {
 
   static async getHorariosByDni(req, res, next) {
@@ -53,30 +53,42 @@ export class ProfesionalesController {
     }
   }
 
-  static async filterBy(req, res) {
-    const { especialidad, obrasocial } = req.query
-    const profesionales = await ProfesionalesModel.filterBy({ especialidad, obraSocial: obrasocial })
-    if (profesionales.length === 0) {
-      return res.status(404).json({ message: "We couldn't find any professionals with the given filters" })
+  static async filterBy(req, res, next) {
+    try {
+      const { especialidad, obrasocial } = req.query
+      const profesionales = await ProfesionalesModel.filterBy({ especialidad, obraSocial: obrasocial })
+      if (profesionales.length === 0) {
+        throw new AppError("We couldn't find any professionals with the given filters", 404, "NOT_FOUND");
+      }
+      return res.json(profesionales)
+    } catch (err) {
+      next(err);
     }
-    return res.json(profesionales)
   }
 
-  static async getByDni(req, res) {
-    const { dni } = req.params
-    const profesionalData = await ProfesionalesModel.getByDni({ dni })
-    if (!profesionalData) {
-      return res.status(404).json({ message: "We could not find your profesional" })
-    }
+  static async getByDni(req, res, next) {
+    try {
+      const { dni } = req.params
+      const profesionalData = await ProfesionalesModel.getByDni({ dni })
+      if (!profesionalData) {
+        throw new AppError("We could not find your profesional", 404, "NOT_FOUND");
+      }
 
-    return res.json(profesionalData)
+      return res.json(profesionalData)
+    } catch (err) {
+      next(err);
+    }
   }
 
-  static async existe(req, res) {
-    const { dni } = req.params
-    const existeProfesional = await ProfesionalesModel.existe({ dni })
+  static async existe(req, res, next) {
+    try {
+      const { dni } = req.params
+      const existeProfesional = await ProfesionalesModel.existe({ dni })
 
-    return res.json(existeProfesional)
+      return res.json(existeProfesional)
+    } catch (err) {
+      next(err);
+    }
   }
 
   static async updateByDni(req, res, next) {

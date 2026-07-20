@@ -7,6 +7,7 @@ import TurnosTable from "./TurnosTable.jsx"
 import { useQuery } from "@tanstack/react-query"
 import { getTurnosClienteByDni } from "../../../api/clientes.js"
 import { useAuth } from "../../../hooks/useAuth.js"
+import { Link } from "react-router-dom"
 
 export default function MisTurnos() {
   const { user } = useAuth()
@@ -63,7 +64,7 @@ export default function MisTurnos() {
           </Stack>
           <Group>
             <SegmentedControl visibleFrom="md" size="md" radius="lg" value={estado} onChange={setEstado} data={[{ label: 'Próximos', value: 'activo' }, { label: 'Historial', value: 'cancelado' }]} disabled={!user} />
-            <Avatar radius="xl" alt="" /* component={Link} */ to="/user" />
+            <Avatar radius="xl" alt="" component={Link} to="/miperfil" />
           </Group>
         </Group>
       </PageHeader>
