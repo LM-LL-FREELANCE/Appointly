@@ -91,3 +91,16 @@ GET http://localhost:4000/api/clientes/20232778/mes
 
 ###get turnos activos
 GET http://localhost:4000/api/clientes/20232778/turnos/activos
+
+###updated clientes data
+PATCH http://localhost:4000/api/clientes/20232778/actualizar
+Content-Type: application/json
+
+{
+  "nombre": "Andrea",
+  "apellido": "Arroyo",
+  "genero": "F"
+}
+
+###get by id a cliente
+GET http://localhost:4000/api/clientes/20232778
