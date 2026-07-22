@@ -157,10 +157,15 @@ export class ClientesModel {
       valueToUpdate.push(data.genero)
     }
 
+    if (data.foto_url !== undefined) {
+      fieldsToUpdate.push("foto_url = ?")
+      valueToUpdate.push(data.foto_url)
+    }
     if (id_final_obra_social !== undefined) {
       fieldsToUpdate.push("id_obra_social = ?")
       valueToUpdate.push(id_final_obra_social)
     }
+
 
     if (fieldsToUpdate.length > 0) {
       query += fieldsToUpdate.join(", ")
@@ -178,13 +183,14 @@ export class ClientesModel {
   }
 
   static async deleteAccount({ dni }) {
-    const [accRows] = await pool.query(`
-        DELETE FROM cliente WHERE dni_cliente = ?
-      `, [dni])
+    await pool.query(`DELETE FROM turno WHERE dni_cliente = ?`, [dni]);
+
+    const [accRows] = await pool.query(`DELETE FROM cliente WHERE dni_cliente = ?`, [dni]);
 
     if (accRows.affectedRows > 0) {
       return true;
     }
-    return false
+
+    return false;
   }
 }

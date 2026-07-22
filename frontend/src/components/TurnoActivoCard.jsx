@@ -5,7 +5,7 @@ export default function TurnoCard({ data, openedModal, cancelarTurno }) {
 
   return (
     <>
-      <Card radius="md" padding="md" my="md">
+      <Card radius="md" padding="md" my="md" mah={500}>
         <Stack gap="xl" align="center" justify="center">
           <Avatar size="xl" radius="xl" alt="" />
           <Stack gap="lg" align="center" mt="md">

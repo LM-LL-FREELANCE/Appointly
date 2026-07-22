@@ -25,7 +25,7 @@ export const registerProfesional = (data) => {
 }
 
 export const getProfesionalByDni = async ({ dni }) => {
-  return await request(`/api/profesionales/${dni}`)
+  return request(`/api/profesionales/${dni}`)
 }
 
 // GET /api/profesionales/:dni/horarios
