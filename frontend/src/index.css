@@ -21,3 +21,10 @@
 .dia-pasado span {
   color: var(--mantine-color-gray-5);
 }
+
+[data-mantine-color-scheme="dark"] .dia-pasado {
+  background-color: var(--mantine-color-dark-6);
+}
+[data-mantine-color-scheme="dark"] .dia-pasado span {
+  color: var(--mantine-color-dimmed);
+}
