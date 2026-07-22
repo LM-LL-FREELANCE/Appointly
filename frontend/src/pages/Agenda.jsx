@@ -7,6 +7,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Schedule } from '@mantine/schedule'
 import { Paper, Text, Alert, Grid, Avatar, Group, Center, Loader, Button, Stack } from '@mantine/core'
 import { PageHeader } from '../components/PageHeader.jsx'
+import { useAuth } from '../hooks/useAuth.js'
 import dayjs from 'dayjs'
 import 'dayjs/locale/es'
 
@@ -43,13 +44,13 @@ const etiquetasEs = {
 
 export default function Agenda() {
   const navigate = useNavigate()
-  const [profesional, setProfesional] = useState(27845123)
+  const { user } = useAuth()
   const [estado, setEstado] = useState(null)
   const [fecha, setFecha] = useState(new Date())
   const [vista, setVista] = useState('month')
   const esMes = vista === 'month'
   const { desde, hasta } = esMes ? rangoMes(fecha) : rangoSemana(fecha)
-  const { data: profesionalAgenda, isLoading: isLoadingData, error } = useProfesionalDays({ dni_profesional: profesional, desde, hasta, estado })
+  const { data: profesionalAgenda, isLoading: isLoadingData, error } = useProfesionalDays({ dni_profesional: user?.dni, desde, hasta, estado })
 
   const eventos = (profesionalAgenda ?? []).map((t) => {
     // fecha_turno viene como ISO completo ("2026-07-03T03:00:00.000Z"),
@@ -146,7 +147,7 @@ export default function Agenda() {
                     events={eventos}
                   />
                   <Button onClick={() => navigate('/turnos', {
-                    state: { turnos: turnosDelDia, fecha: fechaSel, dni_profesional: profesional },
+                    state: { turnos: turnosDelDia, fecha: fechaSel, dni_profesional: user?.dni },
                   })}>Detalles de los turnos del dia</Button>
                 </Stack>
               </Paper>

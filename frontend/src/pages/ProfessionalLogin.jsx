@@ -75,7 +75,7 @@ export default function ProfessionalLogin() {
           ¡Bienvenido!
         </Title>
 
-        <form onSubmit={form.onSubmit(handleLogin)}>
+        <form onSubmit={form.onSubmit(handleLogin)} noValidate>
           <TextInput
             label="DNI"
             placeholder="25331874" /* size="md" */
@@ -104,7 +104,7 @@ export default function ProfessionalLogin() {
 
         <Text ta="center" mt="md" size="sm">
           ¿Todavía no tienes una cuenta? {' '}
-          <Anchor href="#" fw={500} onClick={(event) => event.preventDefault()}>
+          <Anchor component={Link} to="/professional-signup" fw={500}>
             Regístrate
           </Anchor>
         </Text>

@@ -19,6 +19,11 @@ export const getAllObraSociales = () => {
   return request(`/api/obra-sociales/`)
 }
 
+// POST /api/auth/registro-profesional
+export const registerProfesional = (data) => {
+  return request('/api/auth/registro-profesional', { method: 'POST', body: JSON.stringify(data) })
+}
+
 export const getProfesionalByDni = async ({ dni }) => {
   return await request(`/api/profesionales/${dni}`)
 }
@@ -45,8 +50,8 @@ export const deleteHorario = ({ id }) => {
 
 //GET /api/turnos?profesionales=&desde=&hasta=&estado=
 //ex: getAgendaByProfesional
-export const getTurnosByProfesional = async ({ dni_profesional, desde, hasta, estado }) => {
-  const params = new URLSearchParams({ profesional: dni_profesional, desde })
+export const getTurnosByProfesional = ({ dni_profesional, desde, hasta, estado }) => {
+  const params = new URLSearchParams({ profesional: dni_profesional, desde: desde })
 
   if (hasta) params.append('hasta', hasta)
   if (estado) params.append('estado', estado)

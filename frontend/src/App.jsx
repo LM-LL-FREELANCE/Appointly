@@ -16,6 +16,7 @@ import { ProtectedRoute } from './components/ProtectedRoute.jsx'
 import Login from './pages/Login.jsx'
 import SignUp from './pages/SignUp.jsx'
 import ProfessionalLogin from './pages/ProfessionalLogin.jsx'
+import ProfessionalSignUp from './pages/ProfessionalSignUp.jsx'
 
 /*Other components */
 import Dashboard from './pages/professional/Dashboard/Dashboard.jsx'
@@ -53,6 +54,7 @@ export default function App() {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/professional-login" element={<ProfessionalLogin />} />
+      <Route path="/professional-signup" element={<ProfessionalSignUp />} />
       <Route path="/registrarse" element={<SignUp />} />
 
       <Route path="/" element={<MainLayout links={links} role={user?.role} />}>

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useMediaQuery } from '@mantine/hooks'
-import { Group, Text, Stack, Avatar, Paper, Box, SimpleGrid, Menu } from "@mantine/core"
+import { Group, Text, Stack, Avatar, Paper, Box, SimpleGrid } from "@mantine/core"
 import { BarChart } from '@mantine/charts'
 import { Link } from 'react-router-dom'
 import { PageHeader } from '../../../components/PageHeader.jsx'
@@ -128,15 +128,7 @@ export default function Dashboard() {
             </Text>
           </Stack>
           <Group visibleFrom="sm">
-            <Menu shadow="md" width={200} position="bottom-end">
-              <Menu.Target>
-                <Avatar radius="xl" style={{ cursor: 'pointer' }} />
-              </Menu.Target>
-              <Menu.Dropdown>
-                <Menu.Label>Mi Perfil</Menu.Label>
-                <Menu.Item component={Link} to="/miperfil">Configuración</Menu.Item>
-              </Menu.Dropdown>
-            </Menu>
+            <Avatar radius="xl" alt="" component={Link} to="/miperfil" />
           </Group>
         </Group>
       </PageHeader>

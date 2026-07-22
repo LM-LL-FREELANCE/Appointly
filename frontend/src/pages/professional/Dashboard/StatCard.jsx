@@ -1,6 +1,12 @@
-import { Paper, Stack, Text } from '@mantine/core';
+import { Paper, Stack, Text, useComputedColorScheme } from '@mantine/core';
 
 export function StatCard({ label, value, color = 'brand', height = "100%" }) {
+  const isDark = useComputedColorScheme('light') === 'dark';
+
+  const bg = isDark ? `var(--mantine-color-${color}-light)` : `var(--mantine-color-${color}-0)`;
+  const border = isDark ? `var(--mantine-color-${color}-light-hover)` : `var(--mantine-color-${color}-2)`;
+  const text = isDark ? `var(--mantine-color-${color}-light-color)` : `var(--mantine-color-${color}-7)`;
+
   return (
     <Paper
       withBorder
@@ -10,8 +16,8 @@ export function StatCard({ label, value, color = 'brand', height = "100%" }) {
       px="lg"
       h={height}
       style={{
-        backgroundColor: `var(--mantine-color-${color}-0)`,
-        borderColor: `var(--mantine-color-${color}-2)`,
+        backgroundColor: bg,
+        borderColor: border,
       }}
     >
       <Stack gap={4}>
@@ -28,7 +34,7 @@ export function StatCard({ label, value, color = 'brand', height = "100%" }) {
           fz={56}
           fw={700}
           lh={1}
-          c={`${color}.7`}
+          c={text}
         >
           {value}
         </Text>
