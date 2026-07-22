@@ -6,5 +6,6 @@ export const clienteDataSchema = z.object({
   correo: z.email().max(255),
   fecha_nacimiento: z.iso.date(),
   genero: z.enum(["M", "F", "X"]),
-  obra_social: z.string()
+  obra_social: z.string(),
+  foto_url: z.string()
 })

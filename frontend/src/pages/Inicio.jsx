@@ -14,7 +14,7 @@ import { CancelarTurnoModal } from "./client/MisTurnos/CancelarTurnoModal.jsx";
 import useCancelTurno from "../hooks/useCancelTurno.jsx";
 import { useQueryClient } from "@tanstack/react-query";
 
-const PRIMARY_COL_HEIGHT = '500px';
+const PRIMARY_COL_HEIGHT = '600px';
 const SECONDARY_COL_HEIGHT = `calc(${PRIMARY_COL_HEIGHT} / 2 - var(--mantine-spacing-md) / 2)`;
 
 export default function Inicio() {

@@ -30,3 +30,7 @@ export const createAccount = (data) => {
 export const getTurnosMes = ({ dni }) => {
   return request(`/api/clientes/${dni}/mes`)
 }
+
+export const getClienteByDni = ({ dni }) => {
+  return request(`/api/clientes/${dni}`)
+}
