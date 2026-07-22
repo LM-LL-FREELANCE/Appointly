@@ -13,7 +13,7 @@ import {
 import { useForm } from '@mantine/form'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth.js'
-import professionalBg from "../assets/images/professional-login-bg.jpg"
+import professionalBg from "../assets/images/professionals-bg.svg"
 
 export default function ProfessionalLogin() {
 

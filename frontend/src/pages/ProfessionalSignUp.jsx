@@ -22,7 +22,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import 'dayjs/locale/es'
 import { useAuth } from '../hooks/useAuth.js'
 import useRegisterProfesional from '../hooks/useRegisterProfesional.jsx'
-import professionalBg from '../assets/images/professional-login-bg.jpg'
+import professionalBg from '../assets/images/professionals-bg.svg'
 
 const opcionesDeGenero = ['Masculino', 'Femenino', 'Prefiero no decirlo']
 
