@@ -2,7 +2,7 @@ import { createTheme } from '@mantine/core';
 
 export const appTheme = createTheme({
   primaryColor: 'brand',
-  primaryShade: { light: 6, dark: 4 },
+  primaryShade: 6,
 
   colors: {
     brand: [
@@ -139,8 +139,8 @@ export const cssVariablesResolver = () => ({
   },
   dark: {
     '--mantine-color-body': '#0F172A',
-    '--mantine-color-default': '#1E293B',
-    '--mantine-color-default-border': '#334155',
+    '--mantine-color-default': '#334155',
+    '--mantine-color-default-border': '#475569',
     '--mantine-color-text': '#F1F5F9',
     '--mantine-color-dimmed': '#94A3B8',
   },

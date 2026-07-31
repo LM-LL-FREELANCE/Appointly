@@ -159,7 +159,7 @@ export default function Horarios() {
           </Stack>
           <Group>
             <Button visibleFrom="md" disabled={isPending} loading={isSaving} onClick={saveHorarios}>Guardar cambios</Button>
-            <Avatar radius="xl" alt="" component={Link} to="/user" />
+            <Avatar radius="xl" alt="" component={Link} to="/miperfil" />
           </Group>
         </Group>
       </PageHeader>

@@ -48,6 +48,20 @@ export class AuthController {
     }
   }
 
+  static async registerProfesional(req, res, next) {
+
+    try {
+      const profesional = await AuthService.registerProfesional(req.body)
+
+      res.set("Location", `/api/profesionales/${profesional.dni}`)
+
+      return res.status(201).json(profesional)
+
+    } catch (error) {
+      next(error)
+    }
+  }
+
   static async login(req, res, next) {
     const { dni, password, role } = req.body
 

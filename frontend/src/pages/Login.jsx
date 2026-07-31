@@ -52,7 +52,7 @@ export default function Login() {
         ¡Bienvenido de nuevo!
       </Title>
 
-      <form onSubmit={form.onSubmit(handleLogin)}>
+      <form onSubmit={form.onSubmit(handleLogin)} noValidate>
         <Paper withBorder shadow="sm" p={22} mt={30} radius="md">
           <TextInput
             label="DNI"
