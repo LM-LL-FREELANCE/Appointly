@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Group, Stack, Text, Avatar, Button, Paper, TextInput, Grid, Select, Flex, FileButton, Notification } from
-  '@mantine/core'
+import { Group, Stack, Text, Avatar, Button, Paper, TextInput, Grid, Select, Flex, FileButton, Notification } from '@mantine/core'
 import { DatePickerInput } from '@mantine/dates'
 import { useMediaQuery } from '@mantine/hooks'
 import { IconLock, IconCalendar } from '@tabler/icons-react'
@@ -16,8 +15,10 @@ import useUpdateProfesional from '../hooks/useUpdateAccProfesional.jsx'
 
 const OPCIONES_GENERO = ['Masculino', 'Femenino', 'Prefiero no decirlo']
 
+
 export default function MiPerfil() {
-  const { user } = useAuth()
+  const { user, isAuthLoading } = useAuth()
+  console.log("ESTADO DE AUTH:", { isAuthLoading, user })
   const isMobile = useMediaQuery('(max-width: 768px)')
   const inputSize = isMobile ? 'md' : 'sm'
 
@@ -25,10 +26,14 @@ export default function MiPerfil() {
     dni: user ? user.dni : undefined,
     rol: user ? user.role : undefined
   })
+
+
+
   const { data: perfilCliente } = useGetCliente({
     dni: user ? user.dni : undefined,
     rol: user ? user.role : undefined
   })
+
   const { mutate: mutateProfesional, isPending: isPendingProfesional } = useUpdateProfesional()
   const { mutate: mutateCliente, isPending: isPendingCliente } = useUpdateCliente()
 
@@ -83,7 +88,6 @@ export default function MiPerfil() {
     }
   }
   const perfilData = user?.role === "profesional" ? perfil : perfilCliente
-
   const [eliminar, { open: openEliminar, close: closeEliminar }] = useDisclosure(false)
   const [nombre, setNombre] = useState("")
   const [apellido, setApellido] = useState("")
