@@ -10,14 +10,21 @@ export function MultiSelectCombobox({ label, data, value, onChange, placeholder,
   const limitReached = maxSelected != null && value.length >= maxSelected
 
   const handleValueSelect = (val) => {
-    if (value.includes(val)) {
+    if (val === '$create') {
+      onChange([...value, search.trim()])
+      setSearch('')
+    } else if (value.includes(val)) {
       onChange(value.filter((v) => v !== val))
     } else if (!limitReached) {
       onChange([...value, val])
+      setSearch('')
     }
   }
 
   const handleValueRemove = (val) => onChange(value.filter((v) => v !== val))
+
+  const exactOptionMatch = data.some((item) => item.toLowerCase() === search.trim().toLowerCase())
+  const exactValueMatch = value.some((item) => item.toLowerCase() === search.trim().toLowerCase())
 
   const options = data
     .filter((item) => item.toLowerCase().includes(search.trim().toLowerCase()))
@@ -32,6 +39,14 @@ export function MultiSelectCombobox({ label, data, value, onChange, placeholder,
         </Combobox.Option>
       )
     })
+
+  if (search.trim().length > 0 && !exactOptionMatch && !exactValueMatch && !limitReached) {
+    options.push(
+      <Combobox.Option value="$create" key="$create">
+        + Crear "{search.trim()}"
+      </Combobox.Option>
+    )
+  }
 
   const pills = value.map((item) => (
     <Pill key={item} size={size} withRemoveButton onRemove={() => handleValueRemove(item)}>
@@ -57,9 +72,16 @@ export function MultiSelectCombobox({ label, data, value, onChange, placeholder,
                     setSearch(e.currentTarget.value)
                   }}
                   onKeyDown={(e) => {
-                    if (e.key === 'Backspace' && search.length === 0) {
-                      e.preventDefault()
-                      handleValueRemove(value[value.length - 1])
+                    if (e.key === 'Enter' && search.trim().length > 0) {
+                      const hasMatches = data.some((item) =>
+                        item.toLowerCase().includes(search.trim().toLowerCase())
+                      );
+                      if (!hasMatches && !exactValueMatch && !limitReached) {
+                        e.preventDefault();
+                        onChange([...value, search.trim()]);
+                        setSearch('');
+                        combobox.closeDropdown();
+                      }
                     }
                   }}
                 />

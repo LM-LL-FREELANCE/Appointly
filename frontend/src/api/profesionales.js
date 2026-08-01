@@ -58,3 +58,11 @@ export const getTurnosByProfesional = ({ dni_profesional, desde, hasta, estado }
 
   return request(`/api/turnos?${params}`)
 }
+
+export const updateByDni = ({ dni, data }) => {
+  return request(`/api/profesionales/${dni}/actualizar`, { method: "PATCH", body: JSON.stringify(data) })
+}
+
+export const deleteAccProfesional = ({ dni }) => {
+  return request(`/api/profesionales/${dni}/delete`, { method: "DELETE" })
+}

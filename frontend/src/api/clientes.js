@@ -34,3 +34,11 @@ export const getTurnosMes = ({ dni }) => {
 export const getClienteByDni = ({ dni }) => {
   return request(`/api/clientes/${dni}`)
 }
+
+export const updateByDni = ({ dni, data }) => {
+  return request(`/api/clientes/${dni}/actualizar`, { method: "PATCH", body: JSON.stringify(data) })
+}
+
+export const deleteAccCliente = ({ dni }) => {
+  return request(`/api/clientes/${dni}/delete`, { method: "DELETE" })
+}

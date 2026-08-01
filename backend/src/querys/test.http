@@ -83,7 +83,7 @@ Content-Type: application/json
   "role": "cliente"
 }
 ###get cliente by dni
-GET http://localhost:4000/api/clientes/20232778
+GET http://localhost:4000/api/clientes/46668814
 
 ###get for a cliente by their dni
 GET http://localhost:4000/api/clientes/20232778/turnos

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Group, Stack, Text, Avatar, Button, Paper, TextInput, Grid, Select, Flex, FileButton } from
+import { Group, Stack, Text, Avatar, Button, Paper, TextInput, Grid, Select, Flex, FileButton, Notification } from
   '@mantine/core'
 import { DatePickerInput } from '@mantine/dates'
 import { useMediaQuery } from '@mantine/hooks'
@@ -9,37 +9,82 @@ import { MultiSelectCombobox } from '../components/MultiSelectCombobox.jsx'
 import { useAuth } from '../hooks/useAuth.js'
 import useGetCliente from '../hooks/useGetClienteData.jsx'
 import useGetProfesional from '../hooks/useGetProfesionalData.jsx'
+import { EliminarCuentaModal } from '../components/EliminarCuentaModal.jsx'
+import { useDisclosure } from '@mantine/hooks'
+import useUpdateCliente from '../hooks/useUpdateAccCliente.jsx'
+import useUpdateProfesional from '../hooks/useUpdateAccProfesional.jsx'
 
-// TODO: reemplazar por datos reales — getAllEspecialidades / useObrasSociales ya existen en
-
-const ESPECIALIDADES_DATA = ['Clínica Médica', 'Cardiología', 'Dermatología', 'Pediatría', 'Traumatología',
-  'Ginecología', 'Oftalmología', 'Psiquiatría']
-const OBRAS_SOCIALES_DATA = ['OSDE', 'Swiss Medical', 'IOMA', 'PAMI', 'Galeno', 'Medifé', 'Unión Personal',
-  'Sancor Salud']
 const OPCIONES_GENERO = ['Masculino', 'Femenino', 'Prefiero no decirlo']
 
 export default function MiPerfil() {
-  const { user, isAuthLoading } = useAuth()
-  console.log("ESTADO DE AUTH:", { isAuthLoading, user })
+  const { user } = useAuth()
   const isMobile = useMediaQuery('(max-width: 768px)')
   const inputSize = isMobile ? 'md' : 'sm'
 
-  //request with data
   const { data: perfil } = useGetProfesional({
     dni: user ? user.dni : undefined,
     rol: user ? user.role : undefined
   })
-
   const { data: perfilCliente } = useGetCliente({
     dni: user ? user.dni : undefined,
     rol: user ? user.role : undefined
   })
+  const { mutate: mutateProfesional, isPending: isPendingProfesional } = useUpdateProfesional()
+  const { mutate: mutateCliente, isPending: isPendingCliente } = useUpdateCliente()
 
-  console.log("profesional", perfil)
-  console.log("cliente", perfilCliente)
+  const [notificacion, setNotificacion] = useState(null)
+
+  const handleSave = () => {
+    let generoFinal = undefined;
+    if (genero === "Masculino") generoFinal = "M";
+    if (genero === "Femenino") generoFinal = "F";
+    if (genero === "Prefiero no decirlo") generoFinal = "X";
+
+    let fechaFinal = undefined;
+    if (fechaNacimiento) {
+      if (typeof fechaNacimiento === 'string') {
+        fechaFinal = fechaNacimiento.split('T')[0];
+      } else if (typeof fechaNacimiento.getFullYear === 'function') {
+        const year = fechaNacimiento.getFullYear();
+        const month = String(fechaNacimiento.getMonth() + 1).padStart(2, '0');
+        const day = String(fechaNacimiento.getDate()).padStart(2, '0');
+        fechaFinal = `${year}-${month}-${day}`;
+      }
+    }
+
+    const baseData = {
+      nombre,
+      apellido,
+      correo,
+      genero: generoFinal,
+      fecha_nacimiento: fechaFinal,
+    }
+
+    const handleSuccess = () => setNotificacion({ tipo: 'success', titulo: '¡Actualizado!', mensaje: 'Tus datos se guardaron correctamente.' });
+    const handleError = (error) => setNotificacion({ tipo: 'error', titulo: 'Error al guardar', mensaje: error?.message || 'Hubo un problema al actualizar tu perfil.' });
+
+    if (user?.role === "profesional") {
+      mutateProfesional({
+        dni: user.dni,
+        data: {
+          ...baseData,
+          especialidades: especialidadesSel,
+          obras_sociales: obraSocialSel
+        }
+      }, { onSuccess: handleSuccess, onError: handleError })
+    } else {
+      mutateCliente({
+        dni: user.dni,
+        data: {
+          ...baseData,
+          obra_social: obraSocialSel.length > 0 && obraSocialSel[0] !== "Sin obra social" ? obraSocialSel[0] : undefined
+        }
+      }, { onSuccess: handleSuccess, onError: handleError })
+    }
+  }
   const perfilData = user?.role === "profesional" ? perfil : perfilCliente
 
-  //states for the inputs
+  const [eliminar, { open: openEliminar, close: closeEliminar }] = useDisclosure(false)
   const [nombre, setNombre] = useState("")
   const [apellido, setApellido] = useState("")
   const [correo, setCorreo] = useState("")
@@ -53,23 +98,40 @@ export default function MiPerfil() {
       setNombre(perfilData.nombre || "")
       setApellido(perfilData.apellido || "")
       setCorreo(perfilData.correo || "")
-      setGenero(perfilData.genero || null)
-
-      // Si existe una fecha, la convertimos a Date para el DatePicker
+      if (perfilData.genero === "M") {
+        setGenero("Masculino")
+      } else if (perfilData.genero === "F") {
+        setGenero("Femenino")
+      } else if (perfilData.genero === "X") {
+        setGenero("Prefiero no decirlo")
+      } else {
+        setGenero(null)
+      }
       if (perfilData.fecha_nacimiento) {
-        // Aseguramos de arreglar la zona horaria si viene en string UTC agregando 'T00:00:00'
         setFechaNacimiento(new Date(perfilData.fecha_nacimiento))
       }
-
-      // Si las especialidades u obras vienen como array, las seteamos aquí
-      // (ajusta las propiedades .especialidades si tu backend las manda de otra forma)
-      // setEspecialidadesSel(perfilData.especialidad?.map(e => e.especialidad) || [])
+      if (perfilData.especialidad) {
+        setEspecialidadesSel(perfilData.especialidad.map(e => e.especialidad))
+      }
+      if (perfilData.obraSociales) {
+        setObraSocialSel(perfilData.obraSociales.map(o => o.obra_sociales))
+      } else if (user?.role === 'cliente') {
+        setObraSocialSel(perfilData.obra_social ? [perfilData.obra_social] : ['Sin obra social'])
+      }
     }
-  }, [perfilData])
+  }, [perfilData, user?.role])
+
+  useEffect(() => {
+    if (notificacion) {
+      const timer = setTimeout(() => {
+        setNotificacion(null)
+      }, 2000)
+      return () => clearTimeout(timer)
+    }
+  }, [notificacion])
 
   const [foto, setFoto] = useState(null)
   const resetRef = useRef(null)
-
   const clearFoto = () => {
     setFoto(null)
     resetRef.current?.()
@@ -109,6 +171,16 @@ export default function MiPerfil() {
         </Stack>
 
         <Paper withBorder p="xl" flex={1} radius="md" w="100%">
+          {notificacion && (
+            <Notification
+              color={notificacion.tipo === 'success' ? 'green' : 'red'}
+              title={notificacion.titulo}
+              onClose={() => setNotificacion(null)}
+              mb="md"
+            >
+              {notificacion.mensaje}
+            </Notification>
+          )}
           <Grid gutter="md">
             <Grid.Col span={{ base: 12, sm: 6 }}>
               <TextInput
@@ -166,7 +238,7 @@ export default function MiPerfil() {
               <MultiSelectCombobox
                 label="Especialidades"
                 size={inputSize}
-                data={ESPECIALIDADES_DATA}
+                data={especialidadesSel}
                 value={especialidadesSel}
                 onChange={setEspecialidadesSel}
                 placeholder="+ agregar..."
@@ -176,7 +248,7 @@ export default function MiPerfil() {
             <MultiSelectCombobox
               label={user?.role === "profesional" ? 'Obras sociales' : 'Obra Social'}
               size={inputSize}
-              data={OBRAS_SOCIALES_DATA}
+              data={obraSocialSel}
               value={obraSocialSel}
               onChange={setObraSocialSel}
               placeholder="+ agregar..."
@@ -185,15 +257,21 @@ export default function MiPerfil() {
           </Stack>
 
           <Group justify="flex-end" gap="sm" mt="xl" wrap="wrap">
-            <Button color="red" variant="outline" size={inputSize} w={{ base: '100%', sm: 'auto' }}>
+            <Button color="red" onClick={openEliminar} variant="outline" size={inputSize} w={{ base: '100%', sm: 'auto' }}>
               Eliminar cuenta
             </Button>
-            <Button size={inputSize} w={{ base: '100%', sm: 'auto' }}>
+            <Button size={inputSize} w={{ base: '100%', sm: 'auto' }} onClick={handleSave} loading={isPendingProfesional || isPendingCliente}>
               Guardar
             </Button>
           </Group>
         </Paper>
       </Flex>
+      {eliminar && (
+        <EliminarCuentaModal
+          opened={eliminar}
+          onClose={closeEliminar}
+        />
+      )}
     </>
   )
 }

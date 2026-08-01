@@ -126,7 +126,7 @@ export class ProfesionalesModel {
 
   static async getByDni({ dni }) {
     const [rows] = await pool.query(`
-            SELECT nombre, apellido, correo, foto_url, fecha_nacimiento FROM profesional WHERE dni_profesional = ?
+            SELECT nombre, apellido, correo, foto_url, fecha_nacimiento, genero FROM profesional WHERE dni_profesional = ?
             `, [dni])
 
     const profesional = rows[0]
