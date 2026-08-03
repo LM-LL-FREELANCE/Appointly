@@ -46,12 +46,12 @@ export class ClientesModel {
           WHERE cliente.dni_cliente = ?
     `;
     const params = [dni];
-    
+
     if (estado) {
-        query += ` AND turno.estado = ?`;
-        params.push(estado);
+      query += ` AND turno.estado = ?`;
+      params.push(estado);
     }
-    
+
     query += `
           GROUP BY
             turno.id_turno,
@@ -82,7 +82,7 @@ export class ClientesModel {
 
   static async getClienteByDni({ dni }) {
     const [rows] = await pool.query(`
-        SELECT c.dni_cliente, c.nombre, c.apellido, o.nombre_obra_social AS "obra_social" FROM 
+        SELECT c.dni_cliente, c.nombre, c.apellido, c.correo, c.fecha_nacimiento, c.genero, o.nombre_obra_social AS "obra_social" FROM 
         cliente c LEFT JOIN obra_social o ON c.id_obra_social = o.id_obra_social WHERE c.dni_cliente = ?
         `, [dni])
 
@@ -106,5 +106,91 @@ export class ClientesModel {
       ORDER BY t.fecha_turno ASC, t.hora_turno ASC
       `, [dni])
     return rows;
+  }
+
+  static async patchClienteData({ dni, data }) {
+    let id_final_obra_social = undefined
+
+    if (data.obra_social !== undefined) {
+
+      if (data.obra_social === null || data.obra_social.trim() === "") {
+        id_final_obra_social = null
+      }
+      else {
+        const [obraSocialRows] = await pool.query(`SELECT id_obra_social FROM obra_social WHERE nombre_obra_social = ?`, data.obra_social)
+
+        if (obraSocialRows.length > 0) {
+          id_final_obra_social = obraSocialRows[0].id_obra_social
+        }
+        else {
+          const [insertObraSocial] = await pool.query(`INSERT INTO obra_social (nombre_obra_social) VALUE(?)`, [data.obra_social])
+          id_final_obra_social = insertObraSocial.insertId;
+        }
+      }
+    }
+    let query = `UPDATE cliente SET `
+    let fieldsToUpdate = []
+    let valueToUpdate = []
+
+    if (data.nombre) {
+      fieldsToUpdate.push("nombre = ?")
+      valueToUpdate.push(data.nombre)
+    }
+
+    if (data.apellido !== undefined) {
+      fieldsToUpdate.push("apellido = ?")
+      valueToUpdate.push(data.apellido)
+    }
+
+    if (data.correo !== undefined) {
+      fieldsToUpdate.push("correo = ?")
+      valueToUpdate.push(data.correo)
+    }
+
+    if (data.fecha_nacimiento !== undefined) {
+      fieldsToUpdate.push("fecha_nacimiento = ?")
+      valueToUpdate.push(data.fecha_nacimiento)
+    }
+
+    if (data.genero !== undefined) {
+      fieldsToUpdate.push("genero = ?")
+      valueToUpdate.push(data.genero)
+    }
+
+    if (data.foto_url !== undefined) {
+      fieldsToUpdate.push("foto_url = ?")
+      valueToUpdate.push(data.foto_url)
+    }
+    if (id_final_obra_social !== undefined) {
+      fieldsToUpdate.push("id_obra_social = ?")
+      valueToUpdate.push(id_final_obra_social)
+    }
+
+
+    if (fieldsToUpdate.length > 0) {
+      query += fieldsToUpdate.join(", ")
+      query += ` WHERE dni_cliente = ?`
+      valueToUpdate.push(dni)
+
+      const [updateResult] = await pool.query(query, valueToUpdate)
+      if (updateResult.affectedRows === 0) {
+        return false;
+      }
+
+      return true;
+    }
+    return false
+  }
+
+  static async deleteAccount({ dni }) {
+    await pool.query(`DELETE FROM turno WHERE dni_cliente = ?`, [dni]);
+
+    const [accRows] = await pool.query(`DELETE FROM cliente WHERE dni_cliente = ?`, [dni]);
+
+    if (accRows.affectedRows > 0) {
+      return true;
+    }
+
+    return false;
   }
 }

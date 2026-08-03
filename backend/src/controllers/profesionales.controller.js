@@ -1,6 +1,8 @@
 import { ProfesionalesService } from "../services/profesionales.service.js"
 import { ProfesionalesModel } from "../models/profesionales.model.js"
 import { AppError } from "../utils/AppError.js"
+import { profesionalesDataSchema } from "../schemas/profesionales.schema.js"
+
 export class ProfesionalesController {
 
   static async getHorariosByDni(req, res, next) {
@@ -92,12 +94,17 @@ export class ProfesionalesController {
   }
 
   static async updateByDni(req, res, next) {
-    const { dni } = req.params
-    const { nombre, apellido, correo, foto_url } = req.body
-
     try {
-      const profesional = await ProfesionalesService.updateByDni({ dni, nombre, apellido, correo, foto_url })
-      res.status(200).json(profesional)
+      const { dni } = req.params
+      if (!dni) throw new AppError("The dni must be on the request", 404, "NOT_FOUND")
+      const parsedDataSchema = profesionalesDataSchema.partial().safeParse(req.body)
+      if (!parsedDataSchema.success) throw new AppError("The data sent is not valid, check", 400, "BAD_REQUEST")
+      const profesional = await ProfesionalesModel.updateByDni({ dni, ...parsedDataSchema.data })
+      if (!profesional) throw new AppError("we could not update the data of the profesional")
+      res.status(200).json({
+        success: true,
+        data: profesional
+      })
     } catch (err) {
       next(err)
     }

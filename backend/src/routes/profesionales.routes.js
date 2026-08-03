@@ -8,7 +8,7 @@ export const profesionalesRouter = Router()
 //lean
 profesionalesRouter.get("/:dni/horarios", requireAuth, grantAccess(["profesional"]), ProfesionalesController.getHorariosByDni) //working
 profesionalesRouter.post("/:dni/horarios", requireAuth, grantAccess(["profesional"]), horarioValidator, ProfesionalesController.createHorario) //working
-profesionalesRouter.patch("/:dni", requireAuth, grantAccess(["profesional"]), ProfesionalesController.updateByDni) //working
+profesionalesRouter.patch("/:dni/actualizar", requireAuth, grantAccess(["profesional"]), ProfesionalesController.updateByDni) //working
 
 //luca
 profesionalesRouter.get("/", ProfesionalesController.filterBy)

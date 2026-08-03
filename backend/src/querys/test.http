@@ -59,18 +59,31 @@ Content-Type: application/json
 ###delete a horario
 DELETE http://localhost:4000/api/horarios/22
 
+
+###update profesional data
+PATCH http://localhost:4000/api/profesionales/27845123/actualizar
+Content-Type: application/json
+
+{
+  "nombre": "Martin",
+  "apellido": "Aguirre",
+  "especialidades": ["Kinesiologia", "Nutricion", "wuachin"],
+  "obras_sociales": ["OSDE", "Swiss Medical", "Ospe"]
+}
+
+
 ###Clientes
 ###inciar sesion con un cliente
 POST http://localhost:4000/api/auth/login
 Content-Type: application/json
 
 {
-  "dni": "20232778",
-  "password": "hola123",
+  "dni": "46668814",
+  "password": "Nel1142981",
   "role": "cliente"
 }
 ###get cliente by dni
-GET http://localhost:4000/api/clientes/20232778
+GET http://localhost:4000/api/clientes/46668814
 
 ###get for a cliente by their dni
 GET http://localhost:4000/api/clientes/20232778/turnos
@@ -91,3 +104,32 @@ GET http://localhost:4000/api/clientes/20232778/mes
 
 ###get turnos activos
 GET http://localhost:4000/api/clientes/20232778/turnos/activos
+
+###updated clientes data
+PATCH http://localhost:4000/api/clientes/20232778/actualizar
+Content-Type: application/json
+
+{
+  "nombre": "Andrea",
+  "apellido": "Arroyo",
+  "genero": "F"
+}
+
+
+###otra cuenta
+POST http://localhost:4000/api/auth/login
+Content-Type: application/json
+
+{
+  "dni": "46578941",
+  "password": "hola123",
+  "role": "cliente"
+}
+###get by id a cliente
+GET http://localhost:4000/api/clientes/20232778
+
+###delete an account
+DELETE http://localhost:4000/api/clientes/46578941/delete
+
+###get cliente by dni
+GET http://localhost:4000/api/clientes/46668814

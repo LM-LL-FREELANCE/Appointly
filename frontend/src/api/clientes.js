@@ -30,3 +30,15 @@ export const createAccount = (data) => {
 export const getTurnosMes = ({ dni }) => {
   return request(`/api/clientes/${dni}/mes`)
 }
+
+export const getClienteByDni = ({ dni }) => {
+  return request(`/api/clientes/${dni}`)
+}
+
+export const updateByDni = ({ dni, data }) => {
+  return request(`/api/clientes/${dni}/actualizar`, { method: "PATCH", body: JSON.stringify(data) })
+}
+
+export const deleteAccCliente = ({ dni }) => {
+  return request(`/api/clientes/${dni}/delete`, { method: "DELETE" })
+}

@@ -80,20 +80,20 @@ export class ProfesionalesModel {
   }
   static async filterBy({ especialidad, obraSocial }) {
     let query = `
-  SELECT 
-    p.dni_profesional, 
-    p.nombre, 
-    p.apellido, 
-    p.correo, 
-    p.foto_url, 
-    p.fecha_nacimiento, 
-    GROUP_CONCAT(DISTINCT e.tipo ORDER BY e.tipo SEPARATOR '|') AS especialidades, 
-    GROUP_CONCAT(DISTINCT ob.nombre_obra_social ORDER BY ob.nombre_obra_social SEPARATOR '|') AS obras_sociales 
-  FROM profesional p 
-  LEFT JOIN profesional_especialidad pe ON p.dni_profesional = pe.dni_profesional
-  LEFT JOIN especialidad e ON pe.id_especialidad = e.id_especialidad 
-  LEFT JOIN obra_social_profesional obp ON p.dni_profesional = obp.dni_profesional
-  LEFT JOIN obra_social ob ON obp.id_obra_social = ob.id_obra_social
+    SELECT 
+      p.dni_profesional, 
+      p.nombre, 
+      p.apellido, 
+      p.correo, 
+      p.foto_url, 
+      p.fecha_nacimiento, 
+      GROUP_CONCAT(DISTINCT e.tipo ORDER BY e.tipo SEPARATOR '|') AS especialidades, 
+      GROUP_CONCAT(DISTINCT ob.nombre_obra_social ORDER BY ob.nombre_obra_social SEPARATOR '|') AS obras_sociales 
+    FROM profesional p 
+    LEFT JOIN profesional_especialidad pe ON p.dni_profesional = pe.dni_profesional
+    LEFT JOIN especialidad e ON pe.id_especialidad = e.id_especialidad 
+    LEFT JOIN obra_social_profesional obp ON p.dni_profesional = obp.dni_profesional
+    LEFT JOIN obra_social ob ON obp.id_obra_social = ob.id_obra_social
 `;
     const conditions = [];
     const values = [];
@@ -126,7 +126,7 @@ export class ProfesionalesModel {
 
   static async getByDni({ dni }) {
     const [rows] = await pool.query(`
-            SELECT nombre, apellido, correo, foto_url, fecha_nacimiento FROM profesional WHERE dni_profesional = ?
+            SELECT nombre, apellido, correo, foto_url, fecha_nacimiento, genero FROM profesional WHERE dni_profesional = ?
             `, [dni])
 
     const profesional = rows[0]
@@ -155,32 +155,95 @@ export class ProfesionalesModel {
   }
 
   static async updateByDni({ dni, ...fields }) {
-    const keys = Object.keys(fields).filter(key => fields[key] !== undefined);
+    const { especialidades, obras_sociales, ...profesionalFields } = fields;
+    const keys = Object.keys(profesionalFields).filter(key => profesionalFields[key] !== undefined);
 
-    if (keys.length === 0) {
-      const [rows] = await pool.query(`                                  
-            SELECT nombre, apellido, correo, foto_url                        
-            FROM profesional WHERE dni_profesional = ?                       
-          `, [dni]);
-      return rows[0];
+    if (keys.length === 0 && especialidades === undefined && obras_sociales === undefined) {
+      return false;
     }
 
-    const setClause = keys.map(key => `${key} = ?`).join(', ');
-    const values = keys.map(key => fields[key]);
-    values.push(dni);
+    if (keys.length > 0) {
+      const setClause = keys.map(key => `${key} = ?`).join(', ');
+      const values = keys.map(key => profesionalFields[key]);
+      values.push(dni);
 
-    await pool.query(`                                                   
-          UPDATE profesional                                                 
-          SET ${setClause}                                                   
-          WHERE dni_profesional = ?                                          
-        `, values);
+      await pool.query(`
+            UPDATE profesional
+            SET ${setClause}
+            WHERE dni_profesional = ?
+          `, values);
+    }
+
+    if (especialidades !== undefined) {
+      await pool.query(`DELETE FROM profesional_especialidad WHERE dni_profesional = ?`, [dni]);
+
+      if (especialidades.length > 0) {
+        const namesValues = especialidades.map(nombre => [nombre]);
+        await pool.query(
+          `INSERT IGNORE INTO especialidad (tipo) VALUES ?`,
+          [namesValues]
+        );
+
+        const [rowsEspecialidades] = await pool.query(
+          `SELECT id_especialidad FROM especialidad WHERE tipo IN (?)`,
+          [especialidades]
+        );
+
+        if (rowsEspecialidades.length > 0) {
+          const relacionEspecialidades = rowsEspecialidades.map(row => [dni, row.id_especialidad]);
+          await pool.query(
+            `INSERT INTO profesional_especialidad (dni_profesional, id_especialidad) VALUES ?`,
+            [relacionEspecialidades]
+          );
+        }
+      }
+    }
+
+    if (obras_sociales !== undefined) {
+      await pool.query(`DELETE FROM obra_social_profesional WHERE dni_profesional = ?`, [dni]);
+
+      if (obras_sociales.length > 0) {
+        const namesObras = obras_sociales.map(nombre => [nombre]);
+        await pool.query(
+          `INSERT IGNORE INTO obra_social (nombre_obra_social) VALUES ?`,
+          [namesObras]
+        );
+
+        const [rowsObras] = await pool.query(
+          `SELECT id_obra_social FROM obra_social WHERE nombre_obra_social IN (?)`,
+          [obras_sociales]
+        );
+
+        if (rowsObras.length > 0) {
+          const relacionObras = rowsObras.map(row => [dni, row.id_obra_social]);
+          await pool.query(
+            `INSERT INTO obra_social_profesional (dni_profesional, id_obra_social) VALUES ?`,
+            [relacionObras]
+          );
+        }
+      }
+    }
 
     const [rows] = await pool.query(`
-          SELECT nombre, apellido, correo, foto_url 
-          FROM profesional WHERE dni_profesional = ?
+          SELECT
+            p.nombre AS "nombre",
+            p.apellido AS "apellido",
+            p.correo AS "correo",
+            p.fecha_nacimiento AS "fecha_nacimiento",
+            p.genero AS "genero",
+            p.foto_url AS "foto",
+          GROUP_CONCAT(DISTINCT e.tipo ORDER BY e.tipo SEPARATOR '|') AS especialidades,
+          GROUP_CONCAT(DISTINCT o.nombre_obra_social ORDER BY o.nombre_obra_social SEPARATOR '|') AS obras_sociales
+          FROM profesional p
+            LEFT JOIN profesional_especialidad pe ON p.dni_profesional = pe.dni_profesional
+            LEFT JOIN especialidad e ON pe.id_especialidad = e.id_especialidad
+            LEFT JOIN obra_social_profesional op ON p.dni_profesional = op.dni_profesional
+            LEFT JOIN obra_social o ON op.id_obra_social = o.id_obra_social
+          WHERE p.dni_profesional = ?
+          GROUP BY p.dni_profesional
         `, [dni]);
 
-    return rows[0]
+    return rows[0];
   }
 
 }

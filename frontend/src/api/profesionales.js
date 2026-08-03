@@ -25,7 +25,7 @@ export const registerProfesional = (data) => {
 }
 
 export const getProfesionalByDni = async ({ dni }) => {
-  return await request(`/api/profesionales/${dni}`)
+  return request(`/api/profesionales/${dni}`)
 }
 
 // GET /api/profesionales/:dni/horarios
@@ -57,4 +57,12 @@ export const getTurnosByProfesional = ({ dni_profesional, desde, hasta, estado }
   if (estado) params.append('estado', estado)
 
   return request(`/api/turnos?${params}`)
+}
+
+export const updateByDni = ({ dni, data }) => {
+  return request(`/api/profesionales/${dni}/actualizar`, { method: "PATCH", body: JSON.stringify(data) })
+}
+
+export const deleteAccProfesional = ({ dni }) => {
+  return request(`/api/profesionales/${dni}/delete`, { method: "DELETE" })
 }
