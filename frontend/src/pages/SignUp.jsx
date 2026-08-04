@@ -8,6 +8,7 @@ import useObrasSociales from "../hooks/useObraSociales";
 import useCreateAccount from "../hooks/useRegisterAccount";
 import useLoginSession from "../hooks/useLoginSession";
 import 'dayjs/locale/es';
+import dayjs from 'dayjs';
 
 export default function SignUp() {
   const navigate = useNavigate()
@@ -57,7 +58,7 @@ export default function SignUp() {
       correo: email,
       password: password,
       confirm: confirmPassword,
-      fecha_nacimiento: fecha,
+      fecha_nacimiento: fecha ? dayjs(fecha).format('YYYY-MM-DD') : null,
       genero: getGeneroFormateado(),
       id_obra_social: obraSocial ? Number(obraSocial) : null
     }, {

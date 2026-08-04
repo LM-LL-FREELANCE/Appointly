@@ -1,0 +1,4 @@
+artifactStore: openspec
+executionMode: auto
+chainedPrStrategy: force-chained
+reviewBudgetLines: 400
