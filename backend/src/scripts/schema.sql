@@ -1,11 +1,3 @@
-CREATE DATABASE IF NOT EXISTS appointly;
-
-USE appointly;
-
-CREATE DATABASE IF NOT EXISTS appointly;
-USE appointly;
-
-
 -- especialidad
 
 CREATE TABLE especialidad (
