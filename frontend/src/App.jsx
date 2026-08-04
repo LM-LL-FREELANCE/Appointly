@@ -1,4 +1,6 @@
+import { lazy, Suspense } from 'react'
 import { Route, Routes } from 'react-router-dom'
+import { Center, Loader } from '@mantine/core'
 import {
   IconLayoutDashboard,
   IconCalendarWeek,
@@ -12,24 +14,26 @@ import {
 import { useAuth } from './hooks/useAuth.js'
 import { ProtectedRoute } from './components/ProtectedRoute.jsx'
 
-/*Auth need components */
-import Login from './pages/Login.jsx'
-import SignUp from './pages/SignUp.jsx'
-import ProfessionalLogin from './pages/ProfessionalLogin.jsx'
-import ProfessionalSignUp from './pages/ProfessionalSignUp.jsx'
+/*Auth components (lazy loaded) */
+const Login = lazy(() => import('./pages/Login.jsx'))
+const SignUp = lazy(() => import('./pages/SignUp.jsx'))
+const ProfessionalLogin = lazy(() => import('./pages/ProfessionalLogin.jsx'))
+const ProfessionalSignUp = lazy(() => import('./pages/ProfessionalSignUp.jsx'))
 
-/*Other components */
-import Dashboard from './pages/professional/Dashboard/Dashboard.jsx'
-import Agenda from './pages/Agenda.jsx'
-import Turnos from './pages/Turnos.jsx'
-import Horarios from './pages/Horarios.jsx'
-import Buscar from './pages/Buscar.jsx'
-import Reservar from './pages/Reservar.jsx'
-import MisTurnos from './pages/client/MisTurnos/MisTurnos.jsx'
-import User from './pages/User.jsx'
-import MiPerfil from './pages/MiPerfil.jsx'
+/*Other components (lazy loaded) */
+const Dashboard = lazy(() => import('./pages/professional/Dashboard/Dashboard.jsx'))
+const Agenda = lazy(() => import('./pages/Agenda.jsx'))
+const Turnos = lazy(() => import('./pages/Turnos.jsx'))
+const Horarios = lazy(() => import('./pages/Horarios.jsx'))
+const Buscar = lazy(() => import('./pages/Buscar.jsx'))
+const Reservar = lazy(() => import('./pages/Reservar.jsx'))
+const MisTurnos = lazy(() => import('./pages/client/MisTurnos/MisTurnos.jsx'))
+const User = lazy(() => import('./pages/User.jsx'))
+const MiPerfil = lazy(() => import('./pages/MiPerfil.jsx'))
+const Inicio = lazy(() => import('./pages/Inicio.jsx'))
+
+/*Layout & static components */
 import MainLayout from './MainLayout.jsx'
-import Inicio from './pages/Inicio.jsx'
 
 export default function App() {
   const { user } = useAuth()
@@ -51,26 +55,28 @@ export default function App() {
   const links = (user?.role === "profesional") ? linksForProfesional : defaultLinks
 
   return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/professional-login" element={<ProfessionalLogin />} />
-      <Route path="/professional-signup" element={<ProfessionalSignUp />} />
-      <Route path="/registrarse" element={<SignUp />} />
+    <Suspense fallback={<Center h="100vh"><Loader /></Center>}>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/professional-login" element={<ProfessionalLogin />} />
+        <Route path="/professional-signup" element={<ProfessionalSignUp />} />
+        <Route path="/registrarse" element={<SignUp />} />
 
-      <Route path="/" element={<MainLayout links={links} role={user?.role} />}>
+        <Route path="/" element={<MainLayout links={links} role={user?.role} />}>
 
-        {defaultLinks.map(link => <Route key={link.path} path={link.path} element={link.element} />)}
+          {defaultLinks.map(link => <Route key={link.path} path={link.path} element={link.element} />)}
 
-        <Route element={<ProtectedRoute />}>
-          <Route path="/user" element={<User />} />
-          <Route path="/miperfil" element={<MiPerfil />} />
+          <Route element={<ProtectedRoute />}>
+            <Route path="/user" element={<User />} />
+            <Route path="/miperfil" element={<MiPerfil />} />
+          </Route>
+
+          <Route element={<ProtectedRoute roles={['profesional']} />}>
+            {linksForProfesional.map(link => <Route key={link.path} path={link.path} element={link.element} />)}
+          </Route>
+
         </Route>
-
-        <Route element={<ProtectedRoute roles={['profesional']} />}>
-          {linksForProfesional.map(link => <Route key={link.path} path={link.path} element={link.element} />)}
-        </Route>
-
-      </Route>
-    </Routes>
+      </Routes>
+    </Suspense>
   )
 }

@@ -35,7 +35,7 @@
       git add .
       git commit -m "feat: setup single-service express.static and SPA catch-all for deployment"
     ```
-
+✅
  ────────────────────────────────────────────────────────────────────────────────
 
  ### Fase 2: Prueba de Build Local
