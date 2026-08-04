@@ -8,7 +8,7 @@ export const loginSchema = z.strictObject({
   role: z.enum(['cliente', 'profesional'])
 })
 
-export const registerSchema = z.object({
+export const registerSchema = z.strictObject({
   dni: dniSchema,
   nombre: z.string().trim().min(1).max(100),
   apellido: z.string().trim().min(1).max(100),
