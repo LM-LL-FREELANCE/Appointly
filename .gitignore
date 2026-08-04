@@ -24,6 +24,6 @@ Thumbs.db
 .claude
 CLAUDE.md
 skills-lock.json
-.docs
-.agents
+.docs/
+.agents/
 .atl
