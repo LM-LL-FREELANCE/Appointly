@@ -164,7 +164,7 @@ export default function SignUp() {
               <Button onClick={() => navigate("/")} variant="subtle" color="gray">Volver al inicio</Button>
               <Button onClick={() => navigate("/login")} >Ya tengo una cuenta</Button>
               <Button
-                disabled={contrasenasNoCoinciden || emailInvalido || !dni || !name || !email || !password}
+                disabled={contrasenasNoCoinciden || emailInvalido || !dni || !name || !lastName || !email || !password || !fecha || !genero}
                 loading={isPending || isLoginIn} // Mantine te pone un loader automáticamente en el botón
                 onClick={confirmarAcc}
               >
