@@ -9,9 +9,13 @@ import { especialidadesRouter } from "./routes/especialidades.routes.js"
 import { turnosRouter } from "./routes/turnos.routes.js"
 import { horariosRouter } from "./routes/horarios.routes.js"
 import { clientesRouter } from "./routes/clientes.routes.js"
-
+import path from "node:path"
 export const app = express()
 
+//deployment middleware, express static
+app.use(express.static(path.join(__dirname, "../../frontend/dist")))
+
+//middlewares for working with other things
 app.disable("x-powered-by")
 app.use(express.json())
 app.use(cookieParser())
@@ -49,3 +53,8 @@ app.use("/api/clientes", clientesRouter)
 
 /*Error handler */
 app.use(errorHandler)
+
+/* Catch-all */
+app.get(/^(?!\/api).*/, (req, res) => {
+  res.sendFile(path.join(__dirname, "../../frontend/dist/index.html"));
+});

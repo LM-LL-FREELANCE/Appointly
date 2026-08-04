@@ -7,6 +7,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "node --watch --env-file=.env src/server.js",
+    "start": "node src/server.js",
     "db:schema": "node --env-file=.env src/scripts/run_sql.js schema.sql",
     "db:seed": "node --env-file=.env src/scripts/run_sql.js seed.sql",
     "db:reset": "node --env-file=.env src/scripts/run_sql.js drop.sql && pnpm run db:schema && pnpm run db:seed"

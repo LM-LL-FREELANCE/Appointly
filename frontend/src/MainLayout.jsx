@@ -11,6 +11,9 @@ export default function MainLayout({ links }) {
   const [mobileOpened, { toggle: toggleMobile, close: closeMobile }] = useDisclosure()
   const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure()
 
+
+  //wuachin el que lee
+
   return (
     <SidebarContext.Provider value={{ mobileOpened, toggleMobile, desktopOpened, toggleDesktop }}>
       <AppShell
