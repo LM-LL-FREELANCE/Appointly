@@ -57,7 +57,7 @@ export default function SignUp() {
       correo: email,
       password: password,
       confirm: confirmPassword,
-      fecha_nacimiento: fecha ? fecha.toISOString().split('T')[0] : null,
+      fecha_nacimiento: fecha,
       genero: getGeneroFormateado(),
       id_obra_social: obraSocial ? Number(obraSocial) : null
     }, {

@@ -1,5 +1,3 @@
-USE appointly;
-
 
 -- especialidad
 
