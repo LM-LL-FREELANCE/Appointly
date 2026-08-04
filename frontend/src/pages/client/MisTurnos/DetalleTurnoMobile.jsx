@@ -6,8 +6,6 @@ import { IconAlertCircle } from '@tabler/icons-react';
 import { PageHeader } from '../../../components/PageHeader.jsx';
 import { cancelTurnoById } from '../../../api/clientes.js';
 
-const DNI = '25890123';
-
 function DetailRow({ label, children }) {
   return (
     <>
@@ -32,9 +30,9 @@ export function DetalleTurnoMobile() {
 
   const queryClient = useQueryClient();
   const { mutate: cancelar, isPending } = useMutation({
-    mutationFn: () => cancelTurnoById(turno.id_turno, DNI, 'cliente'),
+    mutationFn: () => cancelTurnoById({ id: turno.id_turno, motivo: '' }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['turnos', DNI] });
+      queryClient.invalidateQueries({ queryKey: ['turnos'] });
       navigate('/misturnos', { state: { tab } });
     },
   });
@@ -66,7 +64,7 @@ export function DetalleTurnoMobile() {
       <Stack gap="md">
         <Paper withBorder radius="lg" px="md" pt="xs" pb={0}>
           <DetailRow label="Profesional">
-            <Text fz="lg" fw={600}>{turno.p_nombre} {turno.p_apellido}</Text>
+            <Text fz="lg" fw={600}>{turno.nombre} {turno.apellido}</Text>
           </DetailRow>
           <DetailRow label="Especialidad">
             <Text fz="lg" fw={600}>{turno.tipo}</Text>
@@ -111,7 +109,7 @@ export function DetalleTurnoMobile() {
             <Text fw={700} fz="xl">¿Cancelar turno?</Text>
           </Group>
           <Text c="dimmed" fz="sm" lh={1.6}>
-            {turno.fecha_turno} · {turno.hora_turno} · {turno.p_nombre} {turno.p_apellido}.{' '}
+            {turno.fecha_turno} · {turno.hora_turno} · {turno.nombre} {turno.apellido}.{' '}
             Te avisamos por email.
           </Text>
         </Box>

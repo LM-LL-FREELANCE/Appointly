@@ -14,7 +14,7 @@ export function TurnoCard({ turno, estado }) {
 
   const queryClient = useQueryClient();
   const { mutate: cancelar, isPending } = useMutation({
-    mutationFn: () => cancelTurnoById(turno.id_turno),
+    mutationFn: () => cancelTurnoById({ id: turno.id_turno, motivo: '' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['turnos', user?.dni] });
       closeDrawer();
@@ -35,7 +35,7 @@ export function TurnoCard({ turno, estado }) {
           <Group gap="sm" wrap="nowrap">
             <Avatar size="lg" radius="xl" />
             <Stack gap={2}>
-              <Text fw={700} fz="lg">{turno.p_nombre} {turno.p_apellido}</Text>
+              <Text fw={700} fz="lg">{turno.nombre} {turno.apellido}</Text>
               <Text fz="lg">{turno.tipo}</Text>
             </Stack>
           </Group>
@@ -65,7 +65,7 @@ export function TurnoCard({ turno, estado }) {
             <Text fw={700} fz="xl">¿Cancelar turno?</Text>
           </Group>
           <Text c="dimmed" fz="sm" lh={1.6}>
-            {turno.fecha_turno} · {turno.hora_turno} · {turno.p_nombre} {turno.p_apellido}.{' '}
+            {turno.fecha_turno} · {turno.hora_turno} · {turno.nombre} {turno.apellido}.{' '}
             Te avisamos por email.
           </Text>
         </Box>
