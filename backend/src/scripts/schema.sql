@@ -1,3 +1,23 @@
+
+-- persona
+-- Identidad unificada: profesional, cliente y admin son roles opcionales sobre una persona.
+
+CREATE TABLE persona (
+    dni_persona INT UNSIGNED PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    apellido VARCHAR(100) NOT NULL,
+    correo VARCHAR(255) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    telefono VARCHAR(30),
+    fecha_nacimiento DATE NOT NULL,
+    genero ENUM('M', 'F', 'X') NOT NULL,
+    foto_url TEXT,
+    eliminado_en TIMESTAMP NULL DEFAULT NULL,
+    creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    actualizado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+
 -- especialidad
 
 CREATE TABLE especialidad (
@@ -15,37 +35,35 @@ CREATE TABLE obra_social (
 
 
 -- profesional
+-- 1:1 opcional con persona. es_admin: permite que un profesional actue
+-- tambien como admin sin necesitar una cuenta separada (ver tabla admin).
 
 CREATE TABLE profesional (
     dni_profesional INT UNSIGNED PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    apellido VARCHAR(100) NOT NULL,
-    correo VARCHAR(255) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
-    fecha_nacimiento DATE NOT NULL,
-    genero ENUM('M', 'F', 'X') NOT NULL,
-    foto_url TEXT,
-    ubicacion VARCHAR(255),
-    creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    actualizado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    duracion_turno_min INT UNSIGNED NOT NULL DEFAULT 30,
+    es_admin BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (dni_profesional) REFERENCES persona(dni_persona) ON DELETE CASCADE
 );
 
 
 -- cliente
--- id_obra_social nullable: pacientes sin cobertura
+-- 1:1 opcional con persona. id_obra_social nullable: pacientes sin cobertura.
 
 CREATE TABLE cliente (
     dni_cliente INT UNSIGNED PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    apellido VARCHAR(100) NOT NULL,
-    correo VARCHAR(255) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
-    fecha_nacimiento DATE NOT NULL,
-    genero ENUM('M', 'F', 'X') NOT NULL,
     id_obra_social INT UNSIGNED,
-    creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    actualizado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (dni_cliente) REFERENCES persona(dni_persona) ON DELETE CASCADE,
     FOREIGN KEY (id_obra_social) REFERENCES obra_social(id_obra_social)
+);
+
+
+-- admin
+-- 1:1 opcional con persona. Cuenta de administracion dedicada (ej. secretario),
+-- sin ficha de profesional ni de cliente. No confundir con profesional.es_admin.
+
+CREATE TABLE admin (
+    dni_admin INT UNSIGNED PRIMARY KEY,
+    FOREIGN KEY (dni_admin) REFERENCES persona(dni_persona) ON DELETE CASCADE
 );
 
 
@@ -97,6 +115,7 @@ CREATE TABLE turno (
     estado ENUM('activo', 'cancelado') NOT NULL DEFAULT 'activo',
     dni_profesional INT UNSIGNED NOT NULL,
     dni_cliente INT UNSIGNED NOT NULL,
+    motivo_cancelacion VARCHAR(255),
     creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     cancelado_en TIMESTAMP NULL DEFAULT NULL,
     FOREIGN KEY (dni_profesional) REFERENCES profesional(dni_profesional),
