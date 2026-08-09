@@ -1,4 +1,5 @@
-
+CREATE DATABASE IF NOT EXISTS appointly;
+USE appointly;
 -- persona
 -- Identidad unificada: profesional, cliente y admin son roles opcionales sobre una persona.
 

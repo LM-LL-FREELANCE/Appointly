@@ -1,4 +1,4 @@
-
+USE appointly;
 -- especialidad
 
 INSERT INTO especialidad (id_especialidad, tipo) VALUES

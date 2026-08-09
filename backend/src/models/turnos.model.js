@@ -105,7 +105,7 @@ export class TurnosModel {
   /* static async getAgenda({ dni_profesional, desde, hasta, estado }) {
     let query = `
       SELECT t.id_turno, t.fecha_turno, t.hora_turno, t.estado, t.cancelado_en,
-             c.dni_cliente AS "dni", c.nombre, c.apellido
+          c.dni_cliente AS "dni", c.nombre, c.apellido
       FROM turno t
       INNER JOIN cliente c ON t.dni_cliente = c.dni_cliente
       WHERE t.dni_profesional = ? AND t.fecha_turno BETWEEN ? AND ?
