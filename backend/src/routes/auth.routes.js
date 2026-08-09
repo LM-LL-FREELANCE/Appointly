@@ -10,5 +10,7 @@ authRouter.post("/registro", AuthController.register)
 authRouter.post("/registro-profesional", validate(registerProfesionalSchema), AuthController.registerProfesional)
 authRouter.post("/login", validate(loginSchema), AuthController.login)
 authRouter.post("/logout", AuthController.logout)
-authRouter.get("/me", attachUser, AuthController.me)
+authRouter.post("/forgot-password", AuthController.forgotPassword)
 
+
+authRouter.get("/me", attachUser, AuthController.me)

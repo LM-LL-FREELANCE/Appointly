@@ -6,6 +6,7 @@ import { SALT_ROUNDS } from "../config/constants.js"
 import { registerSchema } from "../schemas/auth.schema.js"
 import { AuthService } from "../services/auth.service.js"
 import { cookieOptions } from "../validators/cookieOptions.js"
+import { EmailMethods } from "../emails/email.js"
 
 export class AuthController {
   static async register(req, res, next) {
@@ -40,7 +41,6 @@ export class AuthController {
       await AuthModel.createAccount({ dni, password_hash: password_hashed, correo, nombre, apellido, fecha_nacimiento, genero, id_obra_social: id_obra_social ?? null })
 
       res.set("Location", `/api/clientes/${dni}`)
-
       return res.status(201).json({ dni, nombre, apellido, correo, fecha_nacimiento, genero, id_obra_social })
 
     } catch (error) {
@@ -68,7 +68,8 @@ export class AuthController {
     try {
       const { user, token } = await AuthService.login(dni, password, role)
       res.cookie("access_token", token, cookieOptions)
-      res.json(user)
+      await EmailMethods.sendTest()
+      return res.json(user)
 
     } catch (error) {
       next(error)
@@ -94,6 +95,10 @@ export class AuthController {
     } catch (error) {
       next(error)
     }
+  }
+
+  static async forgotPassword(req, res) {
+
   }
 
 }
