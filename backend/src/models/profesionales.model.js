@@ -1,5 +1,7 @@
 import { pool } from "../config/db.js"
 
+//everthing revise and done
+
 export class ProfesionalesModel {
   static async getHorariosByDni(dni) {
 
@@ -16,14 +18,20 @@ export class ProfesionalesModel {
 
   static async getHorarioById(id) {
     const [rows] = await pool.query(`
-        SELECT * FROM horario_atencion WHERE id_horario = ?
+        SELECT 
+              id_horario AS "id", 
+              dni_profesional AS "dni", 
+              dia_semana AS "dia", 
+              hora_inicio AS "hora de inicio", 
+              hora_fin "hora de fin"
+        FROM horario_atencion WHERE id_horario = ?
         `, [id])
     return rows[0] ?? null
   }
 
   static async checkOverlap(dni, { dia_semana, hora_inicio, hora_fin }, excludeId = null) {
     const sql = `
-        SELECT COUNT(*) AS count
+        SELECT COUNT(1) AS count
         FROM horario_atencion
         WHERE dni_profesional = ?
         AND dia_semana = ?
@@ -46,7 +54,12 @@ export class ProfesionalesModel {
         `, [dni, dia_semana, hora_inicio, hora_fin])
 
     const [row] = await pool.query(`
-        SELECT *
+        SELECT 
+              id_horario AS "id", 
+              dni_profesional AS "dni", 
+              dia_semana AS "dia", 
+              hora_inicio AS "hora de inicio", 
+              hora_fin "hora de fin"
         FROM horario_atencion
         WHERE id_horario = ?
         `, [result.insertId])
@@ -78,43 +91,46 @@ export class ProfesionalesModel {
 
     return result.affectedRows
   }
+
+  //DONE
   static async filterBy({ especialidad, obraSocial }) {
     let query = `
-    SELECT 
-      p.dni_profesional, 
-      p.nombre, 
-      p.apellido, 
-      p.correo, 
-      p.foto_url, 
-      p.fecha_nacimiento, 
-      GROUP_CONCAT(DISTINCT e.tipo ORDER BY e.tipo SEPARATOR '|') AS especialidades, 
-      GROUP_CONCAT(DISTINCT ob.nombre_obra_social ORDER BY ob.nombre_obra_social SEPARATOR '|') AS obras_sociales 
-    FROM profesional p 
-    LEFT JOIN profesional_especialidad pe ON p.dni_profesional = pe.dni_profesional
-    LEFT JOIN especialidad e ON pe.id_especialidad = e.id_especialidad 
-    LEFT JOIN obra_social_profesional obp ON p.dni_profesional = obp.dni_profesional
-    LEFT JOIN obra_social ob ON obp.id_obra_social = ob.id_obra_social
-`;
+      SELECT 
+        persona_profesional.dni_persona, 
+        persona_profesional.nombre, 
+        persona_profesional.apellido, 
+        persona_profesional.correo, 
+        persona_profesional.foto_url, 
+        persona_profesional.fecha_nacimiento, 
+        GROUP_CONCAT(DISTINCT e.tipo ORDER BY e.tipo SEPARATOR '|') AS especialidades, 
+        GROUP_CONCAT(DISTINCT ob.nombre_obra_social ORDER BY ob.nombre_obra_social SEPARATOR '|') AS obras_sociales 
+      FROM profesional p 
+      INNER JOIN persona AS persona_profesional ON p.dni_profesional = persona_profesional.dni_persona
+      LEFT JOIN profesional_especialidad pe ON p.dni_profesional = pe.dni_profesional
+      LEFT JOIN especialidad e ON pe.id_especialidad = e.id_especialidad 
+      LEFT JOIN obra_social_profesional obp ON p.dni_profesional = obp.dni_profesional
+      LEFT JOIN obra_social ob ON obp.id_obra_social = ob.id_obra_social
+    `;
     const conditions = [];
     const values = [];
     if (especialidad) {
       conditions.push(`EXISTS (
-    SELECT 1 FROM profesional_especialidad pe2 
-    WHERE pe2.dni_profesional = p.dni_profesional AND pe2.id_especialidad = ?
-  )`);
+        SELECT 1 FROM profesional_especialidad pe2 
+        WHERE pe2.dni_profesional = p.dni_profesional AND pe2.id_especialidad = ?
+      )`);
       values.push(especialidad);
     }
     if (obraSocial) {
       conditions.push(`EXISTS (
-    SELECT 1 FROM obra_social_profesional obp2 
-    WHERE obp2.dni_profesional = p.dni_profesional AND obp2.id_obra_social = ?
-  )`);
+        SELECT 1 FROM obra_social_profesional obp2 
+        WHERE obp2.dni_profesional = p.dni_profesional AND obp2.id_obra_social = ?
+      )`);
       values.push(obraSocial);
     }
     if (conditions.length > 0) {
       query += ` WHERE ` + conditions.join(' AND ');
     }
-    query += ` GROUP BY p.dni_profesional`;
+    query += ` GROUP BY persona_profesional.dni_persona`
 
     const [profesionales] = await pool.query(query, values);
     return profesionales.map(p => ({
@@ -123,29 +139,6 @@ export class ProfesionalesModel {
       obrasSociales: p.obras_sociales ? p.obras_sociales.split('|') : [],
     }));
   }
-
-  static async getByDni({ dni }) {
-    const [rows] = await pool.query(`
-            SELECT nombre, apellido, correo, foto_url, fecha_nacimiento, genero FROM profesional WHERE dni_profesional = ?
-            `, [dni])
-
-    const profesional = rows[0]
-    if (!profesional) return null
-
-
-    const [especialidad] = await pool.query(`
-            SELECT e.tipo AS "especialidad" FROM especialidad e INNER JOIN profesional_especialidad pe
-                ON e.id_especialidad = pe.id_especialidad WHERE pe.dni_profesional = ?
-            `, [dni])
-
-    const [obraSociales] = await pool.query(`
-            SELECT ob.nombre_obra_social AS "obra_sociales" FROM obra_social ob INNER JOIN 
-            obra_social_profesional osp ON ob.id_obra_social = osp.id_obra_social WHERE osp.dni_profesional = ?
-            `, [dni])
-
-    return { ...profesional, especialidad, obraSociales }
-  }
-
   static async existe({ dni }) {
     const [rows] = await pool.query(
       'SELECT 1 FROM profesional WHERE dni_profesional = ? LIMIT 1',
@@ -154,24 +147,67 @@ export class ProfesionalesModel {
     return rows.length > 0;
   }
 
-  static async updateByDni({ dni, ...fields }) {
-    const { especialidades, obras_sociales, ...profesionalFields } = fields;
-    const keys = Object.keys(profesionalFields).filter(key => profesionalFields[key] !== undefined);
+  //DONE
+  static async getByDni({ dni }) {
+    const [rows] = await pool.query(`
+      SELECT
+        persona_profesional.nombre,
+        persona_profesional.apellido,
+        persona_profesional.correo,
+        persona_profesional.fecha_nacimiento,
+        persona_profesional.genero,
+        persona_profesional.foto_url,
+        p.duracion_turno_min,
+        p.es_admin,
+        GROUP_CONCAT(DISTINCT e.tipo ORDER BY e.tipo SEPARATOR '|') AS especialidades,
+        GROUP_CONCAT(DISTINCT o.nombre_obra_social ORDER BY o.nombre_obra_social SEPARATOR '|') AS obras_sociales
+      FROM profesional p
+        INNER JOIN persona AS persona_profesional ON p.dni_profesional = persona_profesional.dni_persona
+        LEFT JOIN profesional_especialidad pe ON p.dni_profesional = pe.dni_profesional
+        LEFT JOIN especialidad e ON pe.id_especialidad = e.id_especialidad
+        LEFT JOIN obra_social_profesional op ON p.dni_profesional = op.dni_profesional
+        LEFT JOIN obra_social o ON op.id_obra_social = o.id_obra_social
+      WHERE p.dni_profesional = ?
+      GROUP BY p.dni_profesional
+    `, [dni]);
 
-    if (keys.length === 0 && especialidades === undefined && obras_sociales === undefined) {
+    if (rows.length === 0) return null;
+
+    const p = rows[0];
+    return {
+      ...p,
+      especialidades: p.especialidades ? p.especialidades.split('|') : [],
+      obras_sociales: p.obras_sociales ? p.obras_sociales.split('|') : []
+    };
+  }
+
+  // DONE
+  static async updateByDni({ dni, ...fields }) {
+    const { especialidades, obras_sociales, duracion_turno_min, ...personaFields } = fields;
+    const personaKeys = Object.keys(personaFields).filter(key => personaFields[key] !== undefined);
+
+    if (personaKeys.length === 0 && duracion_turno_min === undefined && especialidades === undefined && obras_sociales === undefined) {
       return false;
     }
 
-    if (keys.length > 0) {
-      const setClause = keys.map(key => `${key} = ?`).join(', ');
-      const values = keys.map(key => profesionalFields[key]);
+    if (personaKeys.length > 0) {
+      const setClause = personaKeys.map(key => `${key} = ?`).join(', ');
+      const values = personaKeys.map(key => personaFields[key]);
       values.push(dni);
 
       await pool.query(`
-            UPDATE profesional
+            UPDATE persona
             SET ${setClause}
-            WHERE dni_profesional = ?
+            WHERE dni_persona = ?
           `, values);
+    }
+
+    if (duracion_turno_min !== undefined) {
+      await pool.query(`
+            UPDATE profesional
+            SET duracion_turno_min = ?
+            WHERE dni_profesional = ?
+          `, [duracion_turno_min, dni]);
     }
 
     if (especialidades !== undefined) {
@@ -226,15 +262,17 @@ export class ProfesionalesModel {
 
     const [rows] = await pool.query(`
           SELECT
-            p.nombre AS "nombre",
-            p.apellido AS "apellido",
-            p.correo AS "correo",
-            p.fecha_nacimiento AS "fecha_nacimiento",
-            p.genero AS "genero",
-            p.foto_url AS "foto",
-          GROUP_CONCAT(DISTINCT e.tipo ORDER BY e.tipo SEPARATOR '|') AS especialidades,
-          GROUP_CONCAT(DISTINCT o.nombre_obra_social ORDER BY o.nombre_obra_social SEPARATOR '|') AS obras_sociales
+            persona_profesional.nombre AS "nombre",
+            persona_profesional.apellido AS "apellido",
+            persona_profesional.correo AS "correo",
+            persona_profesional.fecha_nacimiento AS "fecha_nacimiento",
+            persona_profesional.genero AS "genero",
+            persona_profesional.foto_url AS "foto",
+            p.duracion_turno_min AS "duracion_turno",
+            GROUP_CONCAT(DISTINCT e.tipo ORDER BY e.tipo SEPARATOR '|') AS especialidades,
+            GROUP_CONCAT(DISTINCT o.nombre_obra_social ORDER BY o.nombre_obra_social SEPARATOR '|') AS obras_sociales
           FROM profesional p
+            INNER JOIN persona AS persona_profesional ON p.dni_profesional = persona_profesional.dni_persona
             LEFT JOIN profesional_especialidad pe ON p.dni_profesional = pe.dni_profesional
             LEFT JOIN especialidad e ON pe.id_especialidad = e.id_especialidad
             LEFT JOIN obra_social_profesional op ON p.dni_profesional = op.dni_profesional
