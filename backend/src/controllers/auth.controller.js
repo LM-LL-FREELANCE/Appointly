@@ -61,15 +61,24 @@ export class AuthController {
     res.status(204).end()
   }
 
+  // Session probe, not a protected resource: it answers "who am I, if anyone".
+  // A cookie that cannot be resolved to a live account is answered with null and
+  // cleared, so the client recovers on its own instead of retrying a 4xx it can
+  // never fix. This covers a token issued before roles were scoped per table and
+  // a token whose account was dropped by a database reset.
   static async me(req, res, next) {
 
     if (!req.user) return res.json(null)
 
-    const { dni, role } = req.user
-
     try {
-      const user = await AuthService.getMe(dni, role)
-      res.json(user)
+      const user = await AuthService.getSession(req.user.dni, req.user.role)
+
+      if (!user) {
+        res.clearCookie("access_token", cookieOptions)
+        return res.json(null)
+      }
+
+      return res.json(user)
 
     } catch (error) {
       next(error)

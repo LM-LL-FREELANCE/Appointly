@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken"
 import { AuthModel } from "../models/auth.model.js"
 import { ObraSocialesModel } from "../models/obra-sociales.model.js"
 import { AppError } from "../utils/AppError.js"
+import { isKnownRole } from "../utils/userPermission.js"
 import { SALT_ROUNDS } from "../config/constants.js"
 
 export class AuthService {
@@ -39,10 +40,18 @@ export class AuthService {
 
   }
 
-  static async getMe(dni, role) {
+  // Session probe for GET /api/auth/me. Returns null instead of throwing when
+  // the token cannot be resolved to a live account: an unknown role (a token
+  // issued before roles were scoped per table) or an account that no longer
+  // exists both mean "not logged in", not "request failed". Infrastructure
+  // errors still propagate, so a database outage is never reported as a
+  // logged-out session.
+  static async getSession(dni, role) {
+
+    if (!isKnownRole(role)) return null
 
     const userFound = await AuthModel.findCredentialsByDniAndRole(dni, role)
-    if (!userFound) throw new AppError('Sesión inválida.', 401, 'UNAUTHORIZED')
+    if (!userFound) return null
 
     // Built field by field rather than by rest-spreading the row, so
     // password_hash cannot leak into the session response.
