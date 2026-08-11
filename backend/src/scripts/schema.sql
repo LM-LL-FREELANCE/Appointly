@@ -1,22 +1,8 @@
 CREATE DATABASE IF NOT EXISTS appointly;
 USE appointly;
--- persona
--- Identidad unificada: profesional, cliente y admin son roles opcionales sobre una persona.
-
-CREATE TABLE persona (
-    dni_persona INT UNSIGNED PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    apellido VARCHAR(100) NOT NULL,
-    correo VARCHAR(255) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
-    telefono VARCHAR(30),
-    fecha_nacimiento DATE NOT NULL,
-    genero ENUM('M', 'F', 'X') NOT NULL,
-    foto_url TEXT,
-    eliminado_en TIMESTAMP NULL DEFAULT NULL,
-    creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    actualizado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
+-- Identity model: profesional, cliente and admin are independent accounts.
+-- Each role table owns its own dni, correo and password_hash, so the same
+-- human may hold one account per role with different credentials.
 
 
 -- especialidad
@@ -36,35 +22,68 @@ CREATE TABLE obra_social (
 
 
 -- profesional
--- 1:1 opcional con persona. es_admin: permite que un profesional actue
--- tambien como admin sin necesitar una cuenta separada (ver tabla admin).
+-- Standalone account. es_admin lets a profesional also act as admin without a
+-- separate staff account (see the admin table, which is a different concept).
 
 CREATE TABLE profesional (
     dni_profesional INT UNSIGNED PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    apellido VARCHAR(100) NOT NULL,
+    correo VARCHAR(255) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    telefono VARCHAR(30),
+    fecha_nacimiento DATE NOT NULL,
+    genero ENUM('M', 'F', 'X') NOT NULL,
+    foto_url TEXT,
     duracion_turno_min INT UNSIGNED NOT NULL DEFAULT 30,
     es_admin BOOLEAN NOT NULL DEFAULT FALSE,
-    FOREIGN KEY (dni_profesional) REFERENCES persona(dni_persona) ON DELETE CASCADE
+    eliminado_en TIMESTAMP NULL DEFAULT NULL,
+    creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    actualizado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 
 -- cliente
--- 1:1 opcional con persona. id_obra_social nullable: pacientes sin cobertura.
+-- Standalone account. id_obra_social is nullable: patients without coverage.
+-- numero_afiliado is VARCHAR because affiliate numbers are alphanumeric and
+-- carry significant leading zeros; it is only meaningful with an obra social.
 
 CREATE TABLE cliente (
     dni_cliente INT UNSIGNED PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    apellido VARCHAR(100) NOT NULL,
+    correo VARCHAR(255) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    telefono VARCHAR(30),
+    fecha_nacimiento DATE NOT NULL,
+    genero ENUM('M', 'F', 'X') NOT NULL,
+    foto_url TEXT,
     id_obra_social INT UNSIGNED,
-    FOREIGN KEY (dni_cliente) REFERENCES persona(dni_persona) ON DELETE CASCADE,
+    numero_afiliado VARCHAR(30),
+    eliminado_en TIMESTAMP NULL DEFAULT NULL,
+    creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    actualizado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (id_obra_social) REFERENCES obra_social(id_obra_social)
 );
 
 
 -- admin
--- 1:1 opcional con persona. Cuenta de administracion dedicada (ej. secretario),
--- sin ficha de profesional ni de cliente. No confundir con profesional.es_admin.
+-- Dedicated staff account (e.g. a receptionist) with no profesional or cliente
+-- record. Not to be confused with profesional.es_admin.
 
 CREATE TABLE admin (
     dni_admin INT UNSIGNED PRIMARY KEY,
-    FOREIGN KEY (dni_admin) REFERENCES persona(dni_persona) ON DELETE CASCADE
+    nombre VARCHAR(100) NOT NULL,
+    apellido VARCHAR(100) NOT NULL,
+    correo VARCHAR(255) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    telefono VARCHAR(30),
+    fecha_nacimiento DATE NOT NULL,
+    genero ENUM('M', 'F', 'X') NOT NULL,
+    foto_url TEXT,
+    eliminado_en TIMESTAMP NULL DEFAULT NULL,
+    creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    actualizado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 
