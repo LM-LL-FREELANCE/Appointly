@@ -1,11 +1,9 @@
 import { pool } from "../config/db.js"
 
-//everthing revise and done
-
 export class TurnosModel {
-  //DONEEEEE
+
   static async getTurnoById(id) {
-    /*const [row] = await pool.query(`
+    const [row] = await pool.query(`
       SELECT
         profesional.apellido AS "p_apellido",
         profesional.nombre AS "p_nombre",
@@ -28,34 +26,6 @@ export class TurnosModel {
         INNER JOIN profesional_especialidad ON profesional.dni_profesional = profesional_especialidad.dni_profesional
         INNER JOIN especialidad ON especialidad.id_especialidad = profesional_especialidad.id_especialidad
       WHERE turno.id_turno = ?`, [id])
-        */
-
-    const [row] = await pool.query(`
-      SELECT
-        persona_profesional.apellido AS "p_apellido",
-        persona_profesional.nombre AS "p_nombre",
-        persona_profesional.dni_persona AS "p_dni",
-        persona_profesional.correo AS "p_correo",
-        especialidad.tipo,
-        persona_cliente.apellido AS "c_apellido",
-        persona_cliente.nombre AS "c_nombre",
-        persona_cliente.correo AS "c_correo",
-        persona_cliente.dni_persona AS "c_dni",
-        turno.fecha_turno,
-        turno.hora_turno,
-        turno.estado,
-        turno.creado_en,
-        turno.cancelado_en
-      FROM turno
-        INNER JOIN profesional ON turno.dni_profesional = profesional.dni_profesional
-        INNER JOIN persona AS persona_profesional ON profesional.dni_profesional = persona_profesional.dni_persona
-        INNER JOIN cliente ON turno.dni_cliente = cliente.dni_cliente
-        INNER JOIN persona AS persona_cliente ON cliente.dni_cliente = persona_cliente.dni_persona
-        INNER JOIN profesional_especialidad ON profesional.dni_profesional = profesional_especialidad.dni_profesional
-        INNER JOIN especialidad ON especialidad.id_especialidad = profesional_especialidad.id_especialidad
-      WHERE turno.id_turno = ?`, [id])
-
-
 
     return row[0] ?? null
   }
@@ -68,7 +38,6 @@ export class TurnosModel {
 
     return this.getTurnoById(id)
   }
-
   static async getTurnosByProfesional({ dni, desde, hasta, estado }) {
     /* let query = `SELECT * FROM turno WHERE dni_profesional = ? AND fecha_turno BETWEEN ? AND ?`;
     const params = [dni, desde, hasta];
@@ -82,22 +51,12 @@ export class TurnosModel {
     const [rows] = await pool.query(query, params);
     return rows; */
 
-
-    /* let query = `
+    let query = `
       SELECT
         t.id_turno, t.fecha_turno, t.hora_turno, t.estado, t.cancelado_en,
         c.dni_cliente AS "dni", c.nombre, c.apellido
       FROM turno t
       INNER JOIN cliente c ON t.dni_cliente = c.dni_cliente
-      WHERE t.dni_profesional = ? AND t.fecha_turno BETWEEN ? AND ?
-    ` */
-    let query = `
-      SELECT
-        t.id_turno, t.fecha_turno, t.hora_turno, t.estado, t.cancelado_en,
-        c.dni_cliente AS "dni", persona_c.nombre, persona_c.apellido
-      FROM turno t
-      INNER JOIN cliente c ON t.dni_cliente = c.dni_cliente
-      INNER JOIN persona AS persona_c ON c.dni_cliente = persona_c.dni_persona
       WHERE t.dni_profesional = ? AND t.fecha_turno BETWEEN ? AND ?
     `
     const params = [dni, desde, hasta]

@@ -104,11 +104,11 @@ export class ClientesController {
         throw new AppError('invalid', 400, 'VALIDATION_FAILED', parsedData.error.flatten().fieldErrors);
       }
 
-      const updatedData = await ClientesModel.patchClienteData({ dni, ...parsedData.data })
+      const updatedData = await ClientesModel.patchClienteData({ dni, data: parsedData.data })
 
       if (!updatedData) throw new AppError("We could't update your data", 409)
 
-      return res.status(200).json({ success: true, message: "Perfil actualizado correctamente", data: updatedData });
+      return res.status(200).json({ success: true, message: "Perfil actualizado correctamente" });
     }
     catch (err) {
       next(err)
