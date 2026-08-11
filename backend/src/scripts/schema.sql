@@ -127,17 +127,24 @@ CREATE TABLE horario_atencion (
 -- turno
 -- Sin constraint de unicidad (profesional + fecha + hora):
 -- se valida en la capa de servicios del backend.
+-- estado: 'activo' es el estado inicial; 'cancelado' y 'completado' son
+-- terminales, y desde ellos no se puede volver a 'activo'. 'completado' se
+-- persiste en lugar de deducirse de la fecha, para que la consulta atendida
+-- quede registrada de forma explicita.
+-- cancelado_en / completado_en marcan cuando se alcanzo el estado terminal
+-- correspondiente; ambos quedan NULL mientras el turno siga activo.
 
 CREATE TABLE turno (
     id_turno INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     fecha_turno DATE NOT NULL,
     hora_turno TIME NOT NULL,
-    estado ENUM('activo', 'cancelado') NOT NULL DEFAULT 'activo',
+    estado ENUM('activo', 'cancelado', 'completado') NOT NULL DEFAULT 'activo',
     dni_profesional INT UNSIGNED NOT NULL,
     dni_cliente INT UNSIGNED NOT NULL,
     motivo_cancelacion VARCHAR(255),
     creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     cancelado_en TIMESTAMP NULL DEFAULT NULL,
+    completado_en TIMESTAMP NULL DEFAULT NULL,
     FOREIGN KEY (dni_profesional) REFERENCES profesional(dni_profesional),
     FOREIGN KEY (dni_cliente) REFERENCES cliente(dni_cliente),
     INDEX idx_turno_profesional_fecha (dni_profesional, fecha_turno),

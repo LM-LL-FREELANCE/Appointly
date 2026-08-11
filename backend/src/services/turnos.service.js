@@ -46,6 +46,13 @@ export class TurnosService {
       throw new AppError("El turno ya fue cancelado.", 409, "ALREADY_CANCELLED")
     }
 
+    // 'cancelado' y 'completado' son estados terminales. El chequeo se hace por
+    // "no esta activo" y no enumerando estados invalidos, asi un estado nuevo
+    // queda bloqueado por defecto en lugar de volverse cancelable sin querer.
+    if (turno.estado !== 'activo') {
+      throw new AppError("Solo se puede cancelar un turno activo.", 409, "NOT_CANCELLABLE")
+    }
+
     const turnoCancelado = await TurnosModel.cancelTurno(id)
 
     // Aviso por email (hoy es un stub; ver EmailService). No bloquea la
