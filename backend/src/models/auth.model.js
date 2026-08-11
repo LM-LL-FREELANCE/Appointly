@@ -2,16 +2,7 @@ import { pool } from "../config/db.js"
 import { userPermission } from "../utils/userPermission.js"
 import { AppError } from "../utils/AppError.js"
 
-// Every query targets one role table through a literal SQL string. Table and
-// column names are never interpolated, so an unknown role cannot reach the
-// database: it is rejected by the dispatcher below before any query runs.
 export class AuthModel {
-
-  // --- credentials -----------------------------------------------------------
-  // `role` is a constant written into each method, never read from the row, so
-  // the JWT claim built from it can never be undefined.
-  // `eliminado_en IS NULL` belongs here only: a soft-deleted account must not
-  // authenticate, but it still holds its PK and UNIQUE index (see existe* below).
 
   static async findClienteCredentials(dni) {
     const [rows] = await pool.query(`
@@ -62,11 +53,6 @@ export class AuthModel {
     }
   }
 
-  // --- existence checks ------------------------------------------------------
-  // Deliberately NOT filtered by `eliminado_en`: a soft-deleted row still owns
-  // the primary key and the UNIQUE correo index, so ignoring it would turn a
-  // clean 409 into a duplicate-key 500 on insert.
-
   static async existeDniCliente(dni) {
     const [rows] = await pool.query(`
       SELECT 1 FROM cliente WHERE dni_cliente = ? LIMIT 1
@@ -115,10 +101,6 @@ export class AuthModel {
     return rows.length > 0
   }
 
-  // --- account creation ------------------------------------------------------
-  // One INSERT per account: identity now lives in the role table, so no
-  // multi-table transaction is needed.
-
   static async createClienteAccount({ dni, nombre, apellido, correo, password_hash, telefono, fecha_nacimiento, genero, id_obra_social, numero_afiliado }) {
     const [result] = await pool.query(`
       INSERT INTO cliente
@@ -139,8 +121,6 @@ export class AuthModel {
     return result
   }
 
-  // Provisioning/seeding only: no route exposes admin creation. A future
-  // endpoint must sit behind requireAuth + grantAccess(['admin']).
   static async createAdminAccount({ dni, nombre, apellido, correo, password_hash, telefono, fecha_nacimiento, genero }) {
     const [result] = await pool.query(`
       INSERT INTO admin

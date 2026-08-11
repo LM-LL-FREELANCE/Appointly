@@ -54,8 +54,6 @@ INSERT INTO obra_social_profesional (dni_profesional, id_obra_social) VALUES
 
 
 -- cliente
--- numero_afiliado sigue el patron OS{id_obra_social}-{dni}/00 y es NULL para
--- los clientes sin cobertura: un numero de afiliado no existe sin obra social.
 
 INSERT INTO cliente
 (dni_cliente, nombre, apellido, correo, password_hash, telefono, fecha_nacimiento, genero, foto_url, id_obra_social, numero_afiliado) VALUES
@@ -92,7 +90,6 @@ INSERT INTO cliente
 
 
 -- admin
--- Cuenta de administracion dedicada, sin ficha de profesional ni de cliente.
 
 INSERT INTO admin
 (dni_admin, nombre, apellido, correo, password_hash, telefono, fecha_nacimiento, genero, foto_url) VALUES
@@ -163,19 +160,8 @@ INSERT INTO turno (fecha_turno, hora_turno, estado, dni_profesional, dni_cliente
 ('2026-06-18', '17:00', 'cancelado', 31678234, 40235682, 'Cliente no pudo asistir', '2026-06-11 11:05:00');
 
 
--- turnos completados: la consulta ya fue atendida.
--- INSERT aparte porque estas filas usan completado_en en lugar de
--- motivo_cancelacion / cancelado_en.
--- Cada uno cae dentro del horario_atencion de su profesional, en un slot libre,
--- y ningun cliente queda con dos turnos a la misma fecha y hora.
--- completado_en = fecha y hora del turno + 30 min (duracion_turno_min por defecto).
-
 INSERT INTO turno (fecha_turno, hora_turno, estado, dni_profesional, dni_cliente, completado_en) VALUES
--- Aguirre, lunes 08:00-13:00
 ('2026-06-15', '11:00', 'completado', 27845123, 24123456, '2026-06-15 11:30:00'),
--- Fernandez, lunes 10:00-18:00
 ('2026-06-15', '13:00', 'completado', 28934567, 32123450, '2026-06-15 13:30:00'),
--- Vega, martes 09:00-14:00
 ('2026-06-16', '11:00', 'completado', 30156789, 22456789, '2026-06-16 11:30:00'),
--- Paz, miercoles 09:00-13:00
 ('2026-06-17', '11:00', 'completado', 33412890, 25890123, '2026-06-17 11:30:00');

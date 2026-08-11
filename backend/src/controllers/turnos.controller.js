@@ -14,8 +14,6 @@ const diffDias = (desde, hasta) => Math.round((new Date(hasta + 'T00:00:00') - n
 
 const hoy = () => new Date().toISOString().slice(0, 10)
 const enDias = (n) => new Date(Date.now() + n * 86_400_000).toISOString().slice(0, 10)
-// Mirrors the turno.estado ENUM in schema.sql. Keep both in sync when a state
-// is added, or the new state becomes unreachable through this filter.
 const ESTADOS_VALIDOS = new Set(['activo', 'cancelado', 'completado'])
 
 export class TurnosController {
@@ -46,7 +44,6 @@ export class TurnosController {
         throw new AppError('"desde" cannot be later than "hasta"', 400, 'VALIDATION_FAILED');
       }
 
-      // Built from the set so the message cannot go stale as states are added.
       if (estado && !ESTADOS_VALIDOS.has(estado)) {
         throw new AppError(`"estado" must be one of: ${[...ESTADOS_VALIDOS].join(', ')}`, 400, 'VALIDATION_FAILED');
       }

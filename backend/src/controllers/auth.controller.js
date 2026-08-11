@@ -8,9 +8,6 @@ export class AuthController {
   static async register(req, res, next) {
 
     try {
-      // Parsed here rather than through the validate() middleware on purpose:
-      // validate() raises BAD_REQUEST with a different payload shape, and this
-      // route's contract is VALIDATION_FAILED carrying fieldErrors.
       const parsedSchema = registerSchema.safeParse(req.body)
 
       if (!parsedSchema.success) {
@@ -61,11 +58,6 @@ export class AuthController {
     res.status(204).end()
   }
 
-  // Session probe, not a protected resource: it answers "who am I, if anyone".
-  // A cookie that cannot be resolved to a live account is answered with null and
-  // cleared, so the client recovers on its own instead of retrying a 4xx it can
-  // never fix. This covers a token issued before roles were scoped per table and
-  // a token whose account was dropped by a database reset.
   static async me(req, res, next) {
 
     if (!req.user) return res.json(null)

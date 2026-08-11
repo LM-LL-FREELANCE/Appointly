@@ -18,15 +18,12 @@ export const registerSchema = z.strictObject({
   password: z.string().min(6),
   confirm: z.string(),
   telefono: z.string().trim().max(30).nullish(),
-  // .nullish(), not .optional(): the signup form sends a literal null when the
-  // client has no coverage, and .optional() rejects null.
   id_obra_social: z.number().nullish(),
   numero_afiliado: z.string().trim().max(30).nullish(),
 }).refine((data) => data.password === data.confirm, {
   error: "Las contraseñas no coinciden",
   path: ["confirm"],
 }).refine((data) => {
-  // An affiliate number is meaningless without the insurer that issued it.
   if (!data.numero_afiliado) return true
   return data.id_obra_social != null
 }, {

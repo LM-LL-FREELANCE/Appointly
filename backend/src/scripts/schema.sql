@@ -1,8 +1,5 @@
 CREATE DATABASE IF NOT EXISTS appointly;
 USE appointly;
--- Identity model: profesional, cliente and admin are independent accounts.
--- Each role table owns its own dni, correo and password_hash, so the same
--- human may hold one account per role with different credentials.
 
 
 -- especialidad
@@ -22,8 +19,6 @@ CREATE TABLE obra_social (
 
 
 -- profesional
--- Standalone account. es_admin lets a profesional also act as admin without a
--- separate staff account (see the admin table, which is a different concept).
 
 CREATE TABLE profesional (
     dni_profesional INT UNSIGNED PRIMARY KEY,
@@ -44,9 +39,6 @@ CREATE TABLE profesional (
 
 
 -- cliente
--- Standalone account. id_obra_social is nullable: patients without coverage.
--- numero_afiliado is VARCHAR because affiliate numbers are alphanumeric and
--- carry significant leading zeros; it is only meaningful with an obra social.
 
 CREATE TABLE cliente (
     dni_cliente INT UNSIGNED PRIMARY KEY,
@@ -68,8 +60,6 @@ CREATE TABLE cliente (
 
 
 -- admin
--- Dedicated staff account (e.g. a receptionist) with no profesional or cliente
--- record. Not to be confused with profesional.es_admin.
 
 CREATE TABLE admin (
     dni_admin INT UNSIGNED PRIMARY KEY,
@@ -127,12 +117,6 @@ CREATE TABLE horario_atencion (
 -- turno
 -- Sin constraint de unicidad (profesional + fecha + hora):
 -- se valida en la capa de servicios del backend.
--- estado: 'activo' es el estado inicial; 'cancelado' y 'completado' son
--- terminales, y desde ellos no se puede volver a 'activo'. 'completado' se
--- persiste en lugar de deducirse de la fecha, para que la consulta atendida
--- quede registrada de forma explicita.
--- cancelado_en / completado_en marcan cuando se alcanzo el estado terminal
--- correspondiente; ambos quedan NULL mientras el turno siga activo.
 
 CREATE TABLE turno (
     id_turno INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
