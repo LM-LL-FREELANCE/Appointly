@@ -1,4 +1,15 @@
 USE appointly;
+
+-- rol
+-- IDs fijos: 1=cliente, 2=profesional, 3=admin.
+-- profesional.id_rol y cliente.id_rol dependen de este orden (ver CHECK en schema.sql).
+
+INSERT INTO rol (id_rol, nombre) VALUES
+(1, 'cliente'),
+(2, 'profesional'),
+(3, 'admin');
+
+
 -- especialidad
 
 INSERT INTO especialidad (id_especialidad, tipo) VALUES
@@ -20,27 +31,120 @@ INSERT INTO obra_social (id_obra_social, nombre_obra_social) VALUES
 (6, 'Medife');
 
 
+-- persona
+-- Aguirre aparece una sola vez: es la misma persona que despues asume
+-- el rol profesional Y el rol admin (Caso 2 del DER).
+
+INSERT INTO persona
+(dni_persona, nombre, apellido, fecha_nacimiento, genero, telefono, foto_url) VALUES
+-- profesionales
+(27845123, 'Martin',   'Aguirre',   '1979-03-12', 'M', '11-1000-0001', NULL),
+(30156789, 'Carolina', 'Vega',      '1983-08-25', 'F', '11-1000-0002', NULL),
+(28934567, 'Lucia',    'Fernandez', '1981-01-30', 'F', '11-1000-0003', NULL),
+(33412890, 'Federico', 'Paz',       '1988-11-07', 'M', '11-1000-0004', NULL),
+(31678234, 'Valeria',  'Quiroga',   '1986-05-19', 'F', '11-1000-0005', NULL),
+-- clientes
+(22456789, 'Ricardo',  'Sosa',       '1971-02-14', 'M', '11-1000-0006', NULL),
+(23789012, 'Graciela', 'Moreno',     '1973-06-09', 'F', '11-1000-0007', NULL),
+(24123456, 'Hugo',     'Cabrera',    '1974-09-21', 'M', '11-1000-0008', NULL),
+(25890123, 'Silvia',   'Rojas',      '1976-12-03', 'F', '11-1000-0009', NULL),
+(26345678, 'Oscar',    'Gimenez',    '1977-04-17', 'M', '11-1000-0010', NULL),
+(27012345, 'Marta',    'Luna',       '1978-08-28', 'F', '11-1000-0011', NULL),
+(28567890, 'Daniel',   'Castro',     '1980-01-11', 'M', '11-1000-0012', NULL),
+(29234567, 'Patricia', 'Molina',     '1981-05-23', 'F', '11-1000-0013', NULL),
+(30890123, 'Sergio',   'Herrera',    '1983-10-06', 'M', '11-1000-0014', NULL),
+(31456789, 'Andrea',   'Dominguez',  '1985-03-15', 'F', '11-1000-0015', NULL),
+(32123450, 'Pablo',    'Rios',       '1986-07-27', 'M', '11-1000-0016', NULL),
+(32789016, 'Veronica', 'Acosta',     '1987-11-08', 'F', '11-1000-0017', NULL),
+(33456782, 'Gustavo',  'Flores',     '1989-02-19', 'M', '11-1000-0018', NULL),
+(34123458, 'Natalia',  'Benitez',    '1990-06-30', 'F', '11-1000-0019', NULL),
+(34890124, 'Diego',    'Medina',     '1991-10-12', 'M', '11-1000-0020', NULL),
+(35567890, 'Florencia','Ortiz',      '1992-01-24', 'F', '11-1000-0021', NULL),
+(36234566, 'Matias',   'Suarez',     '1993-05-05', 'M', '11-1000-0022', NULL),
+(36901232, 'Camila',   'Torres',     '1994-09-16', 'F', '11-1000-0023', NULL),
+(37568908, 'Lucas',    'Ramirez',    '1995-12-28', 'M', '11-1000-0024', NULL),
+(38235674, 'Julieta',  'Pereyra',    '1997-04-09', 'F', '11-1000-0025', NULL),
+(38902340, 'Nicolas',  'Gomez',      '1998-08-20', 'M', '11-1000-0026', NULL),
+(39569016, 'Agustina', 'Villalba',   '1999-11-01', 'F', '11-1000-0027', NULL),
+(40235682, 'Tomas',    'Arias',      '2001-03-13', 'M', '11-1000-0028', NULL),
+(40902348, 'Sofia',    'Ledesma',    '2002-07-25', 'F', '11-1000-0029', NULL),
+(41569014, 'Bruno',    'Navarro',    '2003-10-06', 'M', '11-1000-0030', NULL),
+(42235680, 'Martina',  'Cardozo',    '2004-01-18', 'F', '11-1000-0031', NULL),
+(42902346, 'Joaquin',  'Ibarra',     '2005-05-29', 'M', '11-1000-0032', NULL),
+(43569012, 'Valentina','Coronel',    '1996-09-10', 'F', '11-1000-0033', NULL),
+(44235678, 'Ignacio',  'Maldonado',  '1984-12-22', 'M', '11-1000-0034', NULL),
+(44902344, 'Rocio',    'Figueroa',   '1982-04-03', 'F', '11-1000-0035', NULL);
+
+
+-- persona_rol
+-- Cada fila es una cuenta (correo + password) para una persona en un rol dado.
+-- Aguirre tiene DOS cuentas: profesional (id_rol=2) y admin (id_rol=3), con
+-- correos distintos, para probar el path "profesional actuando como admin".
+
+INSERT INTO persona_rol (dni_persona, id_rol, correo, password_hash) VALUES
+-- profesionales (id_rol = 2)
+(27845123, 2, 'martin.aguirre@appointly.dev',   '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG'),
+(30156789, 2, 'carolina.vega@appointly.dev',    '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG'),
+(28934567, 2, 'lucia.fernandez@appointly.dev',  '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG'),
+(33412890, 2, 'federico.paz@appointly.dev',     '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG'),
+(31678234, 2, 'valeria.quiroga@appointly.dev',  '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG'),
+-- admin (id_rol = 3) — Aguirre, cuenta separada de la profesional
+(27845123, 3, 'martin.aguirre.admin@appointly.dev', '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG'),
+-- clientes (id_rol = 1)
+(22456789, 1, 'ricardo.sosa@mail.com',      '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG'),
+(23789012, 1, 'graciela.moreno@mail.com',   '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG'),
+(24123456, 1, 'hugo.cabrera@mail.com',      '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG'),
+(25890123, 1, 'silvia.rojas@mail.com',      '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG'),
+(26345678, 1, 'oscar.gimenez@mail.com',     '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG'),
+(27012345, 1, 'marta.luna@mail.com',        '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG'),
+(28567890, 1, 'daniel.castro@mail.com',     '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG'),
+(29234567, 1, 'patricia.molina@mail.com',   '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG'),
+(30890123, 1, 'sergio.herrera@mail.com',    '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG'),
+(31456789, 1, 'andrea.dominguez@mail.com',  '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG'),
+(32123450, 1, 'pablo.rios@mail.com',        '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG'),
+(32789016, 1, 'veronica.acosta@mail.com',   '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG'),
+(33456782, 1, 'gustavo.flores@mail.com',    '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG'),
+(34123458, 1, 'natalia.benitez@mail.com',   '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG'),
+(34890124, 1, 'diego.medina@mail.com',      '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG'),
+(35567890, 1, 'florencia.ortiz@mail.com',   '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG'),
+(36234566, 1, 'matias.suarez@mail.com',     '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG'),
+(36901232, 1, 'camila.torres@mail.com',     '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG'),
+(37568908, 1, 'lucas.ramirez@mail.com',     '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG'),
+(38235674, 1, 'julieta.pereyra@mail.com',   '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG'),
+(38902340, 1, 'nicolas.gomez@mail.com',     '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG'),
+(39569016, 1, 'agustina.villalba@mail.com', '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG'),
+(40235682, 1, 'tomas.arias@mail.com',       '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG'),
+(40902348, 1, 'sofia.ledesma@mail.com',     '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG'),
+(41569014, 1, 'bruno.navarro@mail.com',     '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG'),
+(42235680, 1, 'martina.cardozo@mail.com',   '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG'),
+(42902346, 1, 'joaquin.ibarra@mail.com',    '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG'),
+(43569012, 1, 'valentina.coronel@mail.com', '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG'),
+(44235678, 1, 'ignacio.maldonado@mail.com', '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG'),
+(44902344, 1, 'rocio.figueroa@mail.com',    '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG');
+
+
 -- profesional
--- es_admin = TRUE solo para Aguirre, para probar el path "profesional actuando como admin".
+-- numero_matricula: matricula profesional provincial (ficticia).
+-- estado_validacion: todos ya validados, son datos de prueba activos.
 
 INSERT INTO profesional
-(dni_profesional, nombre, apellido, correo, password_hash, telefono, fecha_nacimiento, genero, foto_url, duracion_turno_min, es_admin) VALUES
-(27845123, 'Martin',   'Aguirre',   'martin.aguirre@appointly.dev',   '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG', '11-1000-0001', '1979-03-12', 'M', NULL, 30, TRUE),
-(30156789, 'Carolina', 'Vega',      'carolina.vega@appointly.dev',    '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG', '11-1000-0002', '1983-08-25', 'F', NULL, 30, FALSE),
-(28934567, 'Lucia',    'Fernandez', 'lucia.fernandez@appointly.dev',  '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG', '11-1000-0003', '1981-01-30', 'F', NULL, 30, FALSE),
-(33412890, 'Federico', 'Paz',       'federico.paz@appointly.dev',     '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG', '11-1000-0004', '1988-11-07', 'M', NULL, 30, FALSE),
-(31678234, 'Valeria',  'Quiroga',   'valeria.quiroga@appointly.dev',  '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG', '11-1000-0005', '1986-05-19', 'F', NULL, 30, FALSE);
+(dni_profesional, numero_matricula, estado_validacion, duracion_turno_min) VALUES
+(27845123, 'MP-10234', 'aprobado', 30),
+(30156789, 'MP-10589', 'aprobado', 30),
+(28934567, 'MP-20147', 'aprobado', 30),
+(33412890, 'MP-30456', 'aprobado', 30),
+(31678234, 'MP-40812', 'aprobado', 30);
 
 
 -- profesional_especialidad
 
 INSERT INTO profesional_especialidad (dni_profesional, id_especialidad) VALUES
-(27845123, 1),  
-(30156789, 1),  
-(30156789, 5),  
-(28934567, 2),  
-(33412890, 3),  
-(31678234, 4);  
+(27845123, 1),
+(30156789, 1),
+(30156789, 5),
+(28934567, 2),
+(33412890, 3),
+(31678234, 4);
 
 
 -- obra_social_profesional
@@ -56,44 +160,37 @@ INSERT INTO obra_social_profesional (dni_profesional, id_obra_social) VALUES
 -- cliente
 
 INSERT INTO cliente
-(dni_cliente, nombre, apellido, correo, password_hash, telefono, fecha_nacimiento, genero, foto_url, id_obra_social, numero_afiliado) VALUES
-(22456789, 'Ricardo',  'Sosa',       'ricardo.sosa@mail.com',      '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG', '11-1000-0006', '1971-02-14', 'M', NULL, 1,    'OS1-22456789/00'),
-(23789012, 'Graciela', 'Moreno',     'graciela.moreno@mail.com',   '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG', '11-1000-0007', '1973-06-09', 'F', NULL, 5,    'OS5-23789012/00'),
-(24123456, 'Hugo',     'Cabrera',    'hugo.cabrera@mail.com',      '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG', '11-1000-0008', '1974-09-21', 'M', NULL, 2,    'OS2-24123456/00'),
-(25890123, 'Silvia',   'Rojas',      'silvia.rojas@mail.com',      '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG', '11-1000-0009', '1976-12-03', 'F', NULL, 1,    'OS1-25890123/00'),
-(26345678, 'Oscar',    'Gimenez',    'oscar.gimenez@mail.com',     '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG', '11-1000-0010', '1977-04-17', 'M', NULL, NULL, NULL),
-(27012345, 'Marta',    'Luna',       'marta.luna@mail.com',        '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG', '11-1000-0011', '1978-08-28', 'F', NULL, 3,    'OS3-27012345/00'),
-(28567890, 'Daniel',   'Castro',     'daniel.castro@mail.com',     '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG', '11-1000-0012', '1980-01-11', 'M', NULL, 4,    'OS4-28567890/00'),
-(29234567, 'Patricia', 'Molina',     'patricia.molina@mail.com',   '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG', '11-1000-0013', '1981-05-23', 'F', NULL, 5,    'OS5-29234567/00'),
-(30890123, 'Sergio',   'Herrera',    'sergio.herrera@mail.com',    '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG', '11-1000-0014', '1983-10-06', 'M', NULL, 1,    'OS1-30890123/00'),
-(31456789, 'Andrea',   'Dominguez',  'andrea.dominguez@mail.com',  '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG', '11-1000-0015', '1985-03-15', 'F', NULL, NULL, NULL),
-(32123450, 'Pablo',    'Rios',       'pablo.rios@mail.com',        '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG', '11-1000-0016', '1986-07-27', 'M', NULL, 2,    'OS2-32123450/00'),
-(32789016, 'Veronica', 'Acosta',     'veronica.acosta@mail.com',   '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG', '11-1000-0017', '1987-11-08', 'F', NULL, 6,    'OS6-32789016/00'),
-(33456782, 'Gustavo',  'Flores',     'gustavo.flores@mail.com',    '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG', '11-1000-0018', '1989-02-19', 'M', NULL, 5,    'OS5-33456782/00'),
-(34123458, 'Natalia',  'Benitez',    'natalia.benitez@mail.com',   '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG', '11-1000-0019', '1990-06-30', 'F', NULL, 1,    'OS1-34123458/00'),
-(34890124, 'Diego',    'Medina',     'diego.medina@mail.com',      '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG', '11-1000-0020', '1991-10-12', 'M', NULL, 3,    'OS3-34890124/00'),
-(35567890, 'Florencia','Ortiz',      'florencia.ortiz@mail.com',   '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG', '11-1000-0021', '1992-01-24', 'F', NULL, 4,    'OS4-35567890/00'),
-(36234566, 'Matias',   'Suarez',     'matias.suarez@mail.com',     '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG', '11-1000-0022', '1993-05-05', 'M', NULL, NULL, NULL),
-(36901232, 'Camila',   'Torres',     'camila.torres@mail.com',     '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG', '11-1000-0023', '1994-09-16', 'F', NULL, 2,    'OS2-36901232/00'),
-(37568908, 'Lucas',    'Ramirez',    'lucas.ramirez@mail.com',     '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG', '11-1000-0024', '1995-12-28', 'M', NULL, 5,    'OS5-37568908/00'),
-(38235674, 'Julieta',  'Pereyra',    'julieta.pereyra@mail.com',   '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG', '11-1000-0025', '1997-04-09', 'F', NULL, 1,    'OS1-38235674/00'),
-(38902340, 'Nicolas',  'Gomez',      'nicolas.gomez@mail.com',     '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG', '11-1000-0026', '1998-08-20', 'M', NULL, 6,    'OS6-38902340/00'),
-(39569016, 'Agustina', 'Villalba',   'agustina.villalba@mail.com', '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG', '11-1000-0027', '1999-11-01', 'F', NULL, 3,    'OS3-39569016/00'),
-(40235682, 'Tomas',    'Arias',      'tomas.arias@mail.com',       '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG', '11-1000-0028', '2001-03-13', 'M', NULL, NULL, NULL),
-(40902348, 'Sofia',    'Ledesma',    'sofia.ledesma@mail.com',     '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG', '11-1000-0029', '2002-07-25', 'F', NULL, 4,    'OS4-40902348/00'),
-(41569014, 'Bruno',    'Navarro',    'bruno.navarro@mail.com',     '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG', '11-1000-0030', '2003-10-06', 'M', NULL, 5,    'OS5-41569014/00'),
-(42235680, 'Martina',  'Cardozo',    'martina.cardozo@mail.com',   '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG', '11-1000-0031', '2004-01-18', 'F', NULL, 1,    'OS1-42235680/00'),
-(42902346, 'Joaquin',  'Ibarra',     'joaquin.ibarra@mail.com',    '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG', '11-1000-0032', '2005-05-29', 'M', NULL, 2,    'OS2-42902346/00'),
-(43569012, 'Valentina','Coronel',    'valentina.coronel@mail.com', '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG', '11-1000-0033', '1996-09-10', 'F', NULL, NULL, NULL),
-(44235678, 'Ignacio',  'Maldonado',  'ignacio.maldonado@mail.com', '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG', '11-1000-0034', '1984-12-22', 'M', NULL, 6,    'OS6-44235678/00'),
-(44902344, 'Rocio',    'Figueroa',   'rocio.figueroa@mail.com',    '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG', '11-1000-0035', '1982-04-03', 'F', NULL, 5,    'OS5-44902344/00');
-
-
--- admin
-
-INSERT INTO admin
-(dni_admin, nombre, apellido, correo, password_hash, telefono, fecha_nacimiento, genero, foto_url) VALUES
-(50000000, 'Admin', 'Sistema', 'admin@appointly.dev', '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG', '11-1000-0036', '1990-01-01', 'X', NULL);
+(dni_cliente, id_obra_social, numero_afiliado) VALUES
+(22456789, 1,    'OS1-22456789/00'),
+(23789012, 5,    'OS5-23789012/00'),
+(24123456, 2,    'OS2-24123456/00'),
+(25890123, 1,    'OS1-25890123/00'),
+(26345678, NULL, NULL),
+(27012345, 3,    'OS3-27012345/00'),
+(28567890, 4,    'OS4-28567890/00'),
+(29234567, 5,    'OS5-29234567/00'),
+(30890123, 1,    'OS1-30890123/00'),
+(31456789, NULL, NULL),
+(32123450, 2,    'OS2-32123450/00'),
+(32789016, 6,    'OS6-32789016/00'),
+(33456782, 5,    'OS5-33456782/00'),
+(34123458, 1,    'OS1-34123458/00'),
+(34890124, 3,    'OS3-34890124/00'),
+(35567890, 4,    'OS4-35567890/00'),
+(36234566, NULL, NULL),
+(36901232, 2,    'OS2-36901232/00'),
+(37568908, 5,    'OS5-37568908/00'),
+(38235674, 1,    'OS1-38235674/00'),
+(38902340, 6,    'OS6-38902340/00'),
+(39569016, 3,    'OS3-39569016/00'),
+(40235682, NULL, NULL),
+(40902348, 4,    'OS4-40902348/00'),
+(41569014, 5,    'OS5-41569014/00'),
+(42235680, 1,    'OS1-42235680/00'),
+(42902346, 2,    'OS2-42902346/00'),
+(43569012, NULL, NULL),
+(44235678, 6,    'OS6-44235678/00'),
+(44902344, 5,    'OS5-44902344/00');
 
 
 -- horario_atencion

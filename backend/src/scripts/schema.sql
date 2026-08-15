@@ -2,6 +2,16 @@ CREATE DATABASE IF NOT EXISTS appointly;
 USE appointly;
 
 
+-- rol
+-- Catalogo fijo de roles. Los subtipos (profesional, cliente) referencian
+-- un id_rol constante via CHECK, ver mas abajo.
+
+CREATE TABLE rol (
+    id_rol INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(20) NOT NULL UNIQUE
+);
+
+
 -- especialidad
 
 CREATE TABLE especialidad (
@@ -18,62 +28,69 @@ CREATE TABLE obra_social (
 );
 
 
+-- persona
+-- Quien es un humano. No tiene credenciales: esas viven en persona_rol.
+
+CREATE TABLE persona (
+    dni_persona INT UNSIGNED PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    apellido VARCHAR(100) NOT NULL,
+    fecha_nacimiento DATE NOT NULL,
+    genero ENUM('M', 'F', 'X') NOT NULL,
+    telefono VARCHAR(30),
+    foto_url TEXT,
+    creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    actualizado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+
+-- persona_rol
+-- Como se autentica una persona en un rol. Una fila = una cuenta.
+-- PK compuesta (dni_persona, id_rol): una sola cuenta por persona y rol.
+-- UNIQUE (correo, id_rol): el mismo correo puede reusarse en otro rol.
+
+CREATE TABLE persona_rol (
+    dni_persona INT UNSIGNED NOT NULL,
+    id_rol INT UNSIGNED NOT NULL,
+    correo VARCHAR(255) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    eliminado_en TIMESTAMP NULL DEFAULT NULL,
+    creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    actualizado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (dni_persona, id_rol),
+    UNIQUE KEY uq_persona_rol_correo (correo, id_rol),
+    FOREIGN KEY (dni_persona) REFERENCES persona(dni_persona) ON DELETE CASCADE,
+    FOREIGN KEY (id_rol) REFERENCES rol(id_rol)
+);
+
+
 -- profesional
+-- Especializa persona_rol para el rol "profesional" (id_rol = 2, fijo).
+-- La FK compuesta hacia persona_rol garantiza que no exista un profesional
+-- sin su cuenta/rol asignado.
 
 CREATE TABLE profesional (
     dni_profesional INT UNSIGNED PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    apellido VARCHAR(100) NOT NULL,
-    correo VARCHAR(255) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
-    telefono VARCHAR(30),
-    fecha_nacimiento DATE NOT NULL,
-    genero ENUM('M', 'F', 'X') NOT NULL,
-    foto_url TEXT,
+    id_rol INT UNSIGNED NOT NULL DEFAULT 2,
+    numero_matricula VARCHAR(30) NOT NULL UNIQUE,
+    estado_validacion ENUM('pendiente', 'aprobado', 'rechazado') NOT NULL DEFAULT 'pendiente',
     duracion_turno_min INT UNSIGNED NOT NULL DEFAULT 30,
-    es_admin BOOLEAN NOT NULL DEFAULT FALSE,
-    eliminado_en TIMESTAMP NULL DEFAULT NULL,
-    creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    actualizado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    FOREIGN KEY (dni_profesional, id_rol) REFERENCES persona_rol(dni_persona, id_rol) ON DELETE CASCADE,
+    CONSTRAINT chk_profesional_rol CHECK (id_rol = 2)
 );
 
 
 -- cliente
+-- Especializa persona_rol para el rol "cliente" (id_rol = 1, fijo).
 
 CREATE TABLE cliente (
     dni_cliente INT UNSIGNED PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    apellido VARCHAR(100) NOT NULL,
-    correo VARCHAR(255) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
-    telefono VARCHAR(30),
-    fecha_nacimiento DATE NOT NULL,
-    genero ENUM('M', 'F', 'X') NOT NULL,
-    foto_url TEXT,
+    id_rol INT UNSIGNED NOT NULL DEFAULT 1,
     id_obra_social INT UNSIGNED,
     numero_afiliado VARCHAR(30),
-    eliminado_en TIMESTAMP NULL DEFAULT NULL,
-    creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    actualizado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (id_obra_social) REFERENCES obra_social(id_obra_social)
-);
-
-
--- admin
-
-CREATE TABLE admin (
-    dni_admin INT UNSIGNED PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    apellido VARCHAR(100) NOT NULL,
-    correo VARCHAR(255) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
-    telefono VARCHAR(30),
-    fecha_nacimiento DATE NOT NULL,
-    genero ENUM('M', 'F', 'X') NOT NULL,
-    foto_url TEXT,
-    eliminado_en TIMESTAMP NULL DEFAULT NULL,
-    creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    actualizado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    FOREIGN KEY (dni_cliente, id_rol) REFERENCES persona_rol(dni_persona, id_rol) ON DELETE CASCADE,
+    FOREIGN KEY (id_obra_social) REFERENCES obra_social(id_obra_social),
+    CONSTRAINT chk_cliente_rol CHECK (id_rol = 1)
 );
 
 
