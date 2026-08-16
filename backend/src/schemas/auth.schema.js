@@ -31,16 +31,17 @@ export const registerSchema = z.strictObject({
   path: ["numero_afiliado"],
 })
 
-export const registerProfesionalSchema = z.object({
+export const registerProfesionalSchema = z.strictObject({
   dni: dniSchema,
-  nombre: z.string().trim().min(1).max(100),
-  apellido: z.string().trim().min(1).max(100),
-  correo: z.email().max(255),
-  genero: z.enum(["M", "F", "X"]),
+  nombre: z.string().trim().min(1, "El nombre es obligatorio").max(100),
+  apellido: z.string().trim().min(1, "El apellido es obligatorio").max(100),
+  correo: z.string().trim().email("El correo no es válido").max(255),
+  genero: z.enum(["M", "F", "X"], { errorMap: () => ({ message: "El género debe ser M, F o X" }) }),
   fecha_nacimiento: z.iso.date(),
-  password: z.string().min(6),
+  password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
   confirm: z.string(),
   telefono: z.string().trim().max(30).nullish(),
+  numero_matricula: z.string().trim().min(1, "La matrícula es obligatoria").max(30)
 }).refine((data) => data.password === data.confirm, {
   error: "Las contraseñas no coinciden",
   path: ["confirm"],

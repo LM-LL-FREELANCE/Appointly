@@ -30,7 +30,7 @@ export class AuthService {
       role: userFound.role,
       nombre: userFound.nombre,
       apellido: userFound.apellido,
-      es_admin: userFound.es_admin
+      es_admin: userFound.role === "admin"
     }
 
     return { token, user }
@@ -75,11 +75,13 @@ export class AuthService {
     const password_hash = await bcrypt.hash(password, SALT_ROUNDS)
 
     await AuthModel.createClienteAccount({
-      dni, nombre, apellido, correo, password_hash,
-      telefono: telefono ?? null,
-      fecha_nacimiento, genero,
-      id_obra_social: id_obra_social ?? null,
-      numero_afiliado: numero_afiliado ?? null
+      data: {
+        dni, nombre, apellido, correo, password_hash,
+        telefono: telefono ?? null,
+        fecha_nacimiento, genero,
+        id_obra_social: id_obra_social ?? null,
+        numero_afiliado: numero_afiliado ?? null
+      }
     })
 
     return { dni, nombre, apellido, correo, fecha_nacimiento, genero, id_obra_social: id_obra_social ?? null }
@@ -98,9 +100,11 @@ export class AuthService {
     const password_hash = await bcrypt.hash(password, SALT_ROUNDS)
 
     await AuthModel.createProfesionalAccount({
-      dni, nombre, apellido, correo, password_hash,
-      telefono: telefono ?? null,
-      fecha_nacimiento, genero
+      data: {
+        dni, nombre, apellido, correo, password_hash,
+        telefono: telefono ?? null,
+        fecha_nacimiento, genero
+      }
     })
 
     return { dni, nombre, apellido, correo, fecha_nacimiento, genero }
