@@ -49,7 +49,7 @@ export default function Buscar() {
       <PageHeader>
         <Group justify="space-between" style={{ flex: 1 }}>
           <Title order={4}>Buscar doctores</Title>
-          <Group>
+          <Group justify='space-between'>
             <TextInput
               placeholder="Buscar por nombre..."
               leftSection={<IconSearch size={16} />}

@@ -46,6 +46,10 @@ export class TurnosService {
       throw new AppError("El turno ya fue cancelado.", 409, "ALREADY_CANCELLED")
     }
 
+    if (turno.estado !== 'activo') {
+      throw new AppError("Solo se puede cancelar un turno activo.", 409, "NOT_CANCELLABLE")
+    }
+
     const turnoCancelado = await TurnosModel.cancelTurno(id)
 
     // Aviso por email (hoy es un stub; ver EmailService). No bloquea la

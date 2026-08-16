@@ -1,4 +1,5 @@
 import { pool } from "../config/db.js";
+
 export class HorariosModel {
   static async getHorariosByProfesional({ dni }) {
     const [horarios] = await pool.query(`

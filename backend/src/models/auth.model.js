@@ -1,54 +1,150 @@
 import { pool } from "../config/db.js"
 
+
 export class AuthModel {
-
+  //DONE
   static async findCredentialsByDniAndRole(dni, role) {
+    const [rows] = await pool.query(`
+        SELECT
+            pr.dni_persona AS dni,
+            pr.correo,
+            p.nombre,
+            p.apellido,
+            pr.password_hash,
+            r.nombre AS role
+          FROM persona_rol pr
+          INNER JOIN persona p 
+            ON pr.dni_persona = p.dni_persona
+          INNER JOIN rol r 
+            ON pr.id_rol = r.id_rol
+          WHERE pr.dni_persona = ? 
+            AND r.nombre = ? 
+            AND pr.eliminado_en IS NULL
+      `, [dni, role])
+    if (!rows[0]) return null
 
-    const table = role === 'profesional' ? 'profesional' : 'cliente'
-    const col = role === 'profesional' ? 'dni_profesional' : 'dni_cliente'
-
-    const [rows] = await pool.query(
-      `SELECT ${col} AS dni, nombre, apellido, password_hash FROM ${table} WHERE ${col} = ?`,
-      [dni]
-    )
-
-    return rows[0] ? { ...rows[0], role } : null
+    return { ...rows[0] }
   }
 
-  static async existeDni(dni) {
+  static async existeDniCliente(dni) {
     const [rows] = await pool.query(`
-      SELECT 1 FROM profesional WHERE dni_profesional = ?
-      UNION ALL
-      SELECT 1 FROM cliente WHERE dni_cliente = ?
-      LIMIT 1
-      `, [dni, dni])
+      SELECT 1 FROM cliente WHERE dni_cliente = ? LIMIT 1
+      `, [dni])
 
     return rows.length > 0
   }
-
-  static async existeCorreo(correo) {
+  //DONE
+  static async existeCorreoCliente(correo) {
     const [rows] = await pool.query(`
-      SELECT 1 FROM cliente WHERE correo = ? LIMIT 1
+      SELECT 
+          1 
+        FROM persona_rol AS pr 
+        INNER JOIN rol r ON r.id_rol = pr.id_rol 
+        WHERE pr.correo = ? 
+          AND r.nombre = "cliente"
+        LIMIT 1
       `, [correo])
 
     return rows.length > 0
   }
 
-  static async createAccount({ dni, password_hash, correo, nombre, apellido, fecha_nacimiento, genero, id_obra_social }) {
-    const [result] = await pool.query(`INSERT INTO cliente (dni_cliente, nombre, apellido, correo, password_hash, fecha_nacimiento, genero, id_obra_social) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, [dni, nombre, apellido, correo, password_hash, fecha_nacimiento, genero, id_obra_social])
-    return result
-  }
+  static async existeDniProfesional(dni) {
+    const [rows] = await pool.query(`
+      SELECT 
+          1 
+        FROM profesional 
+        WHERE dni_profesional = ? 
+        LIMIT 1
+      `, [dni])
 
+    return rows.length > 0
+  }
+  //DONE
   static async existeCorreoProfesional(correo) {
     const [rows] = await pool.query(`
-      SELECT 1 FROM profesional WHERE correo = ? LIMIT 1
+      SELECT 
+          1 
+        FROM persona_rol pr
+        INNER JOIN rol r ON r.id_rol = pr.id_rol
+        WHERE pr.correo = ?
+        AND r.nombre = "profesional"
+        LIMIT 1
       `, [correo])
 
     return rows.length > 0
   }
 
-  static async createProfesionalAccount({ dni, password_hash, correo, nombre, apellido, fecha_nacimiento, genero }) {
-    const [result] = await pool.query(`INSERT INTO profesional (dni_profesional, nombre, apellido, correo, password_hash, fecha_nacimiento, genero) VALUES (?, ?, ?, ?, ?, ?, ?)`, [dni, nombre, apellido, correo, password_hash, fecha_nacimiento, genero])
-    return result
+
+  static async createClienteAccount({ data }) {
+    const { dni, nombre, apellido, correo, password_hash, telefono, fecha_nacimiento, genero, id_obra_social, numero_afiliado } = data
+    /*const [result] = await pool.query(`
+      INSERT INTO cliente
+        (dni_cliente, nombre, apellido, correo, password_hash, telefono, fecha_nacimiento, genero, id_obra_social, numero_afiliado)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `, [dni, nombre, apellido, correo, password_hash, telefono ?? null, fecha_nacimiento, genero, id_obra_social ?? null, numero_afiliado ?? null])
+    */
+    await pool.query(`
+      INSERT IGNORE INTO 
+        persona(dni_persona, nombre, apellido, fecha_nacimiento, genero, telefono) 
+      VALUES
+        (?,?,?,?,?,?)
+      `, [dni, nombre, apellido, fecha_nacimiento, genero, telefono ?? null])
+    await pool.query(`
+      INSERT INTO 
+        persona_rol(dni_persona, correo, password_hash, id_rol) 
+      VALUES
+        (?,?,?, (
+        SELECT 
+            id_rol 
+          FROM rol
+          WHERE nombre = "cliente"
+        ))
+      `, [dni, correo, password_hash])
+
+    await pool.query(`
+      INSERT INTO cliente
+        (dni_cliente, id_obra_social, numero_afiliado, id_rol)
+      VALUES (?,?,?,(
+        SELECT
+            id_rol
+          FROM rol 
+          WHERE nombre = "cliente"
+      ))
+      `, [dni, id_obra_social ?? null, numero_afiliado ?? null])
+    return true
+  }
+
+  static async createProfesionalAccount({ data }) {
+    const { dni, nombre, apellido, correo, password_hash, telefono, fecha_nacimiento, genero, numero_matricula } = data
+    await pool.query(`
+      INSERT IGNORE INTO persona
+        (dni_persona, nombre, apellido, fecha_nacimiento, genero, telefono)
+      VALUES 
+        (?,?,?,?,?,?)
+      `, [dni, nombre, apellido, fecha_nacimiento, genero, telefono ?? null])
+    await pool.query(`
+      INSERT IGNORE INTO persona_rol
+        (dni_persona, correo, password_hash, id_rol)
+      VALUES 
+        (?,?,?, (
+          SELECT 
+              id_rol
+            FROM rol
+            WHERE nombre = "profesional"
+        ))
+      `, [dni, correo, password_hash])
+
+    await pool.query(`
+        INSERT INTO profesional
+          (dni_profesional,numero_matricula, id_rol)
+        VALUES
+          (?,?,(
+          SELECT
+              id_rol
+            FROM rol
+            WHERE nombre = "profesional"
+          ))
+        `, [dni, numero_matricula])
+    return true
   }
 }

@@ -2,36 +2,13 @@ import { pool } from "../config/db.js"
 
 export class ClientesModel {
 
-  /*   static async getTurnosClienteByDni(dni, estado) {
-      const [rows] = await pool.query(`
-        SELECT
-          profesional.apellido AS "p_apellido",
-          profesional.nombre AS "p_nombre",
-          profesional.dni_profesional,
-          especialidad.tipo,
-          turno.id_turno,
-          turno.fecha_turno,
-          turno.hora_turno,
-          turno.estado
-        FROM
-          turno
-          INNER JOIN cliente ON turno.dni_cliente = cliente.dni_cliente
-          INNER JOIN profesional ON turno.dni_profesional = profesional.dni_profesional
-          INNER JOIN profesional_especialidad ON profesional.dni_profesional = profesional_especialidad.dni_profesional
-          INNER JOIN especialidad ON especialidad.id_especialidad = profesional_especialidad.id_especialidad
-        WHERE cliente.dni_cliente = ? AND turno.estado = ?
-        `, [dni, estado])
-  
-      return rows
-    } */
-
   static async getTurnosClienteByDni(dni, estado) {
     let query = `
         SELECT
-            profesional.apellido AS "apellido",
-            profesional.nombre AS "nombre",
-            profesional.dni_profesional AS "dni",
-            profesional.genero AS genero,
+            persona.apellido AS apellido,
+            persona.nombre AS nombre,
+            profesional.dni_profesional AS dni,
+            persona.genero AS genero,
             GROUP_CONCAT(DISTINCT especialidad.tipo ORDER BY especialidad.tipo SEPARATOR '|') AS especialidades,
             "" AS tipo,
             turno.id_turno,
@@ -41,6 +18,7 @@ export class ClientesModel {
           FROM turno
             INNER JOIN cliente ON turno.dni_cliente = cliente.dni_cliente
             INNER JOIN profesional ON turno.dni_profesional = profesional.dni_profesional
+            INNER JOIN persona ON persona.dni_persona = profesional.dni_profesional
             LEFT JOIN profesional_especialidad pe ON profesional.dni_profesional = pe.dni_profesional
             LEFT JOIN especialidad especialidad ON pe.id_especialidad = especialidad.id_especialidad
           WHERE cliente.dni_cliente = ?
@@ -56,9 +34,9 @@ export class ClientesModel {
           GROUP BY
             turno.id_turno,
             profesional.dni_profesional,
-            profesional.apellido,
-            profesional.nombre,
-            profesional.genero,
+            persona.apellido,
+            persona.nombre,
+            persona.genero,
             turno.fecha_turno,
             turno.hora_turno,
             turno.estado
@@ -74,7 +52,10 @@ export class ClientesModel {
 
   static async existe({ dni }) {
     const [rows] = await pool.query(`
-      SELECT 1 FROM cliente WHERE dni_cliente = ? LIMIT 1
+      SELECT * FROM persona p
+      INNER JOIN persona_rol pr ON pr.dni_persona = p.dni_persona
+      INNER JOIN rol r ON r.id_rol = pr.id_rol
+      WHERE pr.id_rol = 1 AND p.dni_persona = ?
       `, [dni])
 
     return rows.length > 0
@@ -82,8 +63,12 @@ export class ClientesModel {
 
   static async getClienteByDni({ dni }) {
     const [rows] = await pool.query(`
-        SELECT c.dni_cliente, c.nombre, c.apellido, c.correo, c.fecha_nacimiento, c.genero, o.nombre_obra_social AS "obra_social" FROM 
-        cliente c LEFT JOIN obra_social o ON c.id_obra_social = o.id_obra_social WHERE c.dni_cliente = ?
+        SELECT c.dni_cliente, p.nombre, p.apellido, pr.correo, p.fecha_nacimiento, p.genero, o.nombre_obra_social AS "obra_social" 
+        FROM cliente c
+        INNER JOIN persona p ON p.dni_persona = c.dni_cliente
+        INNER JOIN persona_rol pr ON pr.dni_persona = c.dni_cliente AND pr.id_rol = c.id_rol
+        LEFT JOIN obra_social o ON c.id_obra_social = o.id_obra_social
+        WHERE c.dni_cliente = ?
         `, [dni])
 
     return rows[0] ?? null
@@ -101,7 +86,9 @@ export class ClientesModel {
   static async getActivos({ dni }) {
     const [rows] = await pool.query(`
       SELECT t.id_turno, t.fecha_turno, t.hora_turno, p.nombre, p.apellido 
-      FROM turno t INNER JOIN profesional p ON t.dni_profesional = p.dni_profesional
+      FROM turno t
+      INNER JOIN profesional prof ON t.dni_profesional = prof.dni_profesional
+      INNER JOIN persona p ON p.dni_persona = prof.dni_profesional
       WHERE t.dni_cliente = ? AND t.estado = 'activo'
       ORDER BY t.fecha_turno ASC, t.hora_turno ASC
       `, [dni])
@@ -128,64 +115,64 @@ export class ClientesModel {
         }
       }
     }
-    let query = `UPDATE cliente SET `
-    let fieldsToUpdate = []
-    let valueToUpdate = []
 
-    if (data.nombre) {
-      fieldsToUpdate.push("nombre = ?")
-      valueToUpdate.push(data.nombre)
+    const personaFields = []
+    const personaValues = []
+
+    if (data.nombre !== undefined) {
+      personaFields.push("nombre = ?")
+      personaValues.push(data.nombre)
     }
 
     if (data.apellido !== undefined) {
-      fieldsToUpdate.push("apellido = ?")
-      valueToUpdate.push(data.apellido)
-    }
-
-    if (data.correo !== undefined) {
-      fieldsToUpdate.push("correo = ?")
-      valueToUpdate.push(data.correo)
+      personaFields.push("apellido = ?")
+      personaValues.push(data.apellido)
     }
 
     if (data.fecha_nacimiento !== undefined) {
-      fieldsToUpdate.push("fecha_nacimiento = ?")
-      valueToUpdate.push(data.fecha_nacimiento)
+      personaFields.push("fecha_nacimiento = ?")
+      personaValues.push(data.fecha_nacimiento)
     }
 
     if (data.genero !== undefined) {
-      fieldsToUpdate.push("genero = ?")
-      valueToUpdate.push(data.genero)
+      personaFields.push("genero = ?")
+      personaValues.push(data.genero)
     }
 
-    if (data.foto_url !== undefined) {
-      fieldsToUpdate.push("foto_url = ?")
-      valueToUpdate.push(data.foto_url)
+    let affected = false
+
+    if (personaFields.length > 0) {
+      const [result] = await pool.query(
+        `UPDATE persona SET ${personaFields.join(", ")} WHERE dni_persona = ?`,
+        [...personaValues, dni]
+      )
+      if (result.affectedRows > 0) affected = true
     }
+
+    if (data.correo !== undefined) {
+      const [result] = await pool.query(
+        `UPDATE persona_rol SET correo = ? WHERE dni_persona = ? AND id_rol = 1`,
+        [data.correo, dni]
+      )
+      if (result.affectedRows > 0) affected = true
+    }
+
     if (id_final_obra_social !== undefined) {
-      fieldsToUpdate.push("id_obra_social = ?")
-      valueToUpdate.push(id_final_obra_social)
+      const [result] = await pool.query(
+        `UPDATE cliente SET id_obra_social = ? WHERE dni_cliente = ?`,
+        [id_final_obra_social, dni]
+      )
+      if (result.affectedRows > 0) affected = true
     }
 
-
-    if (fieldsToUpdate.length > 0) {
-      query += fieldsToUpdate.join(", ")
-      query += ` WHERE dni_cliente = ?`
-      valueToUpdate.push(dni)
-
-      const [updateResult] = await pool.query(query, valueToUpdate)
-      if (updateResult.affectedRows === 0) {
-        return false;
-      }
-
-      return true;
-    }
-    return false
+    return affected
   }
 
   static async deleteAccount({ dni }) {
-    await pool.query(`DELETE FROM turno WHERE dni_cliente = ?`, [dni]);
-
-    const [accRows] = await pool.query(`DELETE FROM cliente WHERE dni_cliente = ?`, [dni]);
+    const [accRows] = await pool.query(
+      `UPDATE persona_rol SET eliminado_en = NOW() WHERE dni_persona = ? AND id_rol = 1 AND eliminado_en IS NULL`,
+      [dni]
+    );
 
     if (accRows.affectedRows > 0) {
       return true;
