@@ -2,15 +2,18 @@ import { useState, useMemo } from "react"
 import { PageHeader } from "../components/PageHeader.jsx"
 import { Alert, Avatar, Box, Button, Group, Loader, Paper, SimpleGrid, Stack, Switch, Text } from "@mantine/core"
 import { Link } from "react-router-dom"
+import { useMediaQuery } from "@mantine/hooks"
 import TimeSlot from "../components/TimeSlot.jsx"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { getHorariosByDni, createHorario, updateHorario, deleteHorario } from "../api/profesionales.js"
 import { useAuth } from "../hooks/useAuth.js"
+import { IconExclamationCircle } from '@tabler/icons-react'
 
 const DIAS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
 export default function Horarios() {
   const { user } = useAuth()
+  const isDesktop = useMediaQuery('(min-width: 62em)')
 
   // Local mutations
   const [added, setAdded] = useState([])
@@ -155,10 +158,10 @@ export default function Horarios() {
         <Group justify="space-between" style={{ flex: 1 }}>
           <Stack gap={0}>
             <Text fw={600} fz={{ base: 'xl', sm: 'lg' }}>Horarios de Atención</Text>
-            <Text c="dimmed" visibleFrom="md" fz={{ base: 'md', sm: 'sm' }}>define los slots reservables</Text>
+            {isDesktop && <Text c="dimmed" fz={{ base: 'md', sm: 'sm' }}>define los slots reservables</Text>}
           </Stack>
           <Group>
-            <Button visibleFrom="md" disabled={isPending} loading={isSaving} onClick={saveHorarios}>Guardar cambios</Button>
+            {isDesktop && <Button disabled={isPending} loading={isSaving} onClick={saveHorarios}>Guardar cambios</Button>}
             <Avatar radius="xl" alt="" component={Link} to="/miperfil" />
           </Group>
         </Group>
@@ -172,8 +175,8 @@ export default function Horarios() {
         )}
 
         {isError && (
-          <Alert color="red" mt="md">
-            Error al cargar los horarios
+          <Alert color="red" m="md" variant="light" icon={<IconExclamationCircle />}>
+            Hubo un error al cargar los horarios
           </Alert>
         )}
 
@@ -184,25 +187,15 @@ export default function Horarios() {
                 <Group wrap="wrap" gap="md" align="center">
                   <Group justify="space-between" w={{ base: '100%', md: 160 }}>
                     <Switch
-                      size="lg"
-                      hiddenFrom="md"
+                      size={isDesktop ? 'md' : 'lg'}
                       checked={dayEnabled[dia]}
                       onChange={() => toggleDay(dia)}
                       withThumbIndicator={false}
-                      label={nombre}
+                      label={isDesktop ? <Text fw={600} size="inherit">{nombre}</Text> : nombre}
                       radius="xl"
                     />
-                    <Switch
-                      size="md"
-                      visibleFrom="md"
-                      checked={dayEnabled[dia]}
-                      onChange={() => toggleDay(dia)}
-                      withThumbIndicator={false}
-                      label={<Text fw={600} size="inherit">{nombre}</Text>}
-                      radius="xl"
-                    />
-                    {dayEnabled[dia] && slotsByDay[dia].length > 0 && (
-                      <Text c="dimmed" size="md" hiddenFrom="md">
+                    {!isDesktop && dayEnabled[dia] && slotsByDay[dia].length > 0 && (
+                      <Text c="dimmed" size="md">
                         {slotsByDay[dia].length} {slotsByDay[dia].length === 1 ? 'franja' : 'franjas'}
                       </Text>
                     )}
@@ -220,13 +213,8 @@ export default function Horarios() {
                           onChangeFin={(val) => updateSlot(slot._localId, 'hora_fin', val)}
                         />
                       ))}
-                      <Box hiddenFrom="md" style={{ display: 'flex', alignItems: 'center' }}>
-                        <Button variant="default" size="md" w="100%" onClick={() => addSlot(dia)}>
-                          + Agregar franja
-                        </Button>
-                      </Box>
-                      <Box visibleFrom="md" style={{ display: 'flex', alignItems: 'center' }}>
-                        <Button variant="default" size="sm" onClick={() => addSlot(dia)}>
+                      <Box style={{ display: 'flex', alignItems: 'center' }}>
+                        <Button variant="default" size={isDesktop ? 'sm' : 'md'} w={isDesktop ? undefined : '100%'} onClick={() => addSlot(dia)}>
                           + Agregar franja
                         </Button>
                       </Box>
@@ -243,16 +231,19 @@ export default function Horarios() {
         )}
       </Box>
 
-      <Box hiddenFrom="md" h={60} />
+      {!isDesktop && (
+        <>
+          <Box h={60} />
 
-      <Box
-        hiddenFrom="md"
-        p="md"
-        bg="var(--mantine-color-body)"
-        style={{ position: 'fixed', bottom: 0, left: 0, right: 0 }}
-      >
-        <Button fullWidth size="lg" disabled={isPending || isError} loading={isSaving} onClick={saveHorarios}>Guardar cambios</Button>
-      </Box>
+          <Box
+            p="md"
+            bg="var(--mantine-color-body)"
+            style={{ position: 'fixed', bottom: 0, left: 0, right: 0 }}
+          >
+            <Button fullWidth size="lg" disabled={isPending || isError} loading={isSaving} onClick={saveHorarios}>Guardar cambios</Button>
+          </Box>
+        </>
+      )}
     </>
   );
 }
