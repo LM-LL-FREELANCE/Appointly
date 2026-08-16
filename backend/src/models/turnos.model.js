@@ -32,13 +32,13 @@ export class TurnosModel {
              p_cli.apellido AS c_apellido, p_cli.nombre AS c_nombre, pr_cli.correo AS c_correo, t.dni_cliente,
              t.fecha_turno, t.hora_turno,t.estado, t.motivo_cancelacion, t.creado_en, t.completado_en, t.cancelado_en
       FROM turno AS t
-      INNER JOIN persona_rol pr_cli ON pr_cli.dni_persona = t.dni_cliente
+      INNER JOIN persona_rol pr_cli ON pr_cli.dni_persona = t.dni_cliente AND pr_cli.id_rol = 1
       INNER JOIN persona p_cli ON p_cli.dni_persona = t.dni_cliente
-      INNER JOIN persona_rol pr_prof ON pr_prof.dni_persona = t.dni_profesional
+      INNER JOIN persona_rol pr_prof ON pr_prof.dni_persona = t.dni_profesional AND pr_prof.id_rol = 2
       INNER JOIN persona p_prof ON p_prof.dni_persona = t.dni_profesional
       INNER JOIN profesional_especialidad p_e ON p_e.dni_profesional = t.dni_profesional
       INNER JOIN especialidad e ON e.id_especialidad = p_e.id_especialidad
-      WHERE t.id_turno = ? AND pr_prof.id_rol = 2
+      WHERE t.id_turno = ?
       GROUP BY t.id_turno, p_prof.apellido, p_prof.nombre, p_prof.dni_persona, pr_prof.correo,
                p_cli.apellido, p_cli.nombre, pr_cli.correo, t.dni_cliente
     `, [id])
