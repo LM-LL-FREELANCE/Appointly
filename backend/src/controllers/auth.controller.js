@@ -1,5 +1,5 @@
 import { AppError } from "../utils/AppError.js"
-import { registerSchema } from "../schemas/auth.schema.js"
+import { registerSchema, registerProfesionalSchema } from "../schemas/auth.schema.js"
 import { AuthService } from "../services/auth.service.js"
 import { cookieOptions } from "../validators/cookieOptions.js"
 import { EmailMethods } from "../emails/email.js"
@@ -27,7 +27,13 @@ export class AuthController {
   static async registerProfesional(req, res, next) {
 
     try {
-      const profesional = await AuthService.registerProfesional(req.body)
+      const parsedSchema = registerProfesionalSchema.safeParse(req.body)
+
+      if (!parsedSchema.success) {
+        throw new AppError('invalid', 400, 'VALIDATION_FAILED', parsedSchema.error.flatten().fieldErrors);
+      }
+
+      const profesional = await AuthService.registerProfesional(parsedSchema.data)
 
       res.set("Location", `/api/profesionales/${profesional.dni}`)
 
@@ -44,7 +50,7 @@ export class AuthController {
     try {
       const { user, token } = await AuthService.login(dni, password, role)
       res.cookie("access_token", token, cookieOptions)
-      await EmailMethods.sendTest()
+      //await EmailMethods.sendTest()
       return res.json(user)
 
     } catch (error) {
