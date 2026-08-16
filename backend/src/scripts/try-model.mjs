@@ -2,8 +2,10 @@ import { ProfesionalesModel } from "../models/profesionales.model.js";
 import { AuthModel } from "../models/auth.model.js";
 import { ObraSocialesModel } from "../models/obra-sociales.model.js";
 import { HorariosModel } from "../models/horarios.model.js";
+import { TurnosModel } from "../models/turnos.model.js";
+import { EspecialidadesModel } from "../models/especialidades.model.js";
 
-const result = await HorariosModel.getHorariosByProfesional({ dni: 27845123 })
+const result = await TurnosModel.getTurnoById(1)
 console.log(result);
 process.exit(0);
 

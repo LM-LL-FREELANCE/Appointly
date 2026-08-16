@@ -3,7 +3,7 @@ import { pool } from "../config/db.js"
 export class TurnosModel {
 
   static async getTurnoById(id) {
-    const [row] = await pool.query(`
+    /*const [row] = await pool.query(`
       SELECT
         profesional.apellido AS "p_apellido",
         profesional.nombre AS "p_nombre",
@@ -25,49 +25,52 @@ export class TurnosModel {
         INNER JOIN profesional ON turno.dni_profesional = profesional.dni_profesional
         INNER JOIN profesional_especialidad ON profesional.dni_profesional = profesional_especialidad.dni_profesional
         INNER JOIN especialidad ON especialidad.id_especialidad = profesional_especialidad.id_especialidad
-      WHERE turno.id_turno = ?`, [id])
+      WHERE turno.id_turno = ?`, [id])*/
+
+    const [row] = await pool.query(`
+      SELECT p_prof.apellido AS p_apellido, p_prof.nombre AS p_nombre, p_prof.dni_persona AS dni_profesional, pr_prof.correo AS p_correo, GROUP_CONCAT(e.tipo SEPARATOR ', ') AS tipo,
+             p_cli.apellido AS c_apellido, p_cli.nombre AS c_nombre, pr_cli.correo AS c_correo, t.dni_cliente,
+             t.fecha_turno, t.hora_turno,t.estado, t.motivo_cancelacion, t.creado_en, t.completado_en, t.cancelado_en
+      FROM turno AS t
+      INNER JOIN persona_rol pr_cli ON pr_cli.dni_persona = t.dni_cliente
+      INNER JOIN persona p_cli ON p_cli.dni_persona = t.dni_cliente
+      INNER JOIN persona_rol pr_prof ON pr_prof.dni_persona = t.dni_profesional
+      INNER JOIN persona p_prof ON p_prof.dni_persona = t.dni_profesional
+      INNER JOIN profesional_especialidad p_e ON p_e.dni_profesional = t.dni_profesional
+      INNER JOIN especialidad e ON e.id_especialidad = p_e.id_especialidad
+      WHERE t.id_turno = ? AND pr_prof.id_rol = 2
+      GROUP BY t.id_turno, p_prof.apellido, p_prof.nombre, p_prof.dni_persona, pr_prof.correo,
+               p_cli.apellido, p_cli.nombre, pr_cli.correo, t.dni_cliente
+    `, [id])
 
     return row[0] ?? null
   }
 
-  static async cancelTurno(id) {
+  //CON MOTIVO
+  static async cancelTurno(id, motivo = null) {
     await pool.query(`
-        UPDATE turno SET estado = 'cancelado', cancelado_en = NOW()
-        WHERE turno.id_turno = ? 
-        `, [id])
+      UPDATE turno SET estado = 'cancelado', cancelado_en = NOW(), motivo_cancelacion = ?
+      WHERE turno.id_turno = ?
+    `, [motivo, id])
 
     return this.getTurnoById(id)
   }
+
   static async getTurnosByProfesional({ dni, desde, hasta, estado }) {
-    /* let query = `SELECT * FROM turno WHERE dni_profesional = ? AND fecha_turno BETWEEN ? AND ?`;
-    const params = [dni, desde, hasta];
-
-    if (estado) {
-      query += ` AND estado = ?`;
-      params.push(estado);
-    }
-
-    query += ` ORDER BY fecha_turno, hora_turno`;
-    const [rows] = await pool.query(query, params);
-    return rows; */
-
     let query = `
-      SELECT
-        t.id_turno, t.fecha_turno, t.hora_turno, t.estado, t.cancelado_en,
-        c.dni_cliente AS "dni", c.nombre, c.apellido
-      FROM turno t
-      INNER JOIN cliente c ON t.dni_cliente = c.dni_cliente
-      WHERE t.dni_profesional = ? AND t.fecha_turno BETWEEN ? AND ?
-    `
+    SELECT t.id_turno, t.fecha_turno, t.hora_turno, t.estado, t.creado_en, t.completado_en, t.cancelado_en,
+           p.dni_persona AS dni, p.nombre, p.apellido
+    FROM turno t
+    INNER JOIN persona p ON p.dni_persona = t.dni_cliente
+    WHERE t.dni_profesional = ? AND t.fecha_turno BETWEEN ? AND ?
+  `
     const params = [dni, desde, hasta]
-
     if (estado) {
       query += ` AND t.estado = ?`
       params.push(estado)
     }
 
     query += ` ORDER BY t.fecha_turno, t.hora_turno`
-
     const [rows] = await pool.query(query, params)
 
     return rows
@@ -91,7 +94,7 @@ export class TurnosModel {
 
   static async crearTurno({ dni_profesional, dni_cliente, fecha_turno, hora_turno }) {
     const [result] = await pool.query(`
-      INSERT INTO turno (fecha_turno,hora_turno,dni_profesional,dni_cliente) VALUES (?,?,?,?)
+      INSERT INTO turno (fecha_turno, hora_turno, dni_profesional, dni_cliente) VALUES (?, ?, ?, ?)
       `, [fecha_turno, hora_turno, dni_profesional, dni_cliente])
 
     return result.insertId

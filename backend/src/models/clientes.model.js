@@ -74,7 +74,10 @@ export class ClientesModel {
 
   static async existe({ dni }) {
     const [rows] = await pool.query(`
-      SELECT 1 FROM cliente WHERE dni_cliente = ? LIMIT 1
+      SELECT * FROM persona p
+      INNER JOIN persona_rol pr ON pr.dni_persona = p.dni_persona
+      INNER JOIN rol r ON r.id_rol = pr.id_rol
+      WHERE pr.id_rol = 1 AND p.dni_persona = ?
       `, [dni])
 
     return rows.length > 0
