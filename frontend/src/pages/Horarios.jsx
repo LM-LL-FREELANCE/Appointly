@@ -132,11 +132,6 @@ export default function Horarios() {
 
   const queryClient = useQueryClient();
 
-  const notifTextStyles = {
-    title: { fontSize: isDesktop ? 'var(--mantine-font-size-sm)' : 'var(--mantine-font-size-lg)' },
-    description: { fontSize: isDesktop ? 'var(--mantine-font-size-sm)' : 'var(--mantine-font-size-md)' },
-  }
-
   const { mutate: saveHorarios, isPending: isSaving } = useMutation({
     mutationFn: async () => {
       const { toDelete, toPost, toPut } = buildSavePayload();
@@ -160,7 +155,6 @@ export default function Horarios() {
           withCloseButton: false,
           autoClose: false,
           loading: true,
-          styles: notifTextStyles
         });
 
         setTimeout(() => {
@@ -172,7 +166,6 @@ export default function Horarios() {
             loading: false,
             autoClose: 3000,
             allowClose: true,
-            styles: notifTextStyles
           });
         }, 1500);
       })();
@@ -181,14 +174,13 @@ export default function Horarios() {
       console.error('[Horarios] Error al guardar:', err.message);
       notifications.show({
         title: 'Error al guardar los horarios',
-        message: 'Hubo un error al guardar los horarios. Por favor, inténtalo de nuevo.',
+        message: 'Verifica que los lapsos de tiempo no se superpongan',
         color: 'red',
         icon: <IconX />,
         allowClose: true,
-        autoClose: 2000,
-        withcloseButton: false,
+        autoClose: 3000,
+        withCloseButton: false,
         position: 'top-center',
-        stles: notifTextStyles
       })
     }
   });
@@ -296,7 +288,7 @@ export default function Horarios() {
                       )
                     ) : (
                       <Box style={{ display: 'flex', alignItems: 'center' }} mih={{ base: 0, md: 38 }}>
-                        <Text c="dimmed" fz="sm">Día inactivo</Text>
+                        <Text c="dimmed" fz="md">Día inactivo</Text>
                       </Box>
                     )}
                   </Paper>

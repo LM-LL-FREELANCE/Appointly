@@ -118,58 +118,63 @@ export default function Dashboard() {
         <Group justify="space-between" style={{ flex: 1 }}>
           <Stack gap={0}>
             <Text fw={600} fz={{ base: 'xl', sm: 'lg' }}>{saludo}</Text>
-            <Text c="dimmed" visibleFrom="md" fz={{ base: 'md', sm: 'sm' }}>
-              {new Date().toLocaleDateString('es-AR', {
-                timeZone: 'UTC',
-                weekday: 'short',
-                day: 'numeric',
-                month: 'short',
-              })}
-            </Text>
+            {isDesktop && (
+              <Text c="dimmed" fz={{ base: 'md', sm: 'sm' }}>
+                {new Date().toLocaleDateString('es-AR', {
+                  timeZone: 'UTC',
+                  weekday: 'short',
+                  day: 'numeric',
+                  month: 'short',
+                })}
+              </Text>
+            )}
           </Stack>
-          <Group visibleFrom="sm">
-            <Avatar radius="xl" alt="" component={Link} to="/miperfil" />
-          </Group>
+          {isDesktop && (
+            <Group>
+              <Avatar radius="xl" alt="" component={Link} to="/miperfil" />
+            </Group>
+          )}
         </Group>
       </PageHeader>
 
-      {/* Mobile layout */}
-      <Stack hiddenFrom="sm" gap="sm" p="xs" pb="xl" style={{ flex: 1, overflowY: 'auto' }}>
-        <SimpleGrid cols={2}>
+      {!isDesktop && (
+        <Stack gap="sm" p="xs" pb="xl" style={{ flex: 1, overflowY: 'auto' }}>
+          <SimpleGrid cols={2}>
+            <StatCard label="Turnos hoy" value={turnosHoy} color="brand" />
+            <StatCard label="Esta semana" value={estaSemana} color="accent" />
+            <StatCard label="Cancelados (7d)" value={cancelados7d} color="red" />
+            <StatCard label="Slots libres" value={freeSlotsToday} color="cyan" />
+          </SimpleGrid>
+          <ProximoTurno turno={proximoTurno} isDesktop={isDesktop} />
+          <TurnosDeHoy turnos={turnosDeHoy} />
+          <TurnosPorDia data={barData} />
+        </Stack>
+      )}
+
+      {isDesktop && (
+        <Box
+          style={{
+            flex: 1,
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gridTemplateRows: 'auto 1fr',
+            gap: 8,
+            minHeight: 0,
+          }}
+        >
           <StatCard label="Turnos hoy" value={turnosHoy} color="brand" />
           <StatCard label="Esta semana" value={estaSemana} color="accent" />
           <StatCard label="Cancelados (7d)" value={cancelados7d} color="red" />
-          <StatCard label="Slots libres" value={freeSlotsToday} color="cyan" />
-        </SimpleGrid>
-        <ProximoTurno turno={proximoTurno} />
-        <TurnosDeHoy turnos={turnosDeHoy} />
-        {!isDesktop && <TurnosPorDia data={barData} />}
-      </Stack>
+          <StatCard label="Slots libres hoy" value={freeSlotsToday} color="cyan" />
 
-      {/* Desktop layout */}
-      <Box
-        visibleFrom="sm"
-        style={{
-          flex: 1,
-          display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
-          gridTemplateRows: 'auto 1fr',
-          gap: 8,
-          minHeight: 0,
-        }}
-      >
-        <StatCard label="Turnos hoy" value={turnosHoy} color="brand" />
-        <StatCard label="Esta semana" value={estaSemana} color="accent" />
-        <StatCard label="Cancelados (7d)" value={cancelados7d} color="red" />
-        <StatCard label="Slots libres hoy" value={freeSlotsToday} color="cyan" />
+          <TurnosDeHoy turnos={turnosDeHoy} />
 
-        <TurnosDeHoy turnos={turnosDeHoy} />
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, minHeight: 0 }}>
-          <ProximoTurno turno={proximoTurno} />
-          {isDesktop && <TurnosPorDia data={barData} />}
-        </div>
-      </Box>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, minHeight: 0 }}>
+            <ProximoTurno turno={proximoTurno} isDesktop={isDesktop} />
+            <TurnosPorDia data={barData} />
+          </div>
+        </Box>
+      )}
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import { createTheme } from '@mantine/core';
+import { createTheme, Notification } from '@mantine/core'
 
 export const appTheme = createTheme({
   primaryColor: 'brand',
@@ -129,6 +129,16 @@ export const appTheme = createTheme({
     lg: '24px',
     xl: '32px',
   },
+
+  components: {
+    Notification: Notification.extend({
+      styles: {
+        title: { fontSize: 'var(--mantine-font-size-md)' },
+        description: { fontSize: 'var(--mantine-font-size-sm)' }
+      }
+    })
+  }
+
 });
 
 export const cssVariablesResolver = () => ({
