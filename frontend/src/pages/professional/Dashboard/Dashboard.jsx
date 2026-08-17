@@ -156,7 +156,10 @@ export default function Dashboard() {
           style={{
             flex: 1,
             display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
+            // Las primeras 3 columnas (stats + TurnosDeHoy) achican con la pantalla
+            // o al abrir el sidebar; la última (ProximoTurno + gráfico) mantiene un
+            // ancho estable para que sus botones y contenido no se rompan.
+            gridTemplateColumns: 'repeat(3, minmax(0, 1fr)) minmax(280px, 340px)',
             gridTemplateRows: 'auto 1fr',
             gap: 8,
             minHeight: 0,

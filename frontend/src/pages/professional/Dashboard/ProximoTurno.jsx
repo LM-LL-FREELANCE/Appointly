@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Group, Text, Stack, Avatar, Paper, Button, Badge, ThemeIcon, Indicator } from "@mantine/core"
+import { Group, Text, Stack, Avatar, Paper, Button, Badge, ThemeIcon, Divider } from "@mantine/core"
 import { useDisclosure } from '@mantine/hooks'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { IconCalendarClock, IconCalendarOff, IconClock, IconCalendar, IconLogs, IconCancel } from '@tabler/icons-react'
@@ -8,8 +8,6 @@ import { CancelarTurnoProfesionalModal } from './CancelarTurnoProfesionalModal.j
 import { cancelTurnoById } from '../../../api/clientes.js'
 import { useAuth } from '../../../hooks/useAuth.js'
 import { aISO, fechaCorta, horaCorta } from '../../../utils/fechas.utils.js'
-
-/* const CURRENT_DNI = '27845123' */
 
 function labelRelativo(fechaISO) {
   const fecha = fechaISO?.slice(0, 10)
@@ -63,7 +61,6 @@ export function ProximoTurno({ turno, isDesktop }) {
     }
   }
 
-  // CancelarTurnoModal expects p_nombre/p_apellido — remap to show the patient's name
   const turnoParaCancelar = turno ? {
     fecha_turno: turno.fecha_turno?.slice(0, 10),
     hora_turno: turno.hora_turno?.slice(0, 5),
@@ -80,6 +77,7 @@ export function ProximoTurno({ turno, isDesktop }) {
           <IconCalendarClock size={16} stroke={2} />
           <Text fw={700} fz="lg">Próximo turno</Text>
         </Group>
+        <Divider />
 
         {turno ? (
           <>
@@ -114,6 +112,7 @@ export function ProximoTurno({ turno, isDesktop }) {
 
             {isDesktop ? (
               <Stack gap="sm">
+                <Divider size="xs" />
                 <Button variant="default" radius="md" fullWidth leftSection={<IconLogs size={16} />} onClick={openDetail}>
                   Ver Detalle
                 </Button>
