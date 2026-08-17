@@ -2,18 +2,19 @@ import { useState, useMemo } from "react"
 import { PageHeader } from "../components/PageHeader.jsx"
 import { Alert, Avatar, Box, Button, Group, Loader, Paper, SimpleGrid, Stack, Switch, Text } from "@mantine/core"
 import { Link } from "react-router-dom"
-import { useMediaQuery } from "@mantine/hooks"
+import { useIsDesktop } from "../hooks/useIsDesktop.js"
 import TimeSlot from "../components/TimeSlot.jsx"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { getHorariosByDni, createHorario, updateHorario, deleteHorario } from "../api/profesionales.js"
 import { useAuth } from "../hooks/useAuth.js"
-import { IconExclamationCircle } from '@tabler/icons-react'
+import { IconExclamationCircle, IconCheck, IconX } from '@tabler/icons-react'
+import { notifications } from '@mantine/notifications'
 
 const DIAS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
 export default function Horarios() {
   const { user } = useAuth()
-  const isDesktop = useMediaQuery('(min-width: 62em)')
+  const isDesktop = useIsDesktop()
 
   // Local mutations
   const [added, setAdded] = useState([])
@@ -131,6 +132,11 @@ export default function Horarios() {
 
   const queryClient = useQueryClient();
 
+  const notifTextStyles = {
+    title: { fontSize: isDesktop ? 'var(--mantine-font-size-sm)' : 'var(--mantine-font-size-lg)' },
+    description: { fontSize: isDesktop ? 'var(--mantine-font-size-sm)' : 'var(--mantine-font-size-md)' },
+  }
+
   const { mutate: saveHorarios, isPending: isSaving } = useMutation({
     mutationFn: async () => {
       const { toDelete, toPost, toPut } = buildSavePayload();
@@ -146,10 +152,45 @@ export default function Horarios() {
       setDeleted([]);
       setEdited({});
       setDayToggled({});
+      (() => {
+        const id = notifications.show({
+          title: 'Espera un momento...',
+          message: 'Guardando cambios en tus horarios',
+          position: 'top-center',
+          withCloseButton: false,
+          autoClose: false,
+          loading: true,
+          styles: notifTextStyles
+        });
+
+        setTimeout(() => {
+          notifications.update({
+            id,
+            title: 'Datos guardados',
+            message: 'Tus horarios fueron guardados correctamente',
+            icon: <IconCheck />,
+            loading: false,
+            autoClose: 3000,
+            allowClose: true,
+            styles: notifTextStyles
+          });
+        }, 1500);
+      })();
     },
     onError: (err) => {
       console.error('[Horarios] Error al guardar:', err.message);
-    },
+      notifications.show({
+        title: 'Error al guardar los horarios',
+        message: 'Hubo un error al guardar los horarios. Por favor, inténtalo de nuevo.',
+        color: 'red',
+        icon: <IconX />,
+        allowClose: true,
+        autoClose: 2000,
+        withcloseButton: false,
+        position: 'top-center',
+        stles: notifTextStyles
+      })
+    }
   });
 
   return (
@@ -157,11 +198,11 @@ export default function Horarios() {
       <PageHeader>
         <Group justify="space-between" style={{ flex: 1 }}>
           <Stack gap={0}>
-            <Text fw={600} fz={{ base: 'xl', sm: 'lg' }}>Horarios de Atención</Text>
-            {isDesktop && <Text c="dimmed" fz={{ base: 'md', sm: 'sm' }}>define los slots reservables</Text>}
+            <Text fw={600} fz="xl">Horarios de Atención</Text>
+            {isDesktop && <Text c="dimmed" fz="md">define los slots reservables</Text>}
           </Stack>
           <Group>
-            {isDesktop && <Button disabled={isPending} loading={isSaving} onClick={saveHorarios}>Guardar cambios</Button>}
+            {isDesktop && <Button onClick={saveHorarios}>Guardar cambios</Button>}
             <Avatar radius="xl" alt="" component={Link} to="/miperfil" />
           </Group>
         </Group>
@@ -184,46 +225,81 @@ export default function Horarios() {
           <Stack gap="sm" pb={10}>
             {DIAS.map((nombre, dia) => (
               <Paper key={dia} withBorder p="sm" radius="md">
-                <Group wrap="wrap" gap="md" align="center">
-                  <Group justify="space-between" w={{ base: '100%', md: 160 }}>
-                    <Switch
-                      size={isDesktop ? 'md' : 'lg'}
-                      checked={dayEnabled[dia]}
-                      onChange={() => toggleDay(dia)}
-                      withThumbIndicator={false}
-                      label={isDesktop ? <Text fw={600} size="inherit">{nombre}</Text> : nombre}
-                      radius="xl"
-                    />
-                    {!isDesktop && dayEnabled[dia] && slotsByDay[dia].length > 0 && (
-                      <Text c="dimmed" size="md">
-                        {slotsByDay[dia].length} {slotsByDay[dia].length === 1 ? 'franja' : 'franjas'}
-                      </Text>
-                    )}
-                  </Group>
-
-                  {dayEnabled[dia] ? (
-                    <SimpleGrid cols={{ base: 1, sm: 2, md: 3, xl: 5 }} spacing="xs" style={{ flex: 1 }}>
-                      {slotsByDay[dia].map(slot => (
-                        <TimeSlot
-                          key={slot._localId}
-                          horaInicio={slot.hora_inicio}
-                          horaFin={slot.hora_fin}
-                          onDelete={() => removeSlot(slot._localId)}
-                          onChangeInicio={(val) => updateSlot(slot._localId, 'hora_inicio', val)}
-                          onChangeFin={(val) => updateSlot(slot._localId, 'hora_fin', val)}
-                        />
-                      ))}
-                      <Box style={{ display: 'flex', alignItems: 'center' }}>
-                        <Button variant="default" size={isDesktop ? 'sm' : 'md'} w={isDesktop ? undefined : '100%'} onClick={() => addSlot(dia)}>
-                          + Agregar franja
-                        </Button>
-                      </Box>
-                    </SimpleGrid>
+                <Group wrap="wrap" gap="md" align={isDesktop ? 'stretch' : 'center'}>
+                  {isDesktop ? (
+                    <Paper radius="sm" p="md" w={180} style={{ flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Switch
+                        size="md"
+                        checked={dayEnabled[dia]}
+                        onChange={() => toggleDay(dia)}
+                        withThumbIndicator={false}
+                        label={<Text fw={600} size="inherit">{nombre}</Text>}
+                        radius="xl"
+                      />
+                    </Paper>
                   ) : (
-                    <Box style={{ flex: 1, display: 'flex', alignItems: 'center' }} mih={{ base: 0, md: 38 }}>
-                      <Text c="dimmed" fz={{ base: 'lg', md: 'sm' }}>Día inactivo</Text>
-                    </Box>
+                    <Group justify="space-between" w="100%">
+                      <Switch
+                        size="lg"
+                        checked={dayEnabled[dia]}
+                        onChange={() => toggleDay(dia)}
+                        withThumbIndicator={false}
+                        label={nombre}
+                        radius="xl"
+                      />
+                      {dayEnabled[dia] && slotsByDay[dia].length > 0 && (
+                        <Text c="dimmed" size="md">
+                          {slotsByDay[dia].length} {slotsByDay[dia].length === 1 ? 'franja' : 'franjas'}
+                        </Text>
+                      )}
+                    </Group>
                   )}
+
+                  <Paper radius="sm" p={isDesktop ? 'sm' : 0} style={{ flex: 1, minWidth: 0 }}>
+                    {dayEnabled[dia] ? (
+                      isDesktop ? (
+                        <Box style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 200px))', gap: 'var(--mantine-spacing-xs)' }}>
+                          {slotsByDay[dia].map(slot => (
+                            <TimeSlot
+                              key={slot._localId}
+                              horaInicio={slot.hora_inicio}
+                              horaFin={slot.hora_fin}
+                              onDelete={() => removeSlot(slot._localId)}
+                              onChangeInicio={(val) => updateSlot(slot._localId, 'hora_inicio', val)}
+                              onChangeFin={(val) => updateSlot(slot._localId, 'hora_fin', val)}
+                            />
+                          ))}
+                          <Box style={{ display: 'flex', alignItems: 'center' }}>
+                            <Button variant="default" size="sm" onClick={() => addSlot(dia)}>
+                              + Agregar franja
+                            </Button>
+                          </Box>
+                        </Box>
+                      ) : (
+                        <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="xs">
+                          {slotsByDay[dia].map(slot => (
+                            <TimeSlot
+                              key={slot._localId}
+                              horaInicio={slot.hora_inicio}
+                              horaFin={slot.hora_fin}
+                              onDelete={() => removeSlot(slot._localId)}
+                              onChangeInicio={(val) => updateSlot(slot._localId, 'hora_inicio', val)}
+                              onChangeFin={(val) => updateSlot(slot._localId, 'hora_fin', val)}
+                            />
+                          ))}
+                          <Box style={{ display: 'flex', alignItems: 'center' }}>
+                            <Button variant="default" size="md" w="100%" onClick={() => addSlot(dia)}>
+                              + Agregar franja
+                            </Button>
+                          </Box>
+                        </SimpleGrid>
+                      )
+                    ) : (
+                      <Box style={{ display: 'flex', alignItems: 'center' }} mih={{ base: 0, md: 38 }}>
+                        <Text c="dimmed" fz="sm">Día inactivo</Text>
+                      </Box>
+                    )}
+                  </Paper>
                 </Group>
               </Paper>
             ))}
@@ -240,7 +316,7 @@ export default function Horarios() {
             bg="var(--mantine-color-body)"
             style={{ position: 'fixed', bottom: 0, left: 0, right: 0 }}
           >
-            <Button fullWidth size="lg" disabled={isPending || isError} loading={isSaving} onClick={saveHorarios}>Guardar cambios</Button>
+            <Button fullWidth size="lg" /*disabled={isPending || isError || isSaving}*/ onClick={saveHorarios}>Guardar cambios</Button>
           </Box>
         </>
       )}

@@ -1,4 +1,4 @@
-import { AppShell, Group, Text } from '@mantine/core'
+import { AppShell, Group, Text, Burger } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import { Outlet } from 'react-router-dom'
 
@@ -26,8 +26,9 @@ export default function MainLayout({ links }) {
 
         <AppShell.Navbar p="sm">
           <AppShell.Section>
-            <Group px="xs" py="sm">
-              <Text fw={700} size="lg">Appointly</Text>
+            <Group px="xs" py="sm" justify='space-between'>
+              <Text fw={700} size="xl">Appointly</Text>
+              <Burger opened onClick={closeMobile} hiddenFrom="md" size="md" />
             </Group>
           </AppShell.Section>
           <AppShell.Section grow>
