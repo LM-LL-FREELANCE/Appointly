@@ -184,46 +184,81 @@ export default function Horarios() {
           <Stack gap="sm" pb={10}>
             {DIAS.map((nombre, dia) => (
               <Paper key={dia} withBorder p="sm" radius="md">
-                <Group wrap="wrap" gap="md" align="center">
-                  <Group justify="space-between" w={{ base: '100%', md: 160 }}>
-                    <Switch
-                      size={isDesktop ? 'md' : 'lg'}
-                      checked={dayEnabled[dia]}
-                      onChange={() => toggleDay(dia)}
-                      withThumbIndicator={false}
-                      label={isDesktop ? <Text fw={600} size="inherit">{nombre}</Text> : nombre}
-                      radius="xl"
-                    />
-                    {!isDesktop && dayEnabled[dia] && slotsByDay[dia].length > 0 && (
-                      <Text c="dimmed" size="md">
-                        {slotsByDay[dia].length} {slotsByDay[dia].length === 1 ? 'franja' : 'franjas'}
-                      </Text>
-                    )}
-                  </Group>
-
-                  {dayEnabled[dia] ? (
-                    <SimpleGrid cols={{ base: 1, sm: 2, md: 3, xl: 5 }} spacing="xs" style={{ flex: 1 }}>
-                      {slotsByDay[dia].map(slot => (
-                        <TimeSlot
-                          key={slot._localId}
-                          horaInicio={slot.hora_inicio}
-                          horaFin={slot.hora_fin}
-                          onDelete={() => removeSlot(slot._localId)}
-                          onChangeInicio={(val) => updateSlot(slot._localId, 'hora_inicio', val)}
-                          onChangeFin={(val) => updateSlot(slot._localId, 'hora_fin', val)}
-                        />
-                      ))}
-                      <Box style={{ display: 'flex', alignItems: 'center' }}>
-                        <Button variant="default" size={isDesktop ? 'sm' : 'md'} w={isDesktop ? undefined : '100%'} onClick={() => addSlot(dia)}>
-                          + Agregar franja
-                        </Button>
-                      </Box>
-                    </SimpleGrid>
+                <Group wrap="wrap" gap="md" align={isDesktop ? 'stretch' : 'center'}>
+                  {isDesktop ? (
+                    <Paper radius="sm" p="md" w={180} style={{ flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Switch
+                        size="md"
+                        checked={dayEnabled[dia]}
+                        onChange={() => toggleDay(dia)}
+                        withThumbIndicator={false}
+                        label={<Text fw={600} size="inherit">{nombre}</Text>}
+                        radius="xl"
+                      />
+                    </Paper>
                   ) : (
-                    <Box style={{ flex: 1, display: 'flex', alignItems: 'center' }} mih={{ base: 0, md: 38 }}>
-                      <Text c="dimmed" fz={{ base: 'lg', md: 'sm' }}>Día inactivo</Text>
-                    </Box>
+                    <Group justify="space-between" w="100%">
+                      <Switch
+                        size="lg"
+                        checked={dayEnabled[dia]}
+                        onChange={() => toggleDay(dia)}
+                        withThumbIndicator={false}
+                        label={nombre}
+                        radius="xl"
+                      />
+                      {dayEnabled[dia] && slotsByDay[dia].length > 0 && (
+                        <Text c="dimmed" size="md">
+                          {slotsByDay[dia].length} {slotsByDay[dia].length === 1 ? 'franja' : 'franjas'}
+                        </Text>
+                      )}
+                    </Group>
                   )}
+
+                  <Paper radius="sm" p={isDesktop ? 'sm' : 0} style={{ flex: 1, minWidth: 0 }}>
+                    {dayEnabled[dia] ? (
+                      isDesktop ? (
+                        <Box style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 200px))', gap: 'var(--mantine-spacing-xs)' }}>
+                          {slotsByDay[dia].map(slot => (
+                            <TimeSlot
+                              key={slot._localId}
+                              horaInicio={slot.hora_inicio}
+                              horaFin={slot.hora_fin}
+                              onDelete={() => removeSlot(slot._localId)}
+                              onChangeInicio={(val) => updateSlot(slot._localId, 'hora_inicio', val)}
+                              onChangeFin={(val) => updateSlot(slot._localId, 'hora_fin', val)}
+                            />
+                          ))}
+                          <Box style={{ display: 'flex', alignItems: 'center' }}>
+                            <Button variant="default" size="sm" onClick={() => addSlot(dia)}>
+                              + Agregar franja
+                            </Button>
+                          </Box>
+                        </Box>
+                      ) : (
+                        <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="xs">
+                          {slotsByDay[dia].map(slot => (
+                            <TimeSlot
+                              key={slot._localId}
+                              horaInicio={slot.hora_inicio}
+                              horaFin={slot.hora_fin}
+                              onDelete={() => removeSlot(slot._localId)}
+                              onChangeInicio={(val) => updateSlot(slot._localId, 'hora_inicio', val)}
+                              onChangeFin={(val) => updateSlot(slot._localId, 'hora_fin', val)}
+                            />
+                          ))}
+                          <Box style={{ display: 'flex', alignItems: 'center' }}>
+                            <Button variant="default" size="md" w="100%" onClick={() => addSlot(dia)}>
+                              + Agregar franja
+                            </Button>
+                          </Box>
+                        </SimpleGrid>
+                      )
+                    ) : (
+                      <Box style={{ display: 'flex', alignItems: 'center' }} mih={{ base: 0, md: 38 }}>
+                        <Text c="dimmed" fz={{ base: 'lg', md: 'sm' }}>Día inactivo</Text>
+                      </Box>
+                    )}
+                  </Paper>
                 </Group>
               </Paper>
             ))}
