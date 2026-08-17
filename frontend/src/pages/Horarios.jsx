@@ -133,8 +133,8 @@ export default function Horarios() {
   const queryClient = useQueryClient();
 
   const notifTextStyles = {
-    title: { fontSize: isDesktop ? 'var(--mantine-font-size-sm)' : 'var(--mantine-font-size-xl)' },
-    description: { fontSize: isDesktop ? 'var(--mantine-font-size-sm)' : 'var(--mantine-font-size-lg)' },
+    title: { fontSize: isDesktop ? 'var(--mantine-font-size-sm)' : 'var(--mantine-font-size-lg)' },
+    description: { fontSize: isDesktop ? 'var(--mantine-font-size-sm)' : 'var(--mantine-font-size-md)' },
   }
 
   const { mutate: saveHorarios, isPending: isSaving } = useMutation({
