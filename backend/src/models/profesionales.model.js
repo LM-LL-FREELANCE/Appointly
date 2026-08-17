@@ -112,7 +112,7 @@ export class ProfesionalesModel {
       LEFT JOIN obra_social ob 
         ON obp.id_obra_social = ob.id_obra_social
 `;
-    const conditions = [];
+    const conditions = ['pr.eliminado_en IS NULL'];
     const values = [];
     if (especialidad) {
       conditions.push(`EXISTS (
@@ -155,7 +155,7 @@ export class ProfesionalesModel {
                 ON prof.dni_profesional = p.dni_persona
               INNER JOIN persona_rol pr
                 ON prof.dni_profesional = pr.dni_persona AND prof.id_rol = pr.id_rol
-              WHERE prof.dni_profesional = ?
+              WHERE prof.dni_profesional = ? AND pr.eliminado_en IS NULL
             `, [dni])
 
     const profesional = rows[0]
@@ -183,7 +183,9 @@ export class ProfesionalesModel {
 
   static async existe({ dni }) {
     const [rows] = await pool.query(
-      'SELECT 1 FROM profesional WHERE dni_profesional = ? LIMIT 1',
+      `SELECT 1 FROM profesional p 
+       INNER JOIN persona_rol pr ON p.dni_profesional = pr.dni_persona AND p.id_rol = pr.id_rol
+       WHERE p.dni_profesional = ? AND pr.eliminado_en IS NULL LIMIT 1`,
       [dni]
     );
     return rows.length > 0;
@@ -295,6 +297,17 @@ export class ProfesionalesModel {
         `, [dni]);
 
     return rows[0];
+  }
+
+  static async deleteAcc({ dni }) {
+    const [rows] = await pool.query(`
+      UPDATE persona_rol
+      SET eliminado_en = NOW()
+      WHERE dni_persona = ? 
+      AND id_rol = 2
+      `, [dni])
+
+    return rows.affectedRows > 0
   }
 
 }

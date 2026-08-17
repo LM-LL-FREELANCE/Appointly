@@ -109,6 +109,29 @@ export class ProfesionalesController {
       next(err)
     }
   }
+
+  static async deleteAcc(req, res, next) {
+    try {
+
+      const { dni } = req.params
+
+      if (!dni) throw new AppError("the dni must be in the request", 400)
+
+      const updated = await ProfesionalesModel.deleteAcc({ dni })
+
+      if (!updated) throw new AppError("we could not delete your account", 400)
+
+      return res.json({
+        success: true,
+        msg: "your account has been deleted"
+      })
+
+    } catch (err) {
+
+      next(err)
+
+    }
+  }
 }
 
 

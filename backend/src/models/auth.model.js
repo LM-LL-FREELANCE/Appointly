@@ -147,4 +147,33 @@ export class AuthModel {
         `, [dni, numero_matricula])
     return true
   }
+
+  static async getDniByCorreo({ correo, role }) {
+    const [rows] = await pool.query(`
+      SELECT 
+          pr.dni_persona
+        FROM persona_rol pr
+        INNER JOIN rol r
+          ON pr.id_rol = r.id_rol
+        WHERE pr.correo = ? 
+          AND r.nombre = ?
+      `, [correo, role])
+    return rows[0]
+  }
+
+  static async resetPassWord({ dni, password_hashed, role }) {
+    const [rows] = await pool.query(`
+      UPDATE persona_rol 
+      SET password_hash = ?
+      WHERE dni_persona = ? 
+        AND id_rol = (
+          SELECT 
+              id_rol 
+            FROM rol 
+            WHERE nombre = ?
+        )
+      `, [password_hashed, dni, role])
+
+    return rows.affectedRows > 0
+  }
 }

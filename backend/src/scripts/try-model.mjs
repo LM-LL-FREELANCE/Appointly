@@ -7,7 +7,13 @@ import { AuthModel } from "../models/auth.model.js";
 
 
 
-const result = await AuthModel.findCredentialsByDniAndRole(20232779, "profesional")
+const { dni_persona } = await AuthModel.getDniByCorreo({ correo: "ricardo.sosa@mail.com", role: "cliente" })
+console.log(dni_persona);
+process.exit(0);
+
+//node --env-file=.env backend/src/scripts/try-model.mjs
+
+//const result = await AuthModel.findCredentialsByDniAndRole(20232779, "profesional")
 /*const result = await AuthModel.createClienteAccount({
   data: {
     dni: 20232778,
@@ -35,15 +41,6 @@ const result = await AuthModel.findCredentialsByDniAndRole(20232779, "profesiona
     numero_matricula: 123154151
   }
 })works*/
-console.log(result);
-process.exit(0);
-
-
-
-
-
-
-//node --env-file=.env backend/src/scripts/try-model.mjs
 //const result = await HorariosModel.getHorariosByProfesional({ dni: 27845123 })
 //import { TurnosModel } from "../models/turnos.model.js";
 //import { ProfesionalesModel } from "../models/profesionales.model.js";

@@ -40,5 +40,5 @@ export const updateByDni = ({ dni, data }) => {
 }
 
 export const deleteAccCliente = ({ dni }) => {
-  return request(`/api/clientes/${dni}/delete`, { method: "DELETE" })
+  return request(`/api/clientes/${dni}`, { method: "DELETE" })
 }

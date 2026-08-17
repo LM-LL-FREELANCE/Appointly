@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import {
   Grid, Card, Stack, Group, Text,
-  Select, Button, TextInput, SegmentedControl, Title, Center, Loader, Avatar
+  Select, Button, TextInput, SegmentedControl, Title, Center, Loader, Avatar, Flex
 } from '@mantine/core'
 import { IconSearch } from '@tabler/icons-react'
 import { PageHeader } from '../components/PageHeader'
@@ -11,6 +11,7 @@ import { getFilteredProfesional, getAllEspecialidades, getAllObraSociales } from
 import { useQuery, keepPreviousData } from "@tanstack/react-query"
 import { Link, useNavigate } from 'react-router-dom'
 import useObrasSociales from '../hooks/useObraSociales'
+import { useMediaQuery } from "@mantine/hooks"
 
 export default function Buscar() {
   const navigate = useNavigate()
@@ -47,21 +48,31 @@ export default function Buscar() {
   return (
     <Stack gap="md">
       <PageHeader>
-        <Group justify="space-between" style={{ flex: 1 }}>
-          <Title order={4}>Buscar doctores</Title>
-          <Group justify='space-between'>
-            <TextInput
-              placeholder="Buscar por nombre..."
-              leftSection={<IconSearch size={16} />}
-              value={busqueda}
-              onChange={(e) => setBusqueda(e.currentTarget.value)}
-              w={{ base: '100%', sm: 240 }}
-            />
-            <Avatar radius="xl" alt="" component={Link} to="/miperfil" />
-          </Group>
-        </Group>
+        <Title order={4}>Buscar doctores</Title>
       </PageHeader>
-
+      <Flex
+        w="100%"
+        mt="-lg"
+        justify={{ base: "center", sm: "flex-end" }}
+        align="center"
+        gap="md"
+      >
+        <Group
+          w={{ base: "100%", sm: "auto" }}
+          wrap="nowrap"
+          gap="md"
+        >
+          <TextInput
+            placeholder="Buscar por nombre..."
+            leftSection={<IconSearch size={16} />}
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.currentTarget.value)}
+            w={{ base: '100%', sm: 240 }}
+            style={{ flex: 1 }}
+          />
+          <Avatar radius="xl" alt="" component={Link} to="/miperfil" />
+        </Group>
+      </Flex>
 
 
       <Grid gutter={{ base: 'sm', md: 'md' }}>
@@ -111,6 +122,7 @@ export default function Buscar() {
                 Mostrando {doctoresFiltrados.length} de {profesionales.length} profesionales
               </Text>
               <SegmentedControl
+                display={{ base: "none", sm: "flex" }}
                 value={vista}
                 onChange={setVista}
                 data={[

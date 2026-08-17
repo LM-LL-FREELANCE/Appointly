@@ -13,6 +13,11 @@ import { TurnoDetailModal } from "./client/MisTurnos/TurnoDetailModal.jsx";
 import { CancelarTurnoModal } from "./client/MisTurnos/CancelarTurnoModal.jsx";
 import useCancelTurno from "../hooks/useCancelTurno.jsx";
 import { useQueryClient } from "@tanstack/react-query";
+import {
+  IconSearch,
+  IconCalendarPlus,
+  IconCalendarEvent,
+} from "@tabler/icons-react"
 
 const PRIMARY_COL_HEIGHT = '600px';
 const SECONDARY_COL_HEIGHT = `calc(${PRIMARY_COL_HEIGHT} / 2 - var(--mantine-spacing-md) / 2)`;
@@ -39,9 +44,9 @@ export default function Inicio() {
     }),
   }));
   const btnData = [
-    { label: "Buscar Doctores", link: () => navigate("/buscar"), type: "variant" },
-    { label: "Reservar Turno", link: () => navigate("/reservar"), type: "subtle" },
-    { label: "Mis Turnos", link: () => navigate("/misturnos/*"), type: "subtle" },
+    { label: "Buscar Doctores", link: () => navigate("/buscar"), type: "variant", icon: <IconSearch /> },
+    { label: "Reservar Turno", link: () => navigate("/reservar"), type: "outline", icon: <IconCalendarPlus /> },
+    { label: "Mis Turnos", link: () => navigate("/misturnos/*"), type: "outline", icon: <IconCalendarEvent /> },
   ]
 
   console.log(formatedTurno)
@@ -127,7 +132,7 @@ export default function Inicio() {
                     <Title size="h3" >Accesos Rápidos</Title>
                     <Group mt="xl" gap="lg">
                       {btnData.map((btn, index) => (
-                        <ButtonLay key={index} label={btn.label} type={btn.type} link={btn.link} />
+                        <ButtonLay key={index} label={btn.label} type={btn.type} link={btn.link} leftSection={btn.icon} />
                       ))}
                     </Group>
                   </Paper>

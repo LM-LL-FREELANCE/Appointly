@@ -46,3 +46,12 @@ export const registerProfesionalSchema = z.strictObject({
   error: "Las contraseñas no coinciden",
   path: ["confirm"],
 })
+
+export const passwordsSchema = z.strictObject({
+  password: z.string().min(6, { message: "La contraseña debe tener al menos 6 caracteres" }),
+  confirmPassword: z.string(),
+  token: z.string({ required_error: "El token es obligatorio" })
+}).refine((datos) => datos.password === datos.confirmPassword, {
+  message: "Las contraseñas no coinciden",
+  path: ["confirmPassword"],
+});
