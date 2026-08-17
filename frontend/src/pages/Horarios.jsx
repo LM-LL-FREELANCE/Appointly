@@ -200,7 +200,7 @@ export default function Horarios() {
         </Group>
       </PageHeader>
 
-      <Box px={{ base: 0, md: 'xl' }}>
+      <Box>
         {isPending && (
           <Group justify="center" mt="xl">
             <Loader />

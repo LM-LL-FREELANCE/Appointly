@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useMediaQuery } from '@mantine/hooks'
-import { Group, Text, Stack, Avatar, Paper, Box, SimpleGrid } from "@mantine/core"
+import { Group, Text, Stack, Avatar, Paper, Box, SimpleGrid, Divider } from "@mantine/core"
 import { BarChart } from '@mantine/charts'
 import { Link } from 'react-router-dom'
 import { PageHeader } from '../../../components/PageHeader.jsx'
@@ -11,6 +11,7 @@ import { getProfesionalByDni, getTurnosByProfesional } from '../../../api/profes
 import { aISO } from '../../../utils/fechas.utils.js'
 import { useAuth } from '../../../hooks/useAuth.js'
 import useSlots from '../../../hooks/useSlots.jsx'
+import { IconChartBar } from '@tabler/icons-react'
 
 const DIA_LABEL = ['D', 'L', 'M', 'X', 'J', 'V', 'S']
 
@@ -29,7 +30,11 @@ function buildBarData(turnos) {
 function TurnosPorDia({ data }) {
   return (
     <Paper withBorder radius="lg" p="lg" style={{ flex: 2, display: 'flex', flexDirection: 'column' }}>
-      <Text fw={700} fz="lg" mb="md">Turnos por día</Text>
+      <Group gap="xs" style={{ flexDirection: 'row' }}>
+        <IconChartBar size={16} stroke={2} />
+        <Text fw={700} fz="lg">Turnos por día</Text>
+      </Group>
+      <Divider my="md" size="xs" />
       <div style={{ flex: 1, minHeight: 180 }}>
         <BarChart
           h="100%"
