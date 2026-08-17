@@ -7,7 +7,8 @@ import TimeSlot from "../components/TimeSlot.jsx"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { getHorariosByDni, createHorario, updateHorario, deleteHorario } from "../api/profesionales.js"
 import { useAuth } from "../hooks/useAuth.js"
-import { IconExclamationCircle } from '@tabler/icons-react'
+import { IconExclamationCircle, IconCheck, IconX } from '@tabler/icons-react'
+import { notifications } from '@mantine/notifications'
 
 const DIAS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
@@ -131,6 +132,11 @@ export default function Horarios() {
 
   const queryClient = useQueryClient();
 
+  const notifTextStyles = {
+    title: { fontSize: isDesktop ? 'var(--mantine-font-size-sm)' : 'var(--mantine-font-size-xl)' },
+    description: { fontSize: isDesktop ? 'var(--mantine-font-size-sm)' : 'var(--mantine-font-size-lg)' },
+  }
+
   const { mutate: saveHorarios, isPending: isSaving } = useMutation({
     mutationFn: async () => {
       const { toDelete, toPost, toPut } = buildSavePayload();
@@ -146,10 +152,45 @@ export default function Horarios() {
       setDeleted([]);
       setEdited({});
       setDayToggled({});
+      (() => {
+        const id = notifications.show({
+          title: 'Espera un momento...',
+          message: 'Guardando cambios en tus horarios',
+          position: 'top-center',
+          withCloseButton: false,
+          autoClose: false,
+          loading: true,
+          styles: notifTextStyles
+        });
+
+        setTimeout(() => {
+          notifications.update({
+            id,
+            title: 'Datos guardados',
+            message: 'Tus horarios fueron guardados correctamente',
+            icon: <IconCheck />,
+            loading: false,
+            autoClose: 3000,
+            allowClose: true,
+            styles: notifTextStyles
+          });
+        }, 1500);
+      })();
     },
     onError: (err) => {
       console.error('[Horarios] Error al guardar:', err.message);
-    },
+      notifications.show({
+        title: 'Error al guardar los horarios',
+        message: 'Hubo un error al guardar los horarios. Por favor, inténtalo de nuevo.',
+        color: 'red',
+        icon: <IconX />,
+        allowClose: true,
+        autoClose: 2000,
+        withcloseButton: false,
+        position: 'top-center',
+        stles: notifTextStyles
+      })
+    }
   });
 
   return (
@@ -161,7 +202,7 @@ export default function Horarios() {
             {isDesktop && <Text c="dimmed" fz={{ base: 'md', sm: 'sm' }}>define los slots reservables</Text>}
           </Stack>
           <Group>
-            {isDesktop && <Button disabled={isPending} loading={isSaving} onClick={saveHorarios}>Guardar cambios</Button>}
+            {isDesktop && <Button onClick={saveHorarios}>Guardar cambios</Button>}
             <Avatar radius="xl" alt="" component={Link} to="/miperfil" />
           </Group>
         </Group>
@@ -275,7 +316,7 @@ export default function Horarios() {
             bg="var(--mantine-color-body)"
             style={{ position: 'fixed', bottom: 0, left: 0, right: 0 }}
           >
-            <Button fullWidth size="lg" disabled={isPending || isError} loading={isSaving} onClick={saveHorarios}>Guardar cambios</Button>
+            <Button fullWidth size="lg" /*disabled={isPending || isError || isSaving}*/ onClick={saveHorarios}>Guardar cambios</Button>
           </Box>
         </>
       )}
