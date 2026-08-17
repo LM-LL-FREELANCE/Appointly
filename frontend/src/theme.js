@@ -73,12 +73,16 @@ export const appTheme = createTheme({
   fontFamily: "'Roboto', system-ui, -apple-system, 'Segoe UI', sans-serif",
   fontFamilyMonospace: "'Roboto Mono', ui-monospace, SFMono-Regular, monospace",
 
+  // Fluid typography: cada token es más grande en viewports chicos (mobile,
+  // mejor legibilidad/touch) y converge a su valor original al llegar al
+  // breakpoint 'md' (62em / 992px), sin necesidad de fz={{ base, sm }} por página.
+  // Curva calculada entre 320px y 992px de viewport.
   fontSizes: {
-    xs: '12px',
-    sm: '13px',
-    md: '15px',
-    lg: '17px',
-    xl: '20px',
+    xs: 'clamp(0.75rem, 0.9345rem - 0.29762vw, 0.875rem)',
+    sm: 'clamp(0.8125rem, 0.997rem - 0.29762vw, 0.9375rem)',
+    md: 'clamp(0.9375rem, 1.122rem - 0.29762vw, 1.0625rem)',
+    lg: 'clamp(1.0625rem, 1.33929rem - 0.44643vw, 1.25rem)',
+    xl: 'clamp(1.25rem, 1.52679rem - 0.44643vw, 1.4375rem)',
   },
 
   headings: {

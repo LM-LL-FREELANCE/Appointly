@@ -2,7 +2,7 @@ import { useState, useMemo } from "react"
 import { PageHeader } from "../components/PageHeader.jsx"
 import { Alert, Avatar, Box, Button, Group, Loader, Paper, SimpleGrid, Stack, Switch, Text } from "@mantine/core"
 import { Link } from "react-router-dom"
-import { useMediaQuery } from "@mantine/hooks"
+import { useIsDesktop } from "../hooks/useIsDesktop.js"
 import TimeSlot from "../components/TimeSlot.jsx"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { getHorariosByDni, createHorario, updateHorario, deleteHorario } from "../api/profesionales.js"
@@ -14,7 +14,7 @@ const DIAS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', '
 
 export default function Horarios() {
   const { user } = useAuth()
-  const isDesktop = useMediaQuery('(min-width: 62em)')
+  const isDesktop = useIsDesktop()
 
   // Local mutations
   const [added, setAdded] = useState([])
@@ -198,8 +198,8 @@ export default function Horarios() {
       <PageHeader>
         <Group justify="space-between" style={{ flex: 1 }}>
           <Stack gap={0}>
-            <Text fw={600} fz={{ base: 'xl', sm: 'lg' }}>Horarios de Atención</Text>
-            {isDesktop && <Text c="dimmed" fz={{ base: 'md', sm: 'sm' }}>define los slots reservables</Text>}
+            <Text fw={600} fz="xl">Horarios de Atención</Text>
+            {isDesktop && <Text c="dimmed" fz="md">define los slots reservables</Text>}
           </Stack>
           <Group>
             {isDesktop && <Button onClick={saveHorarios}>Guardar cambios</Button>}
@@ -296,7 +296,7 @@ export default function Horarios() {
                       )
                     ) : (
                       <Box style={{ display: 'flex', alignItems: 'center' }} mih={{ base: 0, md: 38 }}>
-                        <Text c="dimmed" fz={{ base: 'lg', md: 'sm' }}>Día inactivo</Text>
+                        <Text c="dimmed" fz="sm">Día inactivo</Text>
                       </Box>
                     )}
                   </Paper>

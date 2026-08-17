@@ -1,12 +1,12 @@
 import { getTimeRange, TimePicker } from '@mantine/dates';
 import { CloseButton, Group, Paper } from '@mantine/core';
-import { useMediaQuery } from '@mantine/hooks';
 import { IconArrowNarrowRight } from '@tabler/icons-react';
+import { useIsDesktop } from '../hooks/useIsDesktop.js';
 
 const presets = getTimeRange({ startTime: '08:00:00', endTime: '22:00:00', interval: '01:00:00' });
 
 export default function TimeSlot({ horaInicio, horaFin, onChangeInicio, onChangeFin, onDelete }) {
-  const isDesktop = useMediaQuery('(min-width: 62em)');
+  const isDesktop = useIsDesktop();
   const size = isDesktop ? 'xs' : 'md';
 
   const pickerStyle = {
