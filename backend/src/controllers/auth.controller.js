@@ -1,8 +1,8 @@
 import { AppError } from "../utils/AppError.js"
-import { registerSchema, registerProfesionalSchema } from "../schemas/auth.schema.js"
+import { registerSchema, registerProfesionalSchema, passwordsSchema } from "../schemas/auth.schema.js"
 import { AuthService } from "../services/auth.service.js"
 import { cookieOptions } from "../validators/cookieOptions.js"
-import { EmailMethods } from "../emails/email.js"
+import { EmailMethods } from "../emails/email.methods.js"
 
 export class AuthController {
   static async register(req, res, next) {
@@ -83,8 +83,47 @@ export class AuthController {
     }
   }
 
-  static async forgotPassword(req, res) {
+  static async forgotPassword(req, res, next) {
+    try {
+      const { correo, role } = req.body
 
+      const token = await AuthService.forgotPassword({ correo, role })
+
+      const resetLink = `${process.env.WEB_FROM}/${token}`
+
+      await EmailMethods.resetPassWord({ correo, link: resetLink })
+
+      return res.json({ success: true, msg: "mail sent" })
+
+    } catch (err) {
+
+      next(err)
+
+    }
+  }
+
+  static async resetPassWord(req, res, next) {
+    try {
+
+      const parsedSchema = passwordsSchema.safeParse(req.body)
+
+      if (!parsedSchema.success) {
+
+        throw new AppError('invalid', 400, 'VALIDATION_FAILED', parsedSchema.error.flatten().fieldErrors);
+
+      }
+
+      const { password, token } = parsedSchema.data
+
+      const changedPassWord = await AuthService.resetPassWord({ password, token })
+
+      if (!changedPassWord) throw new AppError("We could not change your password", 400)
+
+      return res.json({ success: true, msg: "your password was updated" })
+
+    } catch (err) {
+      next(err)
+    }
   }
 
 }

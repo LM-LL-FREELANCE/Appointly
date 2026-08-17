@@ -170,7 +170,10 @@ export class ClientesModel {
 
   static async deleteAccount({ dni }) {
     const [accRows] = await pool.query(
-      `UPDATE persona_rol SET eliminado_en = NOW() WHERE dni_persona = ? AND id_rol = 1 AND eliminado_en IS NULL`,
+      `UPDATE persona_rol 
+      SET eliminado_en = NOW() 
+      WHERE dni_persona = ? AND id_rol = 1 
+      AND eliminado_en IS NULL`,
       [dni]
     );
 

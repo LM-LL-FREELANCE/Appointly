@@ -25,7 +25,7 @@ export function EliminarCuentaModal({ opened, onClose, onConfirm, isPending, siz
             No, volver
           </Button>
           <Button variant="light" color="red" radius="md" onClick={onConfirm} loading={isPending}>
-            Sí, cancelar
+            Sí, eliminar
           </Button>
         </Group>
       </Box>

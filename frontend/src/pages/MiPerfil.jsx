@@ -12,13 +12,14 @@ import { EliminarCuentaModal } from '../components/EliminarCuentaModal.jsx'
 import { useDisclosure } from '@mantine/hooks'
 import useUpdateCliente from '../hooks/useUpdateAccCliente.jsx'
 import useUpdateProfesional from '../hooks/useUpdateAccProfesional.jsx'
+import useDeleteCliente from '../hooks/useDeleteCliente.jsx'
+import useDeleteProfesional from '../hooks/useDeleteProfesional.jsx'
 
 const OPCIONES_GENERO = ['Masculino', 'Femenino', 'Prefiero no decirlo']
 
 
 export default function MiPerfil() {
-  const { user, isAuthLoading } = useAuth()
-  console.log("ESTADO DE AUTH:", { isAuthLoading, user })
+  const { logout, user } = useAuth()
   const isMobile = useMediaQuery('(max-width: 768px)')
   const inputSize = isMobile ? 'md' : 'sm'
 
@@ -34,10 +35,25 @@ export default function MiPerfil() {
     rol: user ? user.role : undefined
   })
 
+  const [notificacion, setNotificacion] = useState(null)
   const { mutate: mutateProfesional, isPending: isPendingProfesional } = useUpdateProfesional()
   const { mutate: mutateCliente, isPending: isPendingCliente } = useUpdateCliente()
+  const { mutate: mutateDeleteCliente, isPesding: isPendingDeleCliente } = useDeleteCliente()
+  const { mutate: mutateDeleteProfesional, isPesding: isPendingDeleProfesional } = useDeleteProfesional()
 
-  const [notificacion, setNotificacion] = useState(null)
+  const handleDeleteConfirm = () => {
+    if (user?.role === "profesional") {
+      mutateDeleteProfesional({
+        dni: user?.dni
+      }, {
+        onSuccess: logout
+      })
+    } else {
+      mutateDeleteCliente({
+        dni: user?.dni
+      }, { onSuccess: logout })
+    }
+  }
 
   const handleSave = () => {
     let generoFinal = undefined;
@@ -147,7 +163,6 @@ export default function MiPerfil() {
       <PageHeader>
         <Group justify="space-between" style={{ flex: 1 }}>
           <Text fw={600} fz={{ base: 'xl', sm: 'lg' }}>Mi perfil</Text>
-          <Avatar radius="xl" alt="" />
         </Group>
       </PageHeader>
 
@@ -274,6 +289,8 @@ export default function MiPerfil() {
         <EliminarCuentaModal
           opened={eliminar}
           onClose={closeEliminar}
+          onConfirm={handleDeleteConfirm}
+          isPending={isPendingDeleCliente || isPendingDeleProfesional}
         />
       )}
     </>

@@ -10,7 +10,8 @@ authRouter.post("/registro", AuthController.register)
 authRouter.post("/registro-profesional", validate(registerProfesionalSchema), AuthController.registerProfesional)
 authRouter.post("/login", validate(loginSchema), AuthController.login)
 authRouter.post("/logout", AuthController.logout)
-authRouter.post("/forgot-password", AuthController.forgotPassword)
-
-
 authRouter.get("/me", attachUser, AuthController.me)
+
+//reset password endpoint
+authRouter.post("/forgot-password", AuthController.forgotPassword)
+authRouter.post("/reset-password", AuthController.resetPassWord)

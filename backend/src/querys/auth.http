@@ -41,3 +41,22 @@ Content-Type: application/json
   "fecha_nacimiento": "1995-11-02",
   "genero": "M"
 }
+
+###forgot password mail
+POST http://localhost:4000/api/auth/forgot-password
+Content-Type: application/json
+
+{
+  "correo": "lucalatigano12@gmail.com",
+  "role": "cliente"
+}
+
+###reset password 
+POST http://localhost:4000/api/auth/reset-password
+Content-Type: application/json
+
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkbmkiOjQ2NjY4ODE0LCJyb2xlIjoiY2xpZW50ZSIsImlhdCI6MTc4NjkyNzQxMywiZXhwIjoxNzg2OTI4MDEzfQ.Rj8nErohXoI_ctrpXSyYTirRfcCnO0kK60HKFZeQRTg",
+  "password": "hola12345",
+  "confirmPassword": "hola12345"
+}

@@ -9,4 +9,4 @@ clientesRouter.get("/:dni", requireAuth, grantAccess(["cliente", "profesional"])
 clientesRouter.get("/:dni/mes", requireAuth, grantAccess(["cliente"]), ClientesController.getTurnosMes) //working
 clientesRouter.get("/:dni/turnos/activos", requireAuth, grantAccess(["cliente"]), ClientesController.getActivos) //working
 clientesRouter.patch("/:dni/actualizar", requireAuth, grantAccess(["cliente"]), ClientesController.patchClienteData) //working
-clientesRouter.delete("/:dni/delete", requireAuth, grantAccess(["cliente"]), ClientesController.deleteAccount)
+clientesRouter.delete("/:dni", requireAuth, grantAccess(["cliente"]), ClientesController.deleteAccount)

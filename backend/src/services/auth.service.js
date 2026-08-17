@@ -110,4 +110,36 @@ export class AuthService {
     return { dni, nombre, apellido, correo, fecha_nacimiento, genero }
   }
 
+  static async forgotPassword({ correo, role }) {
+    const userFound = await AuthModel.getDniByCorreo({ correo, role })
+
+    if (!userFound) throw new AppError('Correo no encontrado', 404, 'INVALID_CORREO')
+
+    const token = jwt.sign({ dni: userFound.dni_persona, role: role }, process.env.JWT_SECRET, {
+      expiresIn: '10m'
+    })
+
+    return token
+  }
+
+  static async resetPassWord({ password, token }) {
+    try {
+      const verifiedToken = jwt.verify(token, process.env.JWT_SECRET)
+
+      const { dni, role } = verifiedToken
+
+      const password_hashed = await bcrypt.hash(password, SALT_ROUNDS)
+
+      const updated = await AuthModel.resetPassWord({ dni, role, password_hashed })
+
+      if (!updated) throw new AppError("We could not update your password", 400)
+
+      return true
+    } catch (err) {
+      if (err instanceof AppError) throw err;
+
+      throw new AppError("The link is no longer active or is not valid", 401, "INVALID_TOKEN");
+    }
+  }
+
 }

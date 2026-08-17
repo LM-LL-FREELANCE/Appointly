@@ -1,11 +1,11 @@
-import { Card, Badge, Avatar, Group, Stack, Title, Text } from "@mantine/core";
+import { Paper, Card, Badge, Avatar, Group, Stack, Title, Text } from "@mantine/core";
 import ButtonLay from "./Button";
 
 export default function TurnoCard({ data, openedModal, cancelarTurno }) {
 
   return (
     <>
-      <Card radius="md" padding="md" my="md" mah={500}>
+      <Paper radius="md" padding="md" my="md" mah={500}>
         <Stack gap="xl" align="center" justify="center">
           <Avatar size="xl" radius="xl" alt="" />
           <Stack gap="lg" align="center" mt="md">
@@ -29,8 +29,7 @@ export default function TurnoCard({ data, openedModal, cancelarTurno }) {
             </Group>
           </Stack>
         </Stack>
-
-      </Card>
+      </Paper>
     </>
   )
 }
