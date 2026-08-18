@@ -1,13 +1,14 @@
 import { useState, useMemo } from "react"
 import { PageHeader } from "../components/PageHeader.jsx"
-import { Alert, Avatar, Box, Button, Group, Loader, Paper, SimpleGrid, Stack, Switch, Text } from "@mantine/core"
+import { Alert, Avatar, Box, Button, Group, Paper, SimpleGrid, Stack, Switch, Text } from "@mantine/core"
 import { Link } from "react-router-dom"
 import { useIsDesktop } from "../hooks/useIsDesktop.js"
 import TimeSlot from "../components/TimeSlot.jsx"
+import HorariosSkeleton from "../components/skeletons/HorariosSkeleton.jsx"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { getHorariosByDni, createHorario, updateHorario, deleteHorario } from "../api/profesionales.js"
 import { useAuth } from "../hooks/useAuth.js"
-import { IconExclamationCircle, IconCheck, IconX } from '@tabler/icons-react'
+import { IconExclamationCircle, IconCheck, IconX, IconPlus } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
 
 const DIAS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
@@ -201,11 +202,7 @@ export default function Horarios() {
       </PageHeader>
 
       <Box>
-        {isPending && (
-          <Group justify="center" mt="xl">
-            <Loader />
-          </Group>
-        )}
+        {isPending && <HorariosSkeleton />}
 
         {isError && (
           <Alert color="red" m="md" variant="light" icon={<IconExclamationCircle />}>
@@ -219,7 +216,7 @@ export default function Horarios() {
               <Paper key={dia} withBorder p="sm" radius="md">
                 <Group wrap="wrap" gap="md" align={isDesktop ? 'stretch' : 'center'}>
                   {isDesktop ? (
-                    <Paper radius="sm" p="md" w={180} style={{ flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Paper radius="sm" p="lg" w={180} style={{ flexShrink: 0, display: 'flex', alignItems: 'start', justifyContent: 'start', paddingLeft: '15px' }}>
                       <Switch
                         size="md"
                         checked={dayEnabled[dia]}
@@ -247,10 +244,10 @@ export default function Horarios() {
                     </Group>
                   )}
 
-                  <Paper radius="sm" p={isDesktop ? 'sm' : 0} style={{ flex: 1, minWidth: 0 }}>
+                  <Paper radius="sm" style={{ flex: 1, minWidth: 0, alignItems: 'center', margin: 'auto' }} h="100%">
                     {dayEnabled[dia] ? (
                       isDesktop ? (
-                        <Box style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 200px))', gap: 'var(--mantine-spacing-xs)' }}>
+                        <Box style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 200px))', gap: 'var(--mantine-spacing-xs)' }} >
                           {slotsByDay[dia].map(slot => (
                             <TimeSlot
                               key={slot._localId}
@@ -262,8 +259,8 @@ export default function Horarios() {
                             />
                           ))}
                           <Box style={{ display: 'flex', alignItems: 'center' }}>
-                            <Button variant="default" size="sm" onClick={() => addSlot(dia)}>
-                              + Agregar franja
+                            <Button variant="default" size="sm" leftSection={<IconPlus size={16} />} onClick={() => addSlot(dia)}>
+                              Agregar franja
                             </Button>
                           </Box>
                         </Box>
@@ -280,15 +277,15 @@ export default function Horarios() {
                             />
                           ))}
                           <Box style={{ display: 'flex', alignItems: 'center' }}>
-                            <Button variant="default" size="md" w="100%" onClick={() => addSlot(dia)}>
-                              + Agregar franja
+                            <Button variant="default" size="md" w="100%" onClick={() => addSlot(dia)} leftSection={<IconPlus size={16} />} >
+                              Agregar franja
                             </Button>
                           </Box>
                         </SimpleGrid>
                       )
                     ) : (
-                      <Box style={{ display: 'flex', alignItems: 'center' }} mih={{ base: 0, md: 38 }}>
-                        <Text c="dimmed" fz="md">Día inactivo</Text>
+                      <Box style={{ display: 'flex', alignItems: 'center' }} h="100%" mih={{ base: 0, md: 38 }}>
+                        <Text c="dimmed" fz="sm" >Día inactivo</Text>
                       </Box>
                     )}
                   </Paper>
