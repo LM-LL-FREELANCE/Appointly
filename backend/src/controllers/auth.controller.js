@@ -89,7 +89,7 @@ export class AuthController {
 
       const token = await AuthService.forgotPassword({ correo, role })
 
-      const resetLink = `${process.env.WEB_FROM}/${token}`
+      const resetLink = `${process.env.WEB_FROM}/resetear-contraseña/${token}`
 
       await EmailMethods.resetPassWord({ correo, link: resetLink })
 
