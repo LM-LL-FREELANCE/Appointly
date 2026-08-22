@@ -7,14 +7,15 @@ import { IconSearch } from '@tabler/icons-react'
 import { PageHeader } from '../components/PageHeader'
 import { DoctorCard } from '../components/DoctorCard'
 import DoctorTable from '../components/DoctorTable'
-import { getFilteredProfesional, getAllEspecialidades, getAllObraSociales } from '../api/profesionales.js'
+import { getFilteredProfesional, getAllEspecialidades } from '../api/profesionales.js'
 import { useQuery, keepPreviousData } from "@tanstack/react-query"
 import { useNavigate } from 'react-router-dom'
 import useObrasSociales from '../hooks/useObraSociales'
-import { useMediaQuery } from "@mantine/hooks"
+import { useIsDesktop } from "../hooks/useIsDesktop.js"
 
 export default function Buscar() {
   const navigate = useNavigate()
+  const isDesktop = useIsDesktop('sm')
   const [busqueda, setBusqueda] = useState('')
   const [especialidad, setEspecialidad] = useState(null)
   const [obraSocial, setObraSocial] = useState(null)
@@ -49,16 +50,25 @@ export default function Buscar() {
     <Stack gap="md">
       <PageHeader
         title="Buscar doctores"
-        actions={(
+        actions={isDesktop && (
           <TextInput
             placeholder="Buscar por nombre..."
             leftSection={<IconSearch size={16} />}
             value={busqueda}
             onChange={(e) => setBusqueda(e.currentTarget.value)}
-            w={{ base: '100%', sm: 240 }}
+            w={240}
           />
         )}
       />
+
+      {!isDesktop && (
+        <TextInput
+          placeholder="Buscar por nombre..."
+          leftSection={<IconSearch size={16} />}
+          value={busqueda}
+          onChange={(e) => setBusqueda(e.currentTarget.value)}
+        />
+      )}
 
       <Grid gutter={{ base: 'sm', md: 'md' }}>
         <Grid.Col span={{ base: 12, md: 3 }}>
@@ -106,15 +116,16 @@ export default function Buscar() {
               <Text size="sm" c="orange">
                 Mostrando {doctoresFiltrados.length} de {profesionales.length} profesionales
               </Text>
-              <SegmentedControl
-                display={{ base: "none", sm: "flex" }}
-                value={vista}
-                onChange={setVista}
-                data={[
-                  { label: 'Cards', value: 'cards' },
-                  { label: 'Lista', value: 'lista' },
-                ]}
-              />
+              {isDesktop && (
+                <SegmentedControl
+                  value={vista}
+                  onChange={setVista}
+                  data={[
+                    { label: 'Cards', value: 'cards' },
+                    { label: 'Lista', value: 'lista' },
+                  ]}
+                />
+              )}
             </Group>
             {vista === 'cards' ? (
               isLoadingProfesionales ? (

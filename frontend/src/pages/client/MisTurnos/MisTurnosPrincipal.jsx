@@ -1,20 +1,20 @@
 import { useState } from "react"
 import { useLocation } from "react-router-dom"
-import { useMediaQuery } from "@mantine/hooks"
 import { PageHeader } from "../../../components/PageHeader.jsx"
-import { Text, Stack, Group, SegmentedControl, Box, Alert, Loader } from "@mantine/core"
+import { Stack, Group, SegmentedControl, Box, Alert, Loader } from "@mantine/core"
 import { TurnoCard } from "./TurnoCard.jsx"
 import TurnosTable from "./TurnosTable.jsx"
 import { useQuery } from "@tanstack/react-query"
 import { getTurnosClienteByDni } from "../../../api/clientes.js"
 import { useAuth } from "../../../hooks/useAuth.js"
+import { useIsDesktop } from "../../../hooks/useIsDesktop.js"
 
 export default function MisTurnos() {
   const { user } = useAuth()
 
   const { state } = useLocation()
   const [estado, setEstado] = useState(state?.tab ?? 'activo')
-  const isDesktop = useMediaQuery('(min-width: 62em)')
+  const isDesktop = useIsDesktop()
 
   const { data: [activos, pasados] = [[], []], isLoading, isError } = useQuery({
     queryKey: ['turnos', user?.dni, ""],

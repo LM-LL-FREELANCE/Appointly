@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
-import { Group, Stack, Text, Avatar, Button, Paper, TextInput, Grid, Select, Flex, FileButton, Notification } from '@mantine/core'
+import { Group, Stack, Avatar, Button, Paper, TextInput, Grid, Select, Flex, FileButton, Notification } from '@mantine/core'
 import { DatePickerInput } from '@mantine/dates'
-import { useMediaQuery } from '@mantine/hooks'
 import { IconLock, IconCalendar } from '@tabler/icons-react'
 import { PageHeader } from '../components/PageHeader.jsx'
 import { MultiSelectCombobox } from '../components/MultiSelectCombobox.jsx'
@@ -14,14 +13,15 @@ import useUpdateCliente from '../hooks/useUpdateAccCliente.jsx'
 import useUpdateProfesional from '../hooks/useUpdateAccProfesional.jsx'
 import useDeleteCliente from '../hooks/useDeleteCliente.jsx'
 import useDeleteProfesional from '../hooks/useDeleteProfesional.jsx'
+import { useIsDesktop } from '../hooks/useIsDesktop.js'
 
 const OPCIONES_GENERO = ['Masculino', 'Femenino', 'Prefiero no decirlo']
 
 
 export default function MiPerfil() {
   const { logout, user } = useAuth()
-  const isMobile = useMediaQuery('(max-width: 768px)')
-  const inputSize = isMobile ? 'md' : 'sm'
+  const isDesktop = useIsDesktop('sm')
+  const inputSize = isDesktop ? 'sm' : 'md'
 
   const { data: perfil } = useGetProfesional({
     dni: user ? user.dni : undefined,

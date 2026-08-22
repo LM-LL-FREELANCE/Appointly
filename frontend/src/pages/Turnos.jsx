@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { Text, Alert, Stack, Button, Box, Group } from '@mantine/core'
+import { Alert, Stack, Button, Box, Group } from '@mantine/core'
 import { PageHeader } from '../components/PageHeader.jsx'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { useIsDesktop } from '../hooks/useIsDesktop.js'
 import TurnosTableProf from './turnos/TurnosTableProf.jsx'
 import { TurnoCardProf } from './turnos/TurnoCardProf.jsx'
 import { DetalleTurnoProfMobile } from './turnos/DetalleTurnoProfMobile.jsx'
@@ -9,6 +10,7 @@ import { DetalleTurnoProfMobile } from './turnos/DetalleTurnoProfMobile.jsx'
 export default function Turnos() {
   const { state } = useLocation()
   const navigate = useNavigate()
+  const isDesktop = useIsDesktop()
 
   const fecha = state?.fecha ?? null
   const dniProfesional = state?.dni_profesional ?? null
@@ -44,31 +46,29 @@ export default function Turnos() {
       ) : (
         <>
           {/* Desktop: tabla */}
-          <Box px={{ base: 0, md: 'xl' }} visibleFrom="md">
-            <TurnosTableProf
-              turnos={turnos}
-              dniProfesional={dniProfesional}
-              onCancelled={marcarCancelado}
-            />
-          </Box>
-
-          {/* Mobile: lista de tarjetas o detalle del turno seleccionado */}
-          <Box hiddenFrom="md">
-            {detalle ? (
-              <DetalleTurnoProfMobile
-                turno={detalle}
+          {isDesktop ? (
+            <Box px={{ base: 0, md: 'xl' }}>
+              <TurnosTableProf
+                turnos={turnos}
                 dniProfesional={dniProfesional}
-                onVolver={() => setDetalle(null)}
                 onCancelled={marcarCancelado}
               />
-            ) : (
-              <Stack gap="sm" pb={10}>
-                {turnos.map((turno) => (
-                  <TurnoCardProf key={turno.id_turno} turno={turno} onVerDetalle={setDetalle} />
-                ))}
-              </Stack>
-            )}
-          </Box>
+            </Box>
+          ) : detalle ? (
+            <DetalleTurnoProfMobile
+              turno={detalle}
+              dniProfesional={dniProfesional}
+              onVolver={() => setDetalle(null)}
+              onCancelled={marcarCancelado}
+            />
+          ) : (
+            <Stack gap="sm" pb={10}>
+              {turnos.map((turno) => (
+                <TurnoCardProf key={turno.id_turno} turno={turno} onVerDetalle={setDetalle} />
+              ))}
+            </Stack>
+          )}
+
           <Group justify="end" mt="md" mx="lg">
             <Button onClick={() => navigate('/agenda')}>
               Volver a agenda

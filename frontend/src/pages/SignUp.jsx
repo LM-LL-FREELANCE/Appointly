@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom"
 import { TextInput, Title, Button, Loader, Stack, Paper, SimpleGrid, Select, PasswordInput, Alert, Group } from "@mantine/core"
 import { DatePickerInput } from "@mantine/dates"
-import { useMediaQuery } from "@mantine/hooks"
+import { useIsDesktop } from "../hooks/useIsDesktop.js"
 import { useState } from "react"
 import { matchesField, useForm } from "@mantine/form"
 import { IconCalendar, IconAlertCircle, IconCheck } from '@tabler/icons-react';
@@ -12,8 +12,8 @@ import 'dayjs/locale/es';
 
 export default function SignUp() {
   const navigate = useNavigate()
-  const isMobile = useMediaQuery('(max-width: 768px)')
-  const inputSize = isMobile ? 'xs' : 'sm'
+  const isDesktop = useIsDesktop('sm')
+  const inputSize = isDesktop ? 'sm' : 'xs'
 
   const opcionesDeGenero = ["Masculino", "Femenino", "Prefiero no decirlo"]
 

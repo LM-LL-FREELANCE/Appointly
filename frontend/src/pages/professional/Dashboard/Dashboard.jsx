@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query'
-import { useMediaQuery } from '@mantine/hooks'
 import { Group, Text, Stack, Paper, Box, SimpleGrid, Divider } from "@mantine/core"
 import { BarChart } from '@mantine/charts'
 import { PageHeader } from '../../../components/PageHeader.jsx'
@@ -10,6 +9,7 @@ import { getProfesionalByDni, getTurnosByProfesional } from '../../../api/profes
 import { aISO } from '../../../utils/fechas.utils.js'
 import { useAuth } from '../../../hooks/useAuth.js'
 import useSlots from '../../../hooks/useSlots.jsx'
+import { useIsDesktop } from '../../../hooks/useIsDesktop.js'
 import { IconChartBar } from '@tabler/icons-react'
 
 const DIA_LABEL = ['D', 'L', 'M', 'X', 'J', 'V', 'S']
@@ -108,7 +108,7 @@ export default function Dashboard() {
     return false
   }) ?? null
 
-  const isDesktop = useMediaQuery('(min-width: 48em)')
+  const isDesktop = useIsDesktop('sm')
   const saludo = perfil ? `Hola, ${perfil.nombre} ${perfil.apellido}` : 'Hola'
 
   return (
