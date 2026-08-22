@@ -24,7 +24,7 @@ export function TurnoCard({ turno, estado }) {
   return (
     <>
       <Paper withBorder radius="lg" p="md">
-        <Stack gap="md">
+        <Stack gap="sm">
           <Group justify="space-between" align="center" wrap="nowrap">
             <Text fw={700} fz="md">{turno.fecha_turno} · {turno.hora_turno}</Text>
             <EstadoTurnoBadge estado={estado} />

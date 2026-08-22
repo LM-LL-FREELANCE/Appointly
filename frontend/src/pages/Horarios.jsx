@@ -10,7 +10,7 @@ import { useAuth } from "../hooks/useAuth.js"
 import { IconExclamationCircle, IconCheck, IconX, IconPlus } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
 
-const DIAS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+const DIAS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
 
 export default function Horarios() {
   const { user } = useAuth()
@@ -31,33 +31,33 @@ export default function Horarios() {
   // Asignar _localId estable a los slots del servidor
   const serverSlots = useMemo(
     () => (data || []).map(s => ({ ...s, _localId: `server-${s.id_horario}` })),
-    [data]);
+    [data])
 
   // Slots finales: servidor + añadidos, filtrando borrados y aplicando ediciones
   const allSlots = useMemo(() => (
     [...serverSlots, ...added]
       .filter(s => !deleted.includes(s._localId))
       .map(s => edited[s._localId] ? { ...s, ...edited[s._localId] } : s)
-  ), [serverSlots, added, deleted, edited]);
+  ), [serverSlots, added, deleted, edited])
 
   // Agrupar por dia
   const slotsByDay = useMemo(() => {
-    const result = {};
-    DIAS.forEach((_, i) => { result[i] = []; });
-    allSlots.forEach(s => result[s.dia_semana].push(s));
-    return result;
-  }, [allSlots]);
+    const result = {}
+    DIAS.forEach((_, i) => { result[i] = [] })
+    allSlots.forEach(s => result[s.dia_semana].push(s))
+    return result
+  }, [allSlots])
 
   // Estado efectivo del switch: override explicito si existe, si no derivado del servidor
   const dayEnabled = useMemo(() => {
-    const result = {};
+    const result = {}
     DIAS.forEach((_, i) => {
       result[i] = i in dayToggled
         ? dayToggled[i]
-        : (data || []).some(s => s.dia_semana === i);
-    });
-    return result;
-  }, [data, dayToggled]);
+        : (data || []).some(s => s.dia_semana === i)
+    })
+    return result
+  }, [data, dayToggled])
 
   const addSlot = (dia) => {
     setAdded(prev => [...prev, {
@@ -66,88 +66,88 @@ export default function Horarios() {
       dia_semana: dia,
       hora_inicio: '',
       hora_fin: '',
-    }]);
-  };
+    }])
+  }
 
   const removeSlot = (localId) => {
-    setDeleted(prev => [...prev, localId]);
-  };
+    setDeleted(prev => [...prev, localId])
+  }
 
   const updateSlot = (localId, field, value) => {
     setEdited(prev => ({
       ...prev,
       [localId]: { ...(prev[localId] || {}), [field]: value },
-    }));
-  };
+    }))
+  }
 
   const toggleDay = (dia) => {
-    const isCurrentlyEnabled = dayEnabled[dia];
+    const isCurrentlyEnabled = dayEnabled[dia]
     if (!isCurrentlyEnabled && slotsByDay[dia].length === 0) {
-      addSlot(dia);
+      addSlot(dia)
     }
-    setDayToggled(prev => ({ ...prev, [dia]: !isCurrentlyEnabled }));
-  };
+    setDayToggled(prev => ({ ...prev, [dia]: !isCurrentlyEnabled }))
+  }
 
   const buildSavePayload = () => {
-    const toDelete = [];
-    const toPost = [];
-    const toPut = [];
+    const toDelete = []
+    const toPost = []
+    const toPut = []
 
     DIAS.forEach((_, dia) => {
-      const serverSlotsForDay = (data || []).filter(s => s.dia_semana === dia);
+      const serverSlotsForDay = (data || []).filter(s => s.dia_semana === dia)
 
       if (!dayEnabled[dia]) {
-        serverSlotsForDay.forEach(s => toDelete.push(s.id_horario));
-        return;
+        serverSlotsForDay.forEach(s => toDelete.push(s.id_horario))
+        return
       }
 
       serverSlotsForDay.forEach(s => {
-        const localId = `server-${s.id_horario}`;
+        const localId = `server-${s.id_horario}`
         if (deleted.includes(localId)) {
-          toDelete.push(s.id_horario);
+          toDelete.push(s.id_horario)
         } else if (edited[localId]) {
           toPut.push({
             id: s.id_horario,
             dia_semana: s.dia_semana,
             hora_inicio: edited[localId].hora_inicio ?? s.hora_inicio,
             hora_fin: edited[localId].hora_fin ?? s.hora_fin,
-          });
+          })
         }
-      });
+      })
 
       added
         .filter(s => s.dia_semana === dia && !deleted.includes(s._localId))
         .forEach(s => {
-          const edits = edited[s._localId] || {};
-          const hora_inicio = edits.hora_inicio ?? s.hora_inicio;
-          const hora_fin = edits.hora_fin ?? s.hora_fin;
+          const edits = edited[s._localId] || {}
+          const hora_inicio = edits.hora_inicio ?? s.hora_inicio
+          const hora_fin = edits.hora_fin ?? s.hora_fin
           if (hora_inicio && hora_fin) {
-            toPost.push({ dia_semana: s.dia_semana, hora_inicio, hora_fin });
+            toPost.push({ dia_semana: s.dia_semana, hora_inicio, hora_fin })
           }
-        });
-    });
+        })
+    })
 
-    return { toDelete, toPost, toPut };
-  };
+    return { toDelete, toPost, toPut }
+  }
 
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient()
 
-  const { mutate: saveHorarios, isPending: isSaving } = useMutation({
+  const { mutate: saveHorarios } = useMutation({
     mutationFn: async () => {
-      const { toDelete, toPost, toPut } = buildSavePayload();
+      const { toDelete, toPost, toPut } = buildSavePayload()
       await Promise.all([
         ...toDelete.map(id => deleteHorario({ id })),
         ...toPut.map(slot => updateHorario({ ...slot })),
         ...toPost.map(slot => createHorario({ ...slot, dni: user.dni })),
-      ]);
+      ])
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['horarios', user.dni] });
-      setAdded([]);
-      setDeleted([]);
-      setEdited({});
-      setDayToggled({});
-      (() => {
+      queryClient.invalidateQueries({ queryKey: ['horarios', user.dni] })
+      setAdded([])
+      setDeleted([])
+      setEdited([])
+      setDayToggled({})
+      ;(() => {
         const id = notifications.show({
           title: 'Espera un momento...',
           message: 'Guardando cambios en tus horarios',
@@ -155,7 +155,7 @@ export default function Horarios() {
           withCloseButton: false,
           autoClose: false,
           loading: true,
-        });
+        })
 
         setTimeout(() => {
           notifications.update({
@@ -166,12 +166,12 @@ export default function Horarios() {
             loading: false,
             autoClose: 3000,
             allowClose: true,
-          });
-        }, 1500);
-      })();
+          })
+        }, 1500)
+      })()
     },
     onError: (err) => {
-      console.error('[Horarios] Error al guardar:', err.message);
+      console.error('[Horarios] Error al guardar:', err.message)
       notifications.show({
         title: 'Error al guardar los horarios',
         message: 'Verifica que los lapsos de tiempo no se superpongan',
@@ -183,7 +183,7 @@ export default function Horarios() {
         position: 'top-center',
       })
     }
-  });
+  })
 
   return (
     <>
@@ -221,7 +221,7 @@ export default function Horarios() {
                   ) : (
                     <Group justify="space-between" w="100%">
                       <Switch
-                        size="lg"
+                        size="md"
                         checked={dayEnabled[dia]}
                         onChange={() => toggleDay(dia)}
                         withThumbIndicator={false}
@@ -229,7 +229,7 @@ export default function Horarios() {
                         radius="xl"
                       />
                       {dayEnabled[dia] && slotsByDay[dia].length > 0 && (
-                        <Text c="dimmed" size="md">
+                        <Text c="dimmed" size="sm">
                           {slotsByDay[dia].length} {slotsByDay[dia].length === 1 ? 'franja' : 'franjas'}
                         </Text>
                       )}
@@ -269,7 +269,7 @@ export default function Horarios() {
                             />
                           ))}
                           <Box style={{ display: 'flex', alignItems: 'center' }}>
-                            <Button variant="default" size="md" w="100%" onClick={() => addSlot(dia)} leftSection={<IconPlus size={16} />} >
+                            <Button variant="default" size="sm" w="100%" onClick={() => addSlot(dia)} leftSection={<IconPlus size={16} />} >
                               Agregar franja
                             </Button>
                           </Box>
@@ -290,17 +290,17 @@ export default function Horarios() {
 
       {!isDesktop && (
         <>
-          <Box h={60} />
+          <Box h={54} />
 
           <Box
             p="md"
             bg="var(--mantine-color-body)"
             style={{ position: 'fixed', bottom: 0, left: 0, right: 0 }}
           >
-            <Button fullWidth size="lg" /*disabled={isPending || isError || isSaving}*/ onClick={saveHorarios}>Guardar cambios</Button>
+            <Button fullWidth size="md" onClick={saveHorarios}>Guardar cambios</Button>
           </Box>
         </>
       )}
     </>
-  );
+  )
 }

@@ -7,7 +7,7 @@ export function TurnoCardProf({ turno, onVerDetalle }) {
   const badgeColor = turno.estado === 'activo' ? 'green' : turno.estado === 'cancelado' ? 'red' : 'gray'
   return (
     <Paper withBorder radius="lg" p="md">
-      <Stack gap="md">
+      <Stack gap="sm">
         <Group justify="space-between" align="center" wrap="nowrap">
           <Text fw={700} fz="md">{fechaCorta(turno.fecha_turno)} · {horaCorta(turno.hora_turno)}</Text>
           <Badge variant="dot" color={badgeColor} radius="xl" size="md" tt="uppercase">
