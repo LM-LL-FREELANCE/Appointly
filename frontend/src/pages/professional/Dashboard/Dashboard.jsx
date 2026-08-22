@@ -133,7 +133,7 @@ export default function Dashboard() {
           <SimpleGrid cols={2}>
             <StatCard label="Turnos hoy" value={turnosHoy} color="brand" />
             <StatCard label="Esta semana" value={estaSemana} color="accent" />
-            <StatCard label="Cancelados (7d)" value={cancelados7d} color="red" />
+            <StatCard label="Cancelados" value={cancelados7d} color="red" />
             <StatCard label="Slots libres" value={freeSlotsToday} color="cyan" />
           </SimpleGrid>
           <ProximoTurno turno={proximoTurno} isDesktop={isDesktop} />
@@ -158,7 +158,7 @@ export default function Dashboard() {
         >
           <StatCard label="Turnos hoy" value={turnosHoy} color="brand" />
           <StatCard label="Esta semana" value={estaSemana} color="accent" />
-          <StatCard label="Cancelados (7d)" value={cancelados7d} color="red" />
+          <StatCard label="Cancelados" value={cancelados7d} color="red" />
           <StatCard label="Slots libres hoy" value={freeSlotsToday} color="cyan" />
 
           <TurnosDeHoy turnos={turnosDeHoy} />
