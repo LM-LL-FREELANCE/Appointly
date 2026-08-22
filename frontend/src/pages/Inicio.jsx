@@ -1,11 +1,11 @@
 import { PageHeader } from "../components/PageHeader";
-import { Stack, Title, Group, Grid, Avatar, Paper, SimpleGrid, Alert, Loader, Container, Center, Text } from "@mantine/core";
+import { Stack, Title, Group, Grid, Paper, SimpleGrid, Alert, Loader, Container, Center, Text } from "@mantine/core";
 import { IconAlertSquareRounded } from '@tabler/icons-react';
 import { useDisclosure } from "@mantine/hooks";
 import { StatCard } from "./professional/Dashboard/StatCard.jsx";
 import useGetTurnosActivos from "../hooks/useGetTurnosActivos.jsx";
 import useGetTurnosMes from "../hooks/useGetTurnosMes.jsx";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import ButtonLay from "../components/Button.jsx";
 import TurnoCard from "../components/TurnoActivoCard.jsx";
 import { useAuth } from "../hooks/useAuth.js";
@@ -78,16 +78,7 @@ export default function Inicio() {
   }
   return (
     <>
-      <Stack gap="md">
-        <PageHeader>
-          <Group justify="space-between" style={{ flex: 1 }}>
-            <Title order={2}>Hola, {userName}</Title>
-            <Group>
-              <Avatar radius="xl" alt="" component={Link} to="/miperfil" />
-            </Group>
-          </Group>
-        </PageHeader>
-      </Stack>
+      <PageHeader title={`Hola, ${userName}`} />
       {!user && (
         <Center style={{ minHeight: '70vh' }}>
           <Stack align="center" gap="md">

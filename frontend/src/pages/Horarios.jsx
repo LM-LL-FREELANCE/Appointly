@@ -1,7 +1,6 @@
 import { useState, useMemo } from "react"
 import { PageHeader } from "../components/PageHeader.jsx"
-import { Alert, Avatar, Box, Button, Group, Paper, SimpleGrid, Stack, Switch, Text } from "@mantine/core"
-import { Link } from "react-router-dom"
+import { Alert, Box, Button, Group, Paper, SimpleGrid, Stack, Switch, Text } from "@mantine/core"
 import { useIsDesktop } from "../hooks/useIsDesktop.js"
 import TimeSlot from "../components/TimeSlot.jsx"
 import HorariosSkeleton from "../components/skeletons/HorariosSkeleton.jsx"
@@ -188,18 +187,11 @@ export default function Horarios() {
 
   return (
     <>
-      <PageHeader>
-        <Group justify="space-between" style={{ flex: 1 }}>
-          <Stack gap={0}>
-            <Text fw={600} fz="xl">Horarios de Atención</Text>
-            {isDesktop && <Text c="dimmed" fz="md">define los slots reservables</Text>}
-          </Stack>
-          <Group>
-            {isDesktop && <Button onClick={saveHorarios}>Guardar cambios</Button>}
-            <Avatar radius="xl" alt="" component={Link} to="/miperfil" />
-          </Group>
-        </Group>
-      </PageHeader>
+      <PageHeader
+        title="Horarios de Atención"
+        subtitle="define los slots reservables"
+        actions={isDesktop && <Button onClick={saveHorarios}>Guardar cambios</Button>}
+      />
 
       <Box>
         {isPending && <HorariosSkeleton />}

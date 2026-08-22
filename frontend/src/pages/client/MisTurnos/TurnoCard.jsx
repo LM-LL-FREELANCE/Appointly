@@ -5,6 +5,7 @@ import { IconAlertCircle } from '@tabler/icons-react'
 import { Link } from 'react-router-dom'
 import { cancelTurnoById } from '../../../api/clientes.js'
 import { useAuth } from '../../../hooks/useAuth.js'
+import { EstadoTurnoBadge } from '../../../components/EstadoTurnoBadge.jsx'
 
 export function TurnoCard({ turno, estado }) {
   const { user } = useAuth()
@@ -27,9 +28,7 @@ export function TurnoCard({ turno, estado }) {
         <Stack gap="md">
           <Group justify="space-between" align="center" wrap="nowrap">
             <Text fw={700} fz="lg">{turno.fecha_turno} · {turno.hora_turno}</Text>
-            <Badge variant="dot" color={badgeColor} radius="xl" size="lg" tt="uppercase">
-              {estado}
-            </Badge>
+            <EstadoTurnoBadge estado={estado} />
           </Group>
 
           <Group gap="sm" wrap="nowrap">

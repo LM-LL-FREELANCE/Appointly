@@ -1,8 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useMediaQuery } from '@mantine/hooks'
-import { Group, Text, Stack, Avatar, Paper, Box, SimpleGrid, Divider } from "@mantine/core"
+import { Group, Text, Stack, Paper, Box, SimpleGrid, Divider } from "@mantine/core"
 import { BarChart } from '@mantine/charts'
-import { Link } from 'react-router-dom'
 import { PageHeader } from '../../../components/PageHeader.jsx'
 import { StatCard } from './StatCard.jsx'
 import { ProximoTurno } from './ProximoTurno.jsx'
@@ -119,28 +118,15 @@ export default function Dashboard() {
       flexDirection: 'column',
       overflow: 'hidden',
     }}>
-      <PageHeader>
-        <Group justify="space-between" style={{ flex: 1 }}>
-          <Stack gap={0}>
-            <Text fw={600} fz={{ base: 'xl', sm: 'lg' }}>{saludo}</Text>
-            {isDesktop && (
-              <Text c="dimmed" fz={{ base: 'md', sm: 'sm' }}>
-                {new Date().toLocaleDateString('es-AR', {
-                  timeZone: 'UTC',
-                  weekday: 'short',
-                  day: 'numeric',
-                  month: 'short',
-                })}
-              </Text>
-            )}
-          </Stack>
-          {isDesktop && (
-            <Group>
-              <Avatar radius="xl" alt="" component={Link} to="/miperfil" />
-            </Group>
-          )}
-        </Group>
-      </PageHeader>
+      <PageHeader
+        title={saludo}
+        subtitle={new Date().toLocaleDateString('es-AR', {
+          timeZone: 'UTC',
+          weekday: 'short',
+          day: 'numeric',
+          month: 'short',
+        })}
+      />
 
       {!isDesktop && (
         <Stack gap="sm" p="xs" pb="xl" style={{ flex: 1, overflowY: 'auto' }}>

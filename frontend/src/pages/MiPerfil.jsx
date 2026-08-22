@@ -160,11 +160,7 @@ export default function MiPerfil() {
 
   return (
     <>
-      <PageHeader>
-        <Group justify="space-between" style={{ flex: 1 }}>
-          <Text fw={600} fz={{ base: 'xl', sm: 'lg' }}>Mi perfil</Text>
-        </Group>
-      </PageHeader>
+      <PageHeader title="Mi perfil" withAvatar={false} />
 
       <Flex direction={{ base: 'column', md: 'row' }} align={{ base: 'stretch', md: 'flex-start' }} gap="lg"
         p="md" pb="xl">

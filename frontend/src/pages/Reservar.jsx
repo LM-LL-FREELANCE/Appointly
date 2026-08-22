@@ -90,16 +90,10 @@ const Reservar = () => {
 
   return (
     <>
-      <PageHeader>
-        <Group align="baseline" gap="xs">
-          <Text fw={600} size="lg">Reservar turno</Text>
-          {doctor && (
-            <Text fw={400} c="dimmed" size="md">
-              {`${doctor.nombre} ${doctor.apellido} · ${especialidad}`}
-            </Text>
-          )}
-        </Group>
-      </PageHeader>
+      <PageHeader
+        title="Reservar turno"
+        subtitle={doctor ? `${doctor.nombre} ${doctor.apellido} · ${especialidad}` : undefined}
+      />
       {!turnoConfirmado && (
         <Stack gap="md">
 

@@ -2,10 +2,10 @@ import useProfesionalDays from '../hooks/useProfesionalDays.jsx'
 import { useState } from 'react'
 import { rangoMes, rangoSemana } from '../utils/fechas.utils.js'
 //react-router
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 //ui
 import { Schedule } from '@mantine/schedule'
-import { Paper, Text, Alert, Grid, Avatar, Group, Center, Loader, Button, Stack } from '@mantine/core'
+import { Paper, Text, Alert, Grid, Group, Center, Loader, Button, Stack } from '@mantine/core'
 import { PageHeader } from '../components/PageHeader.jsx'
 import { useAuth } from '../hooks/useAuth.js'
 import dayjs from 'dayjs'
@@ -78,12 +78,7 @@ export default function Agenda() {
   }
   return (
     <>
-      <PageHeader>
-        <Group justify="space-between" style={{ flex: 1 }}>
-          <Text fw={600} size="lg">Agenda</Text>
-          <Avatar radius="xl" alt="" component={Link} to="/miperfil" />
-        </Group>
-      </PageHeader>
+      <PageHeader title="Agenda" />
       {error && (
         <Alert color="red">
           Error al cargar los datos de la agenda

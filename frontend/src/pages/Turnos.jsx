@@ -24,9 +24,7 @@ export default function Turnos() {
   if (turnos.length === 0 && !fecha) {
     return (
       <>
-        <PageHeader>
-          <Text fw={600} size="lg">Turnos</Text>
-        </PageHeader>
+        <PageHeader title="Turnos" />
         <Stack gap="md" align="center" maw={420} mx="auto" mt="xl">
           <Alert color="red">
             No ha seleccionado la fecha de los turnos del dia que quiere ver. Por favor, aprete el boton "Volver a agenda" y lo redigira a la agenda para que pueda seleccionar la fecha de los turnos del dia que quiere ver.
@@ -39,11 +37,7 @@ export default function Turnos() {
 
   return (
     <>
-      <PageHeader>
-        <Group justify="space-between" style={{ flex: 1 }}>
-          <Text fw={600} size="lg">Turnos del {fecha}</Text>
-        </Group>
-      </PageHeader>
+      <PageHeader title={`Turnos del ${fecha}`} />
 
       {turnos.length === 0 ? (
         <Alert color="blue" mt="md">No hay turnos para este día.</Alert>

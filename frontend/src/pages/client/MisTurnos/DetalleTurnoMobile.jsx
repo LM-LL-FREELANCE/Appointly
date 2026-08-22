@@ -40,9 +40,7 @@ export function DetalleTurnoMobile() {
   if (!turno) {
     return (
       <>
-        <PageHeader>
-          <Text fw={600} fz="xl">Detalle</Text>
-        </PageHeader>
+        <PageHeader title="Detalle" />
         <Paper withBorder radius="lg" p="md">
           <Stack gap="md">
             <Text>No se seleccionó ningún turno para ver detalle.</Text>
@@ -57,9 +55,7 @@ export function DetalleTurnoMobile() {
 
   return (
     <>
-      <PageHeader>
-        <Text fw={600} fz="xl">Detalle</Text>
-      </PageHeader>
+      <PageHeader title="Detalle" />
 
       <Stack gap="md">
         <Paper withBorder radius="lg" px="md" pt="xs" pb={0}>
