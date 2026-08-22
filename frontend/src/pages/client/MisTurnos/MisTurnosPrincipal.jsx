@@ -104,7 +104,7 @@ export default function MisTurnos() {
 
           {!isDesktop && (
             <Stack gap="sm" pb={10}>
-              <SegmentedControl fullWidth size="xl" radius="lg" value={estado} onChange={setEstado} data={[{ label: 'Próximos', value: 'activo' }, { label: 'Historial', value: 'cancelado' }]} />
+              <SegmentedControl fullWidth size="lg" radius="lg" value={estado} onChange={setEstado} data={[{ label: 'Próximos', value: 'activo' }, { label: 'Historial', value: 'cancelado' }]} />
               {(estado === 'activo' ? activos : pasados).map((turno, index) => (
                 <TurnoCard key={index} turno={turno} estado={estado} />
               ))}

@@ -1,17 +1,17 @@
-import { useLocation, useNavigate } from 'react-router-dom';
-import { Badge, Box, Button, Divider, Drawer, Grid, Group, Paper, Stack, Text } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { IconAlertCircle } from '@tabler/icons-react';
-import { PageHeader } from '../../../components/PageHeader.jsx';
-import { cancelTurnoById } from '../../../api/clientes.js';
+import { useLocation, useNavigate } from 'react-router-dom'
+import { Badge, Box, Button, Divider, Drawer, Grid, Group, Paper, Stack, Text } from '@mantine/core'
+import { useDisclosure } from '@mantine/hooks'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { IconAlertCircle } from '@tabler/icons-react'
+import { PageHeader } from '../../../components/PageHeader.jsx'
+import { cancelTurnoById } from '../../../api/clientes.js'
 
 function DetailRow({ label, children }) {
   return (
     <>
       <Grid py="md" align="center">
         <Grid.Col span={5}>
-          <Text fz="lg" c="dimmed">{label}</Text>
+          <Text fz="sm" c="dimmed">{label}</Text>
         </Grid.Col>
         <Grid.Col span={7}>
           {children}
@@ -19,23 +19,23 @@ function DetailRow({ label, children }) {
       </Grid>
       <Divider />
     </>
-  );
+  )
 }
 
 export function DetalleTurnoMobile() {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const { turno, tab = 'activo' } = location.state || {};
-  const [drawerOpened, { open: openDrawer, close: closeDrawer }] = useDisclosure(false);
+  const location = useLocation()
+  const navigate = useNavigate()
+  const { turno, tab = 'activo' } = location.state || {}
+  const [drawerOpened, { open: openDrawer, close: closeDrawer }] = useDisclosure(false)
 
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient()
   const { mutate: cancelar, isPending } = useMutation({
     mutationFn: () => cancelTurnoById({ id: turno.id_turno, motivo: '' }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['turnos'] });
-      navigate('/misturnos', { state: { tab } });
+      queryClient.invalidateQueries({ queryKey: ['turnos'] })
+      navigate('/misturnos', { state: { tab } })
     },
-  });
+  })
 
   if (!turno) {
     return (
@@ -48,10 +48,10 @@ export function DetalleTurnoMobile() {
           </Stack>
         </Paper>
       </>
-    );
+    )
   }
 
-  const badgeColor = turno.estado === 'activo' ? 'green' : turno.estado === 'cancelado' ? 'red' : 'gray';
+  const badgeColor = turno.estado === 'activo' ? 'green' : turno.estado === 'cancelado' ? 'red' : 'gray'
 
   return (
     <>
@@ -60,31 +60,31 @@ export function DetalleTurnoMobile() {
       <Stack gap="md">
         <Paper withBorder radius="lg" px="md" pt="xs" pb={0}>
           <DetailRow label="Profesional">
-            <Text fz="lg" fw={600}>{turno.nombre} {turno.apellido}</Text>
+            <Text fz="md" fw={600}>{turno.nombre} {turno.apellido}</Text>
           </DetailRow>
           <DetailRow label="Especialidad">
-            <Text fz="lg" fw={600}>{turno.tipo}</Text>
+            <Text fz="md" fw={600}>{turno.tipo}</Text>
           </DetailRow>
-          <DetailRow label="Fecha" fz="lg">
-            <Text fz="lg" fw={600}>{turno.fecha_turno}</Text>
+          <DetailRow label="Fecha">
+            <Text fz="md" fw={600}>{turno.fecha_turno}</Text>
           </DetailRow>
           <DetailRow label="Hora">
-            <Text fz="lg" fw={600}>{turno.hora_turno} hs</Text>
+            <Text fz="md" fw={600}>{turno.hora_turno} hs</Text>
           </DetailRow>
           <DetailRow label="Estado">
-            <Badge variant="light" color={badgeColor} radius="xl" size="lg" tt="uppercase">
+            <Badge variant="light" color={badgeColor} radius="xl" size="md" tt="uppercase">
               {turno.estado}
             </Badge>
           </DetailRow>
         </Paper>
 
         {turno.estado === 'activo' && (
-          <Button variant="light" color="red" size="lg" radius="md" fullWidth onClick={openDrawer}>
+          <Button variant="light" color="red" size="md" radius="md" fullWidth onClick={openDrawer}>
             Cancelar turno
           </Button>
         )}
 
-        <Button variant="default" color="gray" size="lg" radius="md" onClick={() => navigate('/misturnos', { state: { tab } })}>
+        <Button variant="default" color="gray" size="md" radius="md" onClick={() => navigate('/misturnos', { state: { tab } })}>
           Atrás
         </Button>
       </Stack>
@@ -111,15 +111,15 @@ export function DetalleTurnoMobile() {
         </Box>
         <Box px="lg" pb="xl">
           <Stack gap="sm">
-            <Button fullWidth variant="light" color="red" size="lg" radius="xl" onClick={() => cancelar()} loading={isPending}>
+            <Button fullWidth variant="light" color="red" size="md" radius="xl" onClick={() => cancelar()} loading={isPending}>
               Sí, cancelar
             </Button>
-            <Button fullWidth variant="default" size="lg" radius="xl" onClick={closeDrawer} disabled={isPending}>
+            <Button fullWidth variant="default" size="md" radius="xl" onClick={closeDrawer} disabled={isPending}>
               No, volver
             </Button>
           </Stack>
         </Box>
       </Drawer>
     </>
-  );
+  )
 }
