@@ -18,15 +18,15 @@ import { notifications } from '@mantine/notifications';
 import '@mantine/notifications/styles.css';
 import { useEffect, useState } from 'react';
 import useSentEmailPassword from '../hooks/useSentEmailPassword.jsx';
-import { IconCheck } from '@tabler/icons-react';
+import { IconCheck, IconX } from '@tabler/icons-react';
 
 export default function Login() {
-  const [forgotPassWordModal, { open: openforgotPassWordModal, close: closeforgotPassWordModal }] = useDisclosure(false)
+  const [forgotPassWordModal, { open: openforgotPassWordModal, close: closeforgotPassWordModal }] =
+    useDisclosure(false)
   const { login, isLoggingIn, loginError } = useAuth()
   const [volverEnviar, setVolverEnviar] = useState(0)
   const [email, setEmail] = useState("")
   const navigate = useNavigate()
-
 
   async function handleLogin(values) {
     try {
@@ -35,7 +35,6 @@ export default function Login() {
     } catch (error) {
       console.error('Login fallido:', error)
     }
-
   }
 
   const form = useForm({
@@ -49,7 +48,9 @@ export default function Login() {
       dni: (value) => (/^\d{7,8}$/).test(value) ? null : 'El DNI debe tener 7 u 8 dígitos'
     }
   })
-  const { mutate: mutateEmail, isPendi: isPendingEmail } = useSentEmailPassword()
+
+  const { mutate: mutateEmail, isPending: isPendingEmail } = useSentEmailPassword()
+
   const handleConfirm = () => {
     mutateEmail({
       correo: email,
@@ -67,16 +68,28 @@ export default function Login() {
           autoClose: false,
           color: 'green'
         });
+      },
+      onError: () => {
+        notifications.show({
+          id: 'errorEnviar',
+          title: 'Error al enviar',
+          message: 'Sucedió un error, verifica que todo lo que ingresaste es correcto.',
+          color: 'red',
+          icon: <IconX />,
+          autoClose: 3000,
+          withCloseButton: true,
+          position: 'top-center',
+        })
       }
     })
   }
+
   const closeModal = () => {
     setVolverEnviar(0)
-    notifications.hide({
-      id: "volverEnviar"
-    })
+    notifications.hide("volverEnviar")
     closeforgotPassWordModal()
   }
+
   const relojActivo = volverEnviar > 0;
 
   useEffect(() => {
@@ -107,9 +120,9 @@ export default function Login() {
 
     return () => clearInterval(reloj);
   }, [relojActivo]);
+
   return (
     <>
-
       <Container size={420} my={100}>
         <Title
           ta="center"
@@ -145,7 +158,8 @@ export default function Login() {
             )}
 
             <Stack gap="md" mt="xl">
-              <Anchor align="center" fw={500} component="button" type="button" size="sm" onClick={openforgotPassWordModal}>
+              <Anchor align="center" fw={500} component="button" type="button" size="sm"
+                onClick={openforgotPassWordModal}>
                 ¿Olvidaste tu contraseña?
               </Anchor>
 
@@ -166,6 +180,7 @@ export default function Login() {
           </Paper>
         </form>
       </Container>
+
       {forgotPassWordModal && (
         <EnviarCorreo
           opened={forgotPassWordModal}

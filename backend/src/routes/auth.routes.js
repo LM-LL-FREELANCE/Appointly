@@ -15,3 +15,4 @@ authRouter.get("/me", attachUser, AuthController.me)
 //reset password endpoint
 authRouter.post("/forgot-password", AuthController.forgotPassword)
 authRouter.post("/reset-password", AuthController.resetPassWord)
+authRouter.get("/verify-reset-token/:token", AuthController.verifyResetToken)

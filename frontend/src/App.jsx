@@ -62,7 +62,7 @@ export default function App() {
         <Route path="/professional-login" element={<ProfessionalLogin />} />
         <Route path="/professional-signup" element={<ProfessionalSignUp />} />
         <Route path="/registrarse" element={<SignUp />} />
-        <Route path="/resetear-contraseña/:token" element={<ResetPassword />} />
+        <Route path="/resetear-contraseña/:token?" element={<ResetPassword />} />
 
         <Route path="/" element={<MainLayout links={links} role={user?.role} />}>
 

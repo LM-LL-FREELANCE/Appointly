@@ -46,6 +46,7 @@ export default function ProfessionalSignUp() {
       correo: '',
       password: '',
       confirm: '',
+      numero_matricula: ''
     },
     validate: {
       dni: (value) => (/^\d{7,8}$/).test(value) ? null : 'El DNI debe tener 7 u 8 dígitos',
@@ -78,6 +79,7 @@ export default function ProfessionalSignUp() {
       confirm: values.confirm,
       fecha_nacimiento: values.fecha_nacimiento,
       genero: getGeneroFormateado(values.genero),
+      numero_matricula: values.numero_matricula
     }, {
       onSuccess: async () => {
         try {
@@ -113,7 +115,6 @@ export default function ProfessionalSignUp() {
           order={2}
           ta="center"
           fw={500}
-          mt="md"
           mb={50}
         >
           Registrate como profesional
@@ -181,6 +182,14 @@ export default function ProfessionalSignUp() {
               key={form.key('correo')}
               {...form.getInputProps('correo')}
               error={form.errors.correo || (errorRegistro?.code === 'DUPLICATE_EMAIL' ? 'Ya existe una cuenta con este correo' : null)}
+            />
+            <TextInput
+              label="Numero de matricula"
+              placeholder="123456789"
+              required
+              radius="md"
+              key={form.key('numero_matricula')}
+              {...form.getInputProps('numero_matricula')}
             />
 
             <SimpleGrid cols={{ base: 1, sm: 2 }}>

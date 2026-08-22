@@ -1,6 +1,6 @@
 import { Button, Container, Title, Anchor, Group, Center, Modal, Text, TextInput, Stack } from '@mantine/core'
 import ButtonLay from './Button.jsx';
-export function EnviarCorreo({ opened, onClose, onConfirm, isPending, isNotAvailble, email, setEmail, size = 'sm', ...props }) {
+export function EnviarCorreo({ opened, onClose, onConfirm, onSettings, isPending, isNotAvailble, email, setEmail, size = 'sm', ...props }) {
   return (
     <Modal
       opened={opened}
@@ -21,11 +21,15 @@ export function EnviarCorreo({ opened, onClose, onConfirm, isPending, isNotAvail
             Ingrese su mail y va a recibir un correo con un link, dirigiendose a ese link
             usted podra restablecer su contraseña.
           </Text>
-          <TextInput placeholder="Ingrese su correo aqui" required value={email} onChange={(e) => setEmail(e.target.value)} />
+          <TextInput
+            placeholder="Ingrese su correo aqui" required
+            value={email} onChange={(e) => setEmail(e.target.value)}
+            readOnly={onSettings ? true : false}
+          />
           <Group justify="space-between" mt="lg">
             <Anchor c="dimmed" size="sm" >
               <Center inline>
-                <ButtonLay label={"Volver"} type={"subtle"} onClick={onClose} />
+                <ButtonLay label={"Volver"} typeColor={"subtle"} onClick={onClose} />
               </Center>
             </Anchor>
             <Button onClick={onConfirm} disabled={isPending || isNotAvailble}>Enviar correo</Button>

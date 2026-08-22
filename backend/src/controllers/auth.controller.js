@@ -125,5 +125,14 @@ export class AuthController {
       next(err)
     }
   }
+  static async verifyResetToken(req, res, next) {
+    try {
+      const { token } = req.params;
+      await AuthService.verifyResetToken(token);
+      return res.json({ success: true, msg: "Token is valid" });
+    } catch (err) {
+      next(err);
+    }
+  }
 
 }

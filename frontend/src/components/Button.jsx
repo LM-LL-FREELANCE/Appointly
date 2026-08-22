@@ -1,8 +1,8 @@
 import { Button } from "@mantine/core";
 
-export default function ButtonLay({ label, link, type, ...props }) {
+export default function ButtonLay({ label, isPending, link, typeColor, ...props }) {
   return (
-    <Button onClick={link} variant={type} {...props}>
+    <Button onClick={link} disabled={isPending} variant={typeColor} {...props}>
       {label}
     </Button>
   )

@@ -94,7 +94,7 @@ export default function Inicio() {
             <Alert variant="light" color="blue" title="Bienvenido a Appointly" icon={<IconAlertSquareRounded />}>
               Debes iniciar sesion o registrarte para poder ver la informacion y poder sacar turnos en la pagina de Apointly
             </Alert>
-            <ButtonLay link={() => navigate("/login")} type="light" color="blue" label={"Inicia sesion aqui"} />
+            <ButtonLay link={() => navigate("/login")} typeColor="light" color="blue" label={"Inicia sesion aqui"} />
           </Stack>
         </Center>
       )}
@@ -132,7 +132,7 @@ export default function Inicio() {
                     <Title size="h3" >Accesos Rápidos</Title>
                     <Group mt="xl" gap="lg">
                       {btnData.map((btn, index) => (
-                        <ButtonLay key={index} label={btn.label} type={btn.type} link={btn.link} leftSection={btn.icon} />
+                        <ButtonLay key={index} label={btn.label} typeColor={btn.type} link={btn.link} leftSection={btn.icon} />
                       ))}
                     </Group>
                   </Paper>

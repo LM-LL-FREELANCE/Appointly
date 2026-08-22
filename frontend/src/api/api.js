@@ -23,3 +23,5 @@ export const login = (credentials) => request('/api/auth/login', { method: 'POST
 export const logout = () => request('/api/auth/logout', { method: 'POST' })
 export const getMe = () => request('/api/auth/me')
 export const sentEmailPassword = (data) => request(`/api/auth/forgot-password`, { method: 'POST', body: JSON.stringify(data) })
+export const verifyToken = (token) => request(`/api/auth/verify-reset-token/${token}`)
+export const resetPassword = (data) => request(`/api/auth/reset-password`, { method: 'POST', body: JSON.stringify(data) })
