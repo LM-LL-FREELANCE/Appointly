@@ -160,7 +160,23 @@ export class AuthModel {
       `, [correo, role])
     return rows[0]
   }
-
+  //not use anywhere just for testing
+  static async getPersonaByCorreo({ correo, role }) {
+    const [rows] = await pool.query(`
+      SELECT 
+          persona_profesional.dni_persona,
+          persona_profesional.apellido,
+          persona_profesional.nombre,
+          persona_rol_profesional.correo
+        FROM persona AS persona_profesional
+        INNER JOIN persona_rol AS persona_rol_profesional
+          ON persona_profesional.dni_persona = persona_rol_profesional.dni_persona
+        INNER JOIN rol r 
+          ON persona_rol_profesional.id_rol = r.id_rol
+        WHERE persona_rol_profesional.correo = ? AND r.nombre = "profesional"
+      `, [correo, role])
+    return rows[0]
+  }
   static async resetPassWord({ dni, password_hashed, role }) {
     const [rows] = await pool.query(`
       UPDATE persona_rol 

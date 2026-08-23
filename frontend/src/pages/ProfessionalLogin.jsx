@@ -61,6 +61,11 @@ export default function ProfessionalLogin() {
     return () => clearInterval(reloj);
   }, [relojActivo]);
 
+  const handleCloseModal = () => {
+    setVolverEnviar(0)
+    notifications.hide("volverEnviar")
+    closeforgotPassWordModal()
+  }
   const handleSend = () => {
     mutateEmail({
       correo: email,
@@ -196,7 +201,7 @@ export default function ProfessionalLogin() {
       {forgotPassWordModal && (
         <EnviarCorreo
           opened={forgotPassWordModal}
-          onClose={closeforgotPassWordModal}
+          onClose={handleCloseModal}
           email={email}
           setEmail={setEmail}
           onConfirm={handleSend}

@@ -2,13 +2,14 @@
 //import { AuthModel } from "../models/auth.model.js";
 //import { ObraSocialesModel } from "../models/obra-sociales.model.js";
 //import { HorariosModel } from "../models/horarios.model.js";
-
 import { AuthModel } from "../models/auth.model.js";
+import { ClientesModel } from "../models/clientes.model.js";
 
 
 
-const { dni_persona } = await AuthModel.getDniByCorreo({ correo: "ricardo.sosa@mail.com", role: "cliente" })
-console.log(dni_persona);
+//const profesional = await ClientesModel.deleteTuple({ correo: "lucalatigano12@gmail.com", role: "cliente" })
+const profesional = await AuthModel.getPersonaByCorreo({ correo: "lucalatigano12@gmail.com", role: "cliente" })
+console.log(profesional);
 process.exit(0);
 
 //node --env-file=.env backend/src/scripts/try-model.mjs
