@@ -19,6 +19,7 @@ const Login = lazy(() => import('./pages/Login.jsx'))
 const SignUp = lazy(() => import('./pages/SignUp.jsx'))
 const ProfessionalLogin = lazy(() => import('./pages/ProfessionalLogin.jsx'))
 const ProfessionalSignUp = lazy(() => import('./pages/ProfessionalSignUp.jsx'))
+const ResetPassword = lazy(() => import('./pages/ResetPassword.jsx'))
 
 /*Other components (lazy loaded) */
 const Dashboard = lazy(() => import('./pages/professional/Dashboard/Dashboard.jsx'))
@@ -61,6 +62,7 @@ export default function App() {
         <Route path="/professional-login" element={<ProfessionalLogin />} />
         <Route path="/professional-signup" element={<ProfessionalSignUp />} />
         <Route path="/registrarse" element={<SignUp />} />
+        <Route path="/resetear-contraseña/:token?" element={<ResetPassword />} />
 
         <Route path="/" element={<MainLayout links={links} role={user?.role} />}>
 

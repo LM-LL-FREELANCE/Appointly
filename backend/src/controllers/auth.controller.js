@@ -89,7 +89,7 @@ export class AuthController {
 
       const token = await AuthService.forgotPassword({ correo, role })
 
-      const resetLink = `${process.env.WEB_FROM}/${token}`
+      const resetLink = `${process.env.WEB_FROM}/resetear-contraseña/${token}`
 
       await EmailMethods.resetPassWord({ correo, link: resetLink })
 
@@ -123,6 +123,15 @@ export class AuthController {
 
     } catch (err) {
       next(err)
+    }
+  }
+  static async verifyResetToken(req, res, next) {
+    try {
+      const { token } = req.params;
+      await AuthService.verifyResetToken(token);
+      return res.json({ success: true, msg: "Token is valid" });
+    } catch (err) {
+      next(err);
     }
   }
 

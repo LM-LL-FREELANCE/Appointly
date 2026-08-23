@@ -184,8 +184,8 @@ export class ProfesionalesModel {
   static async existe({ dni }) {
     const [rows] = await pool.query(
       `SELECT 1 FROM profesional p 
-       INNER JOIN persona_rol pr ON p.dni_profesional = pr.dni_persona AND p.id_rol = pr.id_rol
-       WHERE p.dni_profesional = ? AND pr.eliminado_en IS NULL LIMIT 1`,
+        INNER JOIN persona_rol pr ON p.dni_profesional = pr.dni_persona AND p.id_rol = pr.id_rol
+        WHERE p.dni_profesional = ? AND pr.eliminado_en IS NULL LIMIT 1`,
       [dni]
     );
     return rows.length > 0;

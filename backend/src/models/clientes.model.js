@@ -168,6 +168,7 @@ export class ClientesModel {
     return affected
   }
 
+
   static async deleteAccount({ dni }) {
     const [accRows] = await pool.query(
       `UPDATE persona_rol 

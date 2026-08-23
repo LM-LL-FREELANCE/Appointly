@@ -13,7 +13,7 @@ export class EmailMethods {
   }
 
   static async resetPassWord({ correo, link }) {
-    await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from: process.env.EMAIL_FROM,
       to: correo,
       subject: "Cambiar contraseña",
@@ -24,7 +24,14 @@ export class EmailMethods {
       <p>Este lo redirigirá a nuestra web y ahí podrá hacer el cambio con la nueva contraseña.</p>
       <p>Gracias, consultorio Appointly</p>
       `
-    })
+    });
+
+    if (error) {
+      console.error("Error de Resend:", error);
+      throw new Error(`No se pudo enviar el correo: ${error.message}`);
+    }
+
+    return data;
   }
 
 }

@@ -87,7 +87,7 @@ export class AuthService {
     return { dni, nombre, apellido, correo, fecha_nacimiento, genero, id_obra_social: id_obra_social ?? null }
   }
 
-  static async registerProfesional({ dni, correo, nombre, apellido, telefono, fecha_nacimiento, genero, password }) {
+  static async registerProfesional({ dni, correo, nombre, apellido, telefono, fecha_nacimiento, genero, password, numero_matricula }) {
 
     if (await AuthModel.existeDniProfesional(dni)) {
       throw new AppError("Ya existe una cuenta con ese DNI.", 409, "DUPLICATE_DNI")
@@ -103,11 +103,12 @@ export class AuthService {
       data: {
         dni, nombre, apellido, correo, password_hash,
         telefono: telefono ?? null,
-        fecha_nacimiento, genero
+        fecha_nacimiento, genero,
+        numero_matricula
       }
     })
 
-    return { dni, nombre, apellido, correo, fecha_nacimiento, genero }
+    return { dni, nombre, apellido, correo, fecha_nacimiento, genero, numero_matricula }
   }
 
   static async forgotPassword({ correo, role }) {
@@ -142,4 +143,12 @@ export class AuthService {
     }
   }
 
+  static async verifyResetToken(token) {
+    try {
+      jwt.verify(token, process.env.JWT_SECRET);
+      return true;
+    } catch (err) {
+      throw new AppError("The link is no longer active or is not valid", 401, "INVALID_TOKEN");
+    }
+  }
 }
