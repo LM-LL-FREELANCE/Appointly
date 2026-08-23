@@ -1,12 +1,12 @@
 import { useState } from 'react'
-import { Avatar, Badge, Box, Button, Group, Table, Text, Anchor, Menu, ActionIcon } from '@mantine/core'
+import { Avatar, Box, Group, Table, Text, Menu, ActionIcon } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import { useQueryClient } from '@tanstack/react-query'
 import { TurnoDetailModal } from './TurnoDetailModal.jsx'
 import { CancelarTurnoModal } from './CancelarTurnoModal.jsx'
 import useCancelTurno from '../../../hooks/useCancelTurno.jsx'
 import { EstadoTurnoBadge } from '../../../components/EstadoTurnoBadge.jsx'
-import { IconDotsVertical } from '@tabler/icons-react'
+import { IconDotsVertical, IconEye, IconX } from '@tabler/icons-react'
 
 const COLUMNS = ['Fecha', 'Hora', 'Profesional', 'Especialidad', 'Estado', ''];
 
@@ -92,7 +92,6 @@ export default function TurnosTable({ turno }) {
   }
 
   const rows = turno?.map((item) => {
-    const badgeColor = item.estado === 'activo' ? 'green' : item.estado === 'cancelado' ? 'red' : 'gray'
     return (
       <Table.Tr key={item.id_turno}>
         <Table.Td><Text fz="sm">{item.fecha_turno}</Text></Table.Td>
@@ -108,22 +107,28 @@ export default function TurnosTable({ turno }) {
           <EstadoTurnoBadge estado={item.estado} />
         </Table.Td>
         <Table.Td>
-          <Menu shadow="md">
+          <Menu shadow="md" position="bottom-end" withinPortal>
             <Menu.Target>
-              <Button>
+              <ActionIcon variant="subtle" color="gray" aria-label="Opciones de turno">
                 <IconDotsVertical size={16} />
-              </Button>
+              </ActionIcon>
             </Menu.Target>
 
             <Menu.Dropdown>
-              <Menu.Item onClick={() => handleOpenDetail(item)}>
-                Detalle
+              <Menu.Item
+                leftSection={<IconEye size={14} />}
+                onClick={() => handleOpenDetail(item)}
+              >
+                Ver detalle
               </Menu.Item>
 
               {item.estado === 'activo' && (
                 <Menu.Item
-                  color="red" onClick={() => handleOpenCancel(item)}>
-                  Cancelar
+                  color="red"
+                  leftSection={<IconX size={14} />}
+                  onClick={() => handleOpenCancel(item)}
+                >
+                  Cancelar turno
                 </Menu.Item>
               )}
             </Menu.Dropdown>
@@ -136,7 +141,7 @@ export default function TurnosTable({ turno }) {
   return (
     <Box>
       <Table.ScrollContainer minWidth={600}>
-        <Table verticalSpacing="lg" highlightOnHover>
+        <Table verticalSpacing="lg">
           <Table.Thead>
             <Table.Tr>
               {COLUMNS.map((col) => (
