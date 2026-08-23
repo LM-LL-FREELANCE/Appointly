@@ -7,20 +7,20 @@ export function TurnoCardProf({ turno, onVerDetalle }) {
   const badgeColor = turno.estado === 'activo' ? 'green' : turno.estado === 'cancelado' ? 'red' : 'gray'
   return (
     <Paper withBorder radius="lg" p="md">
-      <Stack gap="md">
+      <Stack gap="sm">
         <Group justify="space-between" align="center" wrap="nowrap">
-          <Text fw={700} fz="lg">{fechaCorta(turno.fecha_turno)} · {horaCorta(turno.hora_turno)}</Text>
-          <Badge variant="dot" color={badgeColor} radius="xl" size="lg" tt="uppercase">
+          <Text fw={700} fz="md">{fechaCorta(turno.fecha_turno)} · {horaCorta(turno.hora_turno)}</Text>
+          <Badge variant="dot" color={badgeColor} radius="xl" size="md" tt="uppercase">
             {turno.estado}
           </Badge>
         </Group>
 
         <Group gap="sm" wrap="nowrap">
-          <Avatar size="lg" radius="xl" />
-          <Text fw={700} fz="lg">{turno.nombre} {turno.apellido}</Text>
+          <Avatar size="md" radius="xl" />
+          <Text fw={600} fz="md">{turno.nombre} {turno.apellido}</Text>
         </Group>
 
-        <Button variant="default" radius="md" size="lg" onClick={() => onVerDetalle(turno)}>
+        <Button variant="default" radius="md" size="md" onClick={() => onVerDetalle(turno)}>
           Ver detalle
         </Button>
       </Stack>

@@ -155,6 +155,7 @@ export const cssVariablesResolver = () => ({
     '--mantine-color-body': '#0F172A',
     '--mantine-color-default': '#334155',
     '--mantine-color-default-border': '#475569',
+    '--mantine-color-default-hover': 'var(--mantine-color-dark-4)',
     '--mantine-color-text': '#F1F5F9',
     '--mantine-color-dimmed': '#94A3B8',
   },

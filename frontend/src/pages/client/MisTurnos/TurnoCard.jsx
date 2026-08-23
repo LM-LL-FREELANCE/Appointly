@@ -1,49 +1,47 @@
-import { Avatar, Badge, Box, Button, Drawer, Group, Paper, Stack, Text } from '@mantine/core'
+import { Avatar, Box, Button, Drawer, Group, Paper, Stack, Text } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { IconAlertCircle } from '@tabler/icons-react'
 import { Link } from 'react-router-dom'
 import { cancelTurnoById } from '../../../api/clientes.js'
 import { useAuth } from '../../../hooks/useAuth.js'
+import { EstadoTurnoBadge } from '../../../components/EstadoTurnoBadge.jsx'
 
 export function TurnoCard({ turno, estado }) {
   const { user } = useAuth()
 
-  const badgeColor = estado === 'activo' ? 'green' : estado === 'cancelado' ? 'red' : 'gray';
-  const [drawerOpened, { open: openDrawer, close: closeDrawer }] = useDisclosure(false);
+  const [drawerOpened, { open: openDrawer, close: closeDrawer }] = useDisclosure(false)
 
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient()
   const { mutate: cancelar, isPending } = useMutation({
     mutationFn: () => cancelTurnoById({ id: turno.id_turno, motivo: '' }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['turnos', user?.dni] });
-      closeDrawer();
+      queryClient.invalidateQueries({ queryKey: ['turnos', user?.dni] })
+      closeDrawer()
     },
-  });
+  })
 
   return (
     <>
       <Paper withBorder radius="lg" p="md">
-        <Stack gap="md">
+        <Stack gap="sm">
           <Group justify="space-between" align="center" wrap="nowrap">
-            <Text fw={700} fz="lg">{turno.fecha_turno} · {turno.hora_turno}</Text>
-            <Badge variant="dot" color={badgeColor} radius="xl" size="lg" tt="uppercase">
-              {estado}
-            </Badge>
+            <Text fw={700} fz="md">{turno.fecha_turno} · {turno.hora_turno}</Text>
+            <EstadoTurnoBadge estado={estado} />
           </Group>
 
           <Group gap="sm" wrap="nowrap">
-            <Avatar size="lg" radius="xl" />
+            <Avatar size="md" radius="xl" />
             <Stack gap={2}>
-              <Text fw={700} fz="lg">{turno.nombre} {turno.apellido}</Text>
-              <Text fz="lg">{turno.tipo}</Text>
+              <Text fw={600} fz="md">{turno.nombre} {turno.apellido}</Text>
+              <Text fz="sm" c="dimmed">{turno.tipo}</Text>
             </Stack>
           </Group>
 
           <Group grow gap="sm">
-            <Button variant="default" radius="md" component={Link} to="/misturnos/detalle" state={{ turno, tab: estado }} size="lg">Detalle</Button>
+            <Button variant="default" radius="md" component={Link} to="/misturnos/detalle" state={{ turno, tab: estado }} size="md">Detalle</Button>
             {estado === 'activo' && (
-              <Button variant="light" color="red" radius="md" size="lg" onClick={openDrawer}>Cancelar</Button>
+              <Button variant="light" color="red" radius="md" size="md" onClick={openDrawer}>Cancelar</Button>
             )}
           </Group>
         </Stack>
@@ -71,15 +69,15 @@ export function TurnoCard({ turno, estado }) {
         </Box>
         <Box px="lg" pb="xl">
           <Stack gap="sm">
-            <Button fullWidth variant="light" color="red" size="lg" radius="xl" onClick={() => cancelar()} loading={isPending}>
+            <Button fullWidth variant="light" color="red" size="md" radius="xl" onClick={() => cancelar()} loading={isPending}>
               Sí, cancelar
             </Button>
-            <Button fullWidth variant="default" size="lg" radius="xl" onClick={closeDrawer} disabled={isPending}>
+            <Button fullWidth variant="default" size="md" radius="xl" onClick={closeDrawer} disabled={isPending}>
               No, volver
             </Button>
           </Stack>
         </Box>
       </Drawer>
     </>
-  );
+  )
 }

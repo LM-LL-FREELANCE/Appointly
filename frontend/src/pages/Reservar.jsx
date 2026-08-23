@@ -2,7 +2,7 @@ import { PageHeader } from "../components/PageHeader";
 import { Text, Stack, Group, Avatar, Title, Notification, Paper, Button, Stepper, Grid, Divider, Loader } from "@mantine/core";
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useMediaQuery } from "@mantine/hooks";
+import { useIsDesktop } from "../hooks/useIsDesktop.js";
 import { DatePickerInput } from "@mantine/dates";
 import { IconCalendar } from "@tabler/icons-react";
 import 'dayjs/locale/es';
@@ -20,7 +20,8 @@ const Reservar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const doctor = location.state?.doctor;
-  const [obraSocial, setObrasocial] = useState("OSDE")
+  const isDesktop = useIsDesktop('sm');
+  const [obraSocial] = useState("OSDE")
   const [fechaSeleccionada, setFechaSeleccionada] = useState(() => {
     const d = new Date();
     d.setHours(12, 0, 0, 0);
@@ -33,7 +34,6 @@ const Reservar = () => {
     desde,
     hasta,
   });
-  const isMobile = useMediaQuery("(max-width: 768px)");
   const [active, setActive] = useState(doctor ? 1 : 0);
   const nextStep = () => setActive((current) => (current < 3 ? current + 1 : current));
   const prevStep = () => setActive((current) => (current > 0 ? current - 1 : current));
@@ -90,23 +90,17 @@ const Reservar = () => {
 
   return (
     <>
-      <PageHeader>
-        <Group align="baseline" gap="xs">
-          <Text fw={600} size="lg">Reservar turno</Text>
-          {doctor && (
-            <Text fw={400} c="dimmed" size="md">
-              {`${doctor.nombre} ${doctor.apellido} · ${especialidad}`}
-            </Text>
-          )}
-        </Group>
-      </PageHeader>
+      <PageHeader
+        title="Reservar turno"
+        subtitle={doctor ? `${doctor.nombre} ${doctor.apellido} · ${especialidad}` : undefined}
+      />
       {!turnoConfirmado && (
         <Stack gap="md">
 
           <Paper withBorder p="md" radius="md">
             <Stepper
               active={active}
-              orientation={isMobile ? "vertical" : "horizontal"}
+              orientation={isDesktop ? "horizontal" : "vertical"}
               w="100%"
             >
               <Stepper.Step label="Profesional" description={doctor ? "elegido" : "eligir uno"} />

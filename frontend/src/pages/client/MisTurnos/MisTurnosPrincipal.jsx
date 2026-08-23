@@ -1,21 +1,20 @@
 import { useState } from "react"
 import { useLocation } from "react-router-dom"
-import { useMediaQuery } from "@mantine/hooks"
 import { PageHeader } from "../../../components/PageHeader.jsx"
-import { Text, Stack, Group, Avatar, SegmentedControl, Box, Alert, Loader } from "@mantine/core"
+import { Stack, Group, SegmentedControl, Box, Alert, Loader } from "@mantine/core"
 import { TurnoCard } from "./TurnoCard.jsx"
 import TurnosTable from "./TurnosTable.jsx"
 import { useQuery } from "@tanstack/react-query"
 import { getTurnosClienteByDni } from "../../../api/clientes.js"
 import { useAuth } from "../../../hooks/useAuth.js"
-import { Link } from "react-router-dom"
+import { useIsDesktop } from "../../../hooks/useIsDesktop.js"
 
 export default function MisTurnos() {
   const { user } = useAuth()
 
   const { state } = useLocation()
   const [estado, setEstado] = useState(state?.tab ?? 'activo')
-  const isDesktop = useMediaQuery('(min-width: 62em)')
+  const isDesktop = useIsDesktop()
 
   const { data: [activos, pasados] = [[], []], isLoading, isError } = useQuery({
     queryKey: ['turnos', user?.dni, ""],
@@ -56,22 +55,22 @@ export default function MisTurnos() {
       )
     }
   })
-  console.log(activos)
+
   return (
     <>
-      <PageHeader>
-        <Group justify="space-between" style={{ flex: 1 }}>
-          <Stack gap={0}>
-            <Text fw={600} fz={{ base: 'xl', sm: 'lg' }}>Mis Turnos</Text>
-          </Stack>
-          <Group>
-            {isDesktop && (
-              <SegmentedControl size="md" radius="lg" value={estado} onChange={setEstado} data={[{ label: 'Próximos', value: 'activo' }, { label: 'Historial', value: 'cancelado' }]} disabled={!user} />
-            )}
-            <Avatar radius="xl" alt="" component={Link} to="/miperfil" />
-          </Group>
-        </Group>
-      </PageHeader>
+      <PageHeader
+        title="Mis Turnos"
+        actions={isDesktop && (
+          <SegmentedControl
+            size="md"
+            radius="lg"
+            value={estado}
+            onChange={setEstado}
+            data={[{ label: 'Próximos', value: 'activo' }, { label: 'Historial', value: 'cancelado' }]}
+            disabled={!user}
+          />
+        )}
+      />
 
       {!user && (
         <Alert color="yellow" mt="md">
@@ -105,7 +104,7 @@ export default function MisTurnos() {
 
           {!isDesktop && (
             <Stack gap="sm" pb={10}>
-              <SegmentedControl fullWidth size="xl" radius="lg" value={estado} onChange={setEstado} data={[{ label: 'Próximos', value: 'activo' }, { label: 'Historial', value: 'cancelado' }]} />
+              <SegmentedControl fullWidth size="md" radius="lg" value={estado} onChange={setEstado} data={[{ label: 'Próximos', value: 'activo' }, { label: 'Historial', value: 'cancelado' }]} />
               {(estado === 'activo' ? activos : pasados).map((turno, index) => (
                 <TurnoCard key={index} turno={turno} estado={estado} />
               ))}

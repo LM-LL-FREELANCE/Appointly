@@ -43,7 +43,7 @@ export default function App() {
     { label: "Dashboard", path: "/dashboard", element: <Dashboard />, icon: IconLayoutDashboard },
     { label: "Agenda", path: "/agenda", element: <Agenda />, icon: IconCalendarWeek },
     { label: "Turnos", path: "/turnos", element: <Turnos />, icon: IconClipboardList },
-    { label: "Horarios de Atencion", path: "/horarios", element: <Horarios />, icon: IconClock },
+    { label: "Horarios de Atención", path: "/horarios", element: <Horarios />, icon: IconClock },
   ]
 
   const defaultLinks = [

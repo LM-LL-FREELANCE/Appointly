@@ -1,8 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { useMediaQuery } from '@mantine/hooks'
-import { Group, Text, Stack, Avatar, Paper, Box, SimpleGrid } from "@mantine/core"
+import { Group, Text, Stack, Paper, Box, SimpleGrid, Divider } from "@mantine/core"
 import { BarChart } from '@mantine/charts'
-import { Link } from 'react-router-dom'
 import { PageHeader } from '../../../components/PageHeader.jsx'
 import { StatCard } from './StatCard.jsx'
 import { ProximoTurno } from './ProximoTurno.jsx'
@@ -11,6 +9,8 @@ import { getProfesionalByDni, getTurnosByProfesional } from '../../../api/profes
 import { aISO } from '../../../utils/fechas.utils.js'
 import { useAuth } from '../../../hooks/useAuth.js'
 import useSlots from '../../../hooks/useSlots.jsx'
+import { useIsDesktop } from '../../../hooks/useIsDesktop.js'
+import { IconChartBar } from '@tabler/icons-react'
 
 const DIA_LABEL = ['D', 'L', 'M', 'X', 'J', 'V', 'S']
 
@@ -29,7 +29,11 @@ function buildBarData(turnos) {
 function TurnosPorDia({ data }) {
   return (
     <Paper withBorder radius="lg" p="lg" style={{ flex: 2, display: 'flex', flexDirection: 'column' }}>
-      <Text fw={700} fz="lg" mb="md">Turnos por día</Text>
+      <Group gap="xs" style={{ flexDirection: 'row' }}>
+        <IconChartBar size={16} stroke={2} />
+        <Text fw={700} fz="lg">Turnos por día</Text>
+      </Group>
+      <Divider my="md" size="xs" />
       <div style={{ flex: 1, minHeight: 180 }}>
         <BarChart
           h="100%"
@@ -104,7 +108,7 @@ export default function Dashboard() {
     return false
   }) ?? null
 
-  const isDesktop = useMediaQuery('(min-width: 48em)')
+  const isDesktop = useIsDesktop('sm')
   const saludo = perfil ? `Hola, ${perfil.nombre} ${perfil.apellido}` : 'Hola'
 
   return (
@@ -114,35 +118,22 @@ export default function Dashboard() {
       flexDirection: 'column',
       overflow: 'hidden',
     }}>
-      <PageHeader>
-        <Group justify="space-between" style={{ flex: 1 }}>
-          <Stack gap={0}>
-            <Text fw={600} fz={{ base: 'xl', sm: 'lg' }}>{saludo}</Text>
-            {isDesktop && (
-              <Text c="dimmed" fz={{ base: 'md', sm: 'sm' }}>
-                {new Date().toLocaleDateString('es-AR', {
-                  timeZone: 'UTC',
-                  weekday: 'short',
-                  day: 'numeric',
-                  month: 'short',
-                })}
-              </Text>
-            )}
-          </Stack>
-          {isDesktop && (
-            <Group>
-              <Avatar radius="xl" alt="" component={Link} to="/miperfil" />
-            </Group>
-          )}
-        </Group>
-      </PageHeader>
+      <PageHeader
+        title={saludo}
+        subtitle={new Date().toLocaleDateString('es-AR', {
+          timeZone: 'UTC',
+          weekday: 'short',
+          day: 'numeric',
+          month: 'short',
+        })}
+      />
 
       {!isDesktop && (
         <Stack gap="sm" p="xs" pb="xl" style={{ flex: 1, overflowY: 'auto' }}>
           <SimpleGrid cols={2}>
             <StatCard label="Turnos hoy" value={turnosHoy} color="brand" />
             <StatCard label="Esta semana" value={estaSemana} color="accent" />
-            <StatCard label="Cancelados (7d)" value={cancelados7d} color="red" />
+            <StatCard label="Cancelados" value={cancelados7d} color="red" />
             <StatCard label="Slots libres" value={freeSlotsToday} color="cyan" />
           </SimpleGrid>
           <ProximoTurno turno={proximoTurno} isDesktop={isDesktop} />
@@ -167,7 +158,7 @@ export default function Dashboard() {
         >
           <StatCard label="Turnos hoy" value={turnosHoy} color="brand" />
           <StatCard label="Esta semana" value={estaSemana} color="accent" />
-          <StatCard label="Cancelados (7d)" value={cancelados7d} color="red" />
+          <StatCard label="Cancelados" value={cancelados7d} color="red" />
           <StatCard label="Slots libres hoy" value={freeSlotsToday} color="cyan" />
 
           <TurnosDeHoy turnos={turnosDeHoy} />

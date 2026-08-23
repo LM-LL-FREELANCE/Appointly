@@ -1,9 +1,10 @@
-import { Group, Text, Avatar, Paper, Table, Badge, Anchor } from "@mantine/core"
+import { Group, Text, Avatar, Paper, Table, Badge, Anchor, Divider } from "@mantine/core"
 import { Link } from 'react-router-dom'
+import { IconTable } from '@tabler/icons-react'
 
 const estadoConfig = {
-  activo:    { color: 'green', label: 'Activo' },
-  cancelado: { color: 'red',   label: 'Cancelado' },
+  activo: { color: 'green', label: 'Activo' },
+  cancelado: { color: 'red', label: 'Cancelado' },
 }
 
 export function TurnosDeHoy({ turnos = [] }) {
@@ -15,8 +16,11 @@ export function TurnosDeHoy({ turnos = [] }) {
       p="lg"
       style={{ display: 'flex', flexDirection: 'column' }}
     >
-      <Group mb="md" align="center">
-        <Text fw={700} fz="lg" style={{ flex: 1 }}>Turnos de hoy</Text>
+      <Group mb="md" align="center" justify="end">
+        <Group gap="xs" style={{ flex: 1 }}>
+          <IconTable stroke={2} size={16} />
+          <Text fw={700} fz="lg">Turnos de hoy</Text>
+        </Group>
         <Anchor
           component={Link}
           to="/agenda"
@@ -28,6 +32,7 @@ export function TurnosDeHoy({ turnos = [] }) {
           Ver agenda →
         </Anchor>
       </Group>
+      <Divider size='xs' mt='xs' />
 
       {turnos.length === 0 ? (
         <Text c="dimmed" fz="sm" ta="center" py="xl">No hay turnos para hoy</Text>
@@ -40,7 +45,7 @@ export function TurnosDeHoy({ turnos = [] }) {
                 return (
                   <Table.Tr key={t.id}>
                     <Table.Td w={80}>
-                      <Text fw={700} fz="sm" ff="monospace">{t.hora}</Text>
+                      <Text fw={700} fz="sm">{t.hora}</Text>
                     </Table.Td>
                     <Table.Td>
                       <Group gap="sm" wrap="nowrap">

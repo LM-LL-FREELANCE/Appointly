@@ -11,7 +11,7 @@ function DetailRow({ label, children }) {
     <>
       <Grid py="md" align="center">
         <Grid.Col span={5}>
-          <Text fz="lg" c="dimmed">{label}</Text>
+          <Text fz="sm" c="dimmed">{label}</Text>
         </Grid.Col>
         <Grid.Col span={7}>
           {children}
@@ -47,28 +47,28 @@ export function DetalleTurnoProfMobile({ turno, dniProfesional, onVolver, onCanc
       <Stack gap="md">
         <Paper withBorder radius="lg" px="md" pt="xs" pb={0}>
           <DetailRow label="Paciente">
-            <Text fz="lg" fw={600}>{turno.nombre} {turno.apellido}</Text>
+            <Text fz="md" fw={600}>{turno.nombre} {turno.apellido}</Text>
           </DetailRow>
           <DetailRow label="Fecha">
-            <Text fz="lg" fw={600}>{fechaCorta(turno.fecha_turno)}</Text>
+            <Text fz="md" fw={600}>{fechaCorta(turno.fecha_turno)}</Text>
           </DetailRow>
           <DetailRow label="Hora">
-            <Text fz="lg" fw={600}>{horaCorta(turno.hora_turno)} hs</Text>
+            <Text fz="md" fw={600}>{horaCorta(turno.hora_turno)} hs</Text>
           </DetailRow>
           <DetailRow label="Estado">
-            <Badge variant="light" color={badgeColor} radius="xl" size="lg" tt="uppercase">
+            <Badge variant="light" color={badgeColor} radius="xl" size="md" tt="uppercase">
               {turno.estado}
             </Badge>
           </DetailRow>
         </Paper>
 
         {turno.estado === 'activo' && (
-          <Button variant="light" color="red" size="lg" radius="md" fullWidth onClick={openDrawer}>
+          <Button variant="light" color="red" size="md" radius="md" fullWidth onClick={openDrawer}>
             Cancelar turno
           </Button>
         )}
 
-        <Button variant="default" color="gray" size="lg" radius="md" onClick={onVolver}>
+        <Button variant="default" color="gray" size="md" radius="md" onClick={onVolver}>
           Atrás
         </Button>
       </Stack>
@@ -105,10 +105,10 @@ export function DetalleTurnoProfMobile({ turno, dniProfesional, onVolver, onCanc
         </Box>
         <Box px="lg" pb="xl">
           <Stack gap="sm">
-            <Button fullWidth variant="light" color="red" size="lg" radius="xl" onClick={() => cancelar()} loading={isPending}>
+            <Button fullWidth variant="light" color="red" size="md" radius="xl" onClick={() => cancelar()} loading={isPending}>
               Sí, cancelar
             </Button>
-            <Button fullWidth variant="default" size="lg" radius="xl" onClick={closeDrawer} disabled={isPending}>
+            <Button fullWidth variant="default" size="md" radius="xl" onClick={closeDrawer} disabled={isPending}>
               No, volver
             </Button>
           </Stack>

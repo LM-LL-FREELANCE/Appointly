@@ -148,10 +148,8 @@ export function ProximoTurno({ turno, isDesktop }) {
           </>
         ) : (
           <Stack align="center" justify="center" gap="xs" style={{ flex: 1 }}>
-            <ThemeIcon variant="light" color="gray" radius="xl" size={48}>
-              <IconCalendarOff size={24} />
-            </ThemeIcon>
-            <Text c="dimmed" fz="sm" ta="center">No hay más turnos próximos</Text>
+            <IconCalendarOff size={48} />
+            <Text c="dimmed" fz="sm" ta="center">No hay turnos próximos</Text>
           </Stack>
         )}
       </Stack>
