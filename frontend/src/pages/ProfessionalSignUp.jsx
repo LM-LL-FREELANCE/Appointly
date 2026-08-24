@@ -1,9 +1,7 @@
 import {
-  Alert,
   Anchor,
   Box,
   Button,
-  Group,
   Paper,
   PasswordInput,
   Select,
@@ -16,13 +14,17 @@ import {
 } from '@mantine/core'
 import { DatePickerInput } from '@mantine/dates'
 import { matchesField, useForm } from '@mantine/form'
-import { IconAlertCircle, IconCalendar } from '@tabler/icons-react'
-import { useState } from 'react'
+import { IconAlertCircle, IconCalendar, IconX } from '@tabler/icons-react'
 import { Link, useNavigate } from 'react-router-dom'
 import 'dayjs/locale/es'
 import { useAuth } from '../hooks/useAuth.js'
 import useRegisterProfesional from '../hooks/useRegisterProfesional.jsx'
 import professionalBg from '../assets/images/professionals-bg.svg'
+import useNotificationCountDown from '../hooks/useNotificationCountDown.jsx'
+import { notifications } from '@mantine/notifications';
+import '@mantine/notifications/styles.css';
+import useGetErrosMsg from '../hooks/useGetErrosMsg.jsx'
+
 
 const opcionesDeGenero = ['Masculino', 'Femenino', 'Prefiero no decirlo']
 
@@ -61,8 +63,8 @@ export default function ProfessionalSignUp() {
   })
 
   const { mutate, isPending, error: errorRegistro } = useRegisterProfesional()
-  const [loginFallido, setLoginFallido] = useState(false)
-
+  const { startCountDown, stopCountDown } = useNotificationCountDown()
+  const { singingUp } = useGetErrosMsg()
   const getGeneroFormateado = (genero) => {
     if (genero === 'Masculino') return 'M'
     if (genero === 'Femenino') return 'F'
@@ -70,26 +72,77 @@ export default function ProfessionalSignUp() {
   }
 
   const handleRegistro = (values) => {
-    mutate({
-      dni: values.dni,
-      nombre: values.nombre,
-      apellido: values.apellido,
-      correo: values.correo,
-      password: values.password,
-      confirm: values.confirm,
-      fecha_nacimiento: values.fecha_nacimiento,
-      genero: getGeneroFormateado(values.genero),
-      numero_matricula: values.numero_matricula
-    }, {
-      onSuccess: async () => {
-        try {
-          await login({ dni: values.dni, password: values.password, role: 'profesional' })
-          navigate('/dashboard')
-        } catch {
-          setLoginFallido(true)
-        }
-      }
+    notifications.show({
+      id: "registrandose",
+      title: 'Espera un momento...',
+      message: 'Estamos creando tu cuenta.',
+      position: 'top-right',
+      withCloseButton: false,
+      autoClose: false,
+      loading: true
     })
+    setTimeout(() => {
+      mutate({
+        dni: values.dni,
+        nombre: values.nombre,
+        apellido: values.apellido,
+        correo: values.correo,
+        password: values.password,
+        confirm: values.confirm,
+        fecha_nacimiento: values.fecha_nacimiento,
+        genero: getGeneroFormateado(values.genero),
+        numero_matricula: values.numero_matricula
+      }, {
+        onSuccess: () => {
+          startCountDown({
+            initialTime: 6,
+            notificationConfig: {
+              id: "registrandose",
+              title: "Cuenta Registrada",
+              message: (tiempoRestante) => `Se iniciará sesión en ${tiempoRestante}s`
+            }
+          })
+          login({
+            dni: values.dni,
+            password: values.password,
+            role: 'profesional'
+          })
+            .then(() => {
+              setTimeout(() => {
+                notifications.hide("registrandose")
+                navigate("/dashboard")
+              }, 6000)
+            })
+            .catch((err) => {
+              stopCountDown()
+              notifications.update({
+                id: "registrandose",
+                title: "Atención",
+                message: "Cuenta creada exitosamente, pero hubo un error al iniciar sesión automáticamente. Por favor, inicia sesión manualmente.",
+                color: 'yellow',
+                icon: <IconAlertCircle />,
+                loading: false,
+                autoClose: 4000,
+                withCloseButton: true,
+                position: 'top-right',
+              })
+            })
+        },
+        onError: (err) => {
+          notifications.update({
+            id: "registrandose",
+            title: err?.code === "DUPLICATE_DNI" || err?.code === "DUPLICATE_EMAIL" ? "Cuenta ya existente" : "Ocurrio un problema registrando su cuenta",
+            message: singingUp(err?.code),
+            color: 'red',
+            icon: <IconX />,
+            loading: false,
+            autoClose: 4000,
+            withCloseButton: true,
+            position: 'top-right',
+          })
+        }
+      })
+    }, 2000)
   }
 
   return (
@@ -222,21 +275,6 @@ export default function ProfessionalSignUp() {
                 Registrarse
               </Button>
             </SimpleGrid>
-
-            {errorRegistro && errorRegistro.code !== 'DUPLICATE_DNI' && errorRegistro.code !== 'DUPLICATE_EMAIL' && (
-              <Alert icon={<IconAlertCircle size={16} />} color="red" title="Error">
-                Hubo un problema al registrar la cuenta. Por favor, intenta de nuevo.
-              </Alert>
-            )}
-
-            {loginFallido && (
-              <Group align="center">
-                <Alert style={{ flex: 1 }} icon={<IconAlertCircle size={16} />} color="red" title="Error">
-                  Tu cuenta fue creada, pero hubo un problema al iniciar sesión automáticamente. Iniciá sesión manualmente.
-                </Alert>
-                <Button onClick={() => navigate('/professional-login')}>Iniciar sesión</Button>
-              </Group>
-            )}
           </Stack>
         </form>
 

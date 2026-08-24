@@ -11,6 +11,7 @@ import { useAuth } from '../../../hooks/useAuth.js'
 import useSlots from '../../../hooks/useSlots.jsx'
 import { useIsDesktop } from '../../../hooks/useIsDesktop.js'
 import { IconChartBar } from '@tabler/icons-react'
+import { notifications } from '@mantine/notifications'
 
 const DIA_LABEL = ['D', 'L', 'M', 'X', 'J', 'V', 'S']
 

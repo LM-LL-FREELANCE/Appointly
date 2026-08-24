@@ -19,6 +19,7 @@ import {
   IconCalendarEvent,
 } from "@tabler/icons-react"
 
+
 const PRIMARY_COL_HEIGHT = '600px';
 const SECONDARY_COL_HEIGHT = `calc(${PRIMARY_COL_HEIGHT} / 2 - var(--mantine-spacing-md) / 2)`;
 
