@@ -11,7 +11,8 @@ import { useAuth } from '../../../hooks/useAuth.js'
 import useSlots from '../../../hooks/useSlots.jsx'
 import { useIsDesktop } from '../../../hooks/useIsDesktop.js'
 import { IconChartBar } from '@tabler/icons-react'
-import { notifications } from '@mantine/notifications'
+import QueryError from '../../../components/QueryError.jsx'
+
 
 const DIA_LABEL = ['D', 'L', 'M', 'X', 'J', 'V', 'S']
 
@@ -58,7 +59,7 @@ export default function Dashboard() {
 
   const { user } = useAuth()
 
-  const { data: perfil } = useQuery({
+  const { data: perfil, isError: isErrorPerfil, error: errorPerfil, refetch: refetchPerfil } = useQuery({
     queryKey: ['perfil', user?.dni],
     queryFn: () => getProfesionalByDni({ dni: user?.dni }),
   })
@@ -69,24 +70,32 @@ export default function Dashboard() {
   endDate.setDate(startDate.getDate() + 6)
 
   const startDateISO = aISO(startDate)
-  const endDateISO = aISO(endDate)
 
-  const { data: slotData } = useSlots({
+
+  const { data: slotData, isError: isErrorSlots, error: errorSlots, refetch: refetchSlots } = useSlots({
     dni: user?.dni,
     desde: startDateISO,
     hasta: startDateISO
   })
 
-  const { data: turnos = [] } = useQuery({
+  const { data: turnos = [], isError: isErrorTurnos, error: errorTurnos, refetch: refetchTurnos } = useQuery({
     queryKey: ['turnos-profesional', user?.dni, startDateISO],
     queryFn: () => getTurnosByProfesional({ dni_profesional: user?.dni, desde: startDateISO })
   })
+
+  const isError = isErrorPerfil || isErrorSlots || isErrorTurnos
+  const errorMsg = errorPerfil?.message || errorSlots?.message || errorTurnos?.message || 'Error al cargar los datos del panel'
+  const refetchAll = () => {
+    refetchPerfil()
+    refetchSlots()
+    refetchTurnos()
+  }
 
   const turnosHoy = turnos.filter(t => t.fecha_turno?.slice(0, 10) === startDateISO && t.estado === 'activo').length
   const estaSemana = turnos.filter(t => t.estado === 'activo').length
   const cancelados7d = turnos.filter(t => t.estado === 'cancelado').length
   const barData = buildBarData(turnos)
-  const freeSlotsToday = slotData?.dias[0].slots.length ?? 0
+  const freeSlotsToday = slotData?.dias[0]?.slots.length ?? 0
 
   const turnosDeHoy = turnos
     .filter(t => t.fecha_turno?.slice(0, 10) === startDateISO)
@@ -128,6 +137,10 @@ export default function Dashboard() {
           month: 'short',
         })}
       />
+
+      {isError && (
+        <QueryError message={errorMsg} onRetry={refetchAll} />
+      )}
 
       {!isDesktop && (
         <Stack gap="sm" p="xs" pb="xl" style={{ flex: 1, overflowY: 'auto' }}>

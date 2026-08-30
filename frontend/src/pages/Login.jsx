@@ -25,7 +25,6 @@ export default function Login() {
   const [forgotPassWordModal, { open: openforgotPassWordModal, close: closeforgotPassWordModal }] =
     useDisclosure(false)
   const { login, isLoggingIn, loginError } = useAuth()
-  const [volverEnviar, setVolverEnviar] = useState(0)
   const [email, setEmail] = useState("")
   const navigate = useNavigate()
 

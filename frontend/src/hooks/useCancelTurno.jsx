@@ -3,6 +3,7 @@ import { cancelTurnoById } from "../api/clientes";
 
 export default function useCancelTurno() {
   return useMutation({
-    mutationFn: cancelTurnoById
+    mutationFn: cancelTurnoById,
+    meta: { silent: true },
   })
 }

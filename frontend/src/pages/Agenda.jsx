@@ -10,6 +10,7 @@ import { PageHeader } from '../components/PageHeader.jsx'
 import { useAuth } from '../hooks/useAuth.js'
 import dayjs from 'dayjs'
 import 'dayjs/locale/es'
+import QueryError from '../components/QueryError.jsx'
 
 
 dayjs.locale('es')
@@ -50,11 +51,9 @@ export default function Agenda() {
   const [vista, setVista] = useState('month')
   const esMes = vista === 'month'
   const { desde, hasta } = esMes ? rangoMes(fecha) : rangoSemana(fecha)
-  const { data: profesionalAgenda, isLoading: isLoadingData, error } = useProfesionalDays({ dni_profesional: user?.dni, desde, hasta, estado })
+  const { data: profesionalAgenda, isLoading: isLoadingData, error, refetch } = useProfesionalDays({ dni_profesional: user?.dni, desde, hasta, estado })
 
   const eventos = (profesionalAgenda ?? []).map((t) => {
-    // fecha_turno viene como ISO completo ("2026-07-03T03:00:00.000Z"),
-    // nos quedamos solo con la parte de la fecha. hora_turno ya trae segundos.
     const fechaISO = t.fecha_turno.slice(0, 10)
     const start = new Date(`${fechaISO}T${t.hora_turno}`)
     const end = new Date(start.getTime() + 30 * 60 * 1000) // dura 30 min
@@ -80,9 +79,7 @@ export default function Agenda() {
     <>
       <PageHeader title="Agenda" />
       {error && (
-        <Alert color="red">
-          Error al cargar los datos de la agenda
-        </Alert>
+        <QueryError message={error?.message} onRetry={refetch} />
       )}
       {(!isLoadingData && !error) && (
         <Paper>

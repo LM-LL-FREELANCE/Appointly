@@ -13,6 +13,7 @@ import { rangoSemana, aISO } from "../utils/fechas.utils";
 import { TableConfirmarTurno } from "../components/TableConfirmarTurno";
 import useCreateTurno from "../hooks/useCrearTurno";
 import { IconCircleDashedCheck } from '@tabler/icons-react';
+import QueryError from "../components/QueryError.jsx";
 
 
 
@@ -29,7 +30,7 @@ const Reservar = () => {
   });
   const [slotSeleccionado, setSlotSeleccionado] = useState(null);
   const { desde, hasta } = rangoSemana(fechaSeleccionada);
-  const { data: slotData, isLoading } = useSlots({
+  const { data: slotData, isLoading, isError, error, refetch } = useSlots({
     dni: doctor?.dni_profesional,
     desde,
     hasta,
@@ -150,9 +151,13 @@ const Reservar = () => {
                         />
                       </Group>
                       <Divider />
-                      {isLoading ? (
+                      {isLoading && (
                         <Loader size="sm" />
-                      ) : (
+                      )}
+                      {isError && (
+                        <QueryError message={error?.message || "No se pudieron cargar los horarios disponibles"} onRetry={refetch} />
+                      )}
+                      {!isLoading && !isError && (
                         <Stack gap="sm">
                           <Text fw={500} size="sm">
                             Horarios disponibles — {formatFecha(fechaSeleccionada)}
