@@ -1,6 +1,6 @@
 import { AppError } from "../utils/AppError.js"
 import { TurnosModel } from "../models/turnos.model.js"
-import { EmailService } from "./email.service.js"
+import { EmailMethods } from "../emails/email.methods.js"
 
 export class TurnosService {
 
@@ -32,7 +32,7 @@ export class TurnosService {
     return TurnosModel.getTurnosByProfesional({ dni, desde, hasta, estado })
   }
 
-  static async cancelTurnoById(id, requesterDni, requesterRol) {
+  static async cancelTurnoById(id, requesterDni, requesterRol, motivo) {
 
     const turno = await TurnosModel.getTurnoById(id)
 
@@ -50,15 +50,13 @@ export class TurnosService {
       throw new AppError("Solo se puede cancelar un turno activo.", 409, "NOT_CANCELLABLE")
     }
 
-    const turnoCancelado = await TurnosModel.cancelTurno(id)
+    const turnoCancelado = await TurnosModel.cancelTurno(id, motivo)
 
-    // Aviso por email (hoy es un stub; ver EmailService). No bloquea la
-    // respuesta: si fallara el envío, la cancelación ya quedó hecha igual.
     try {
       if (requesterRol === "profesional") {
-        await EmailService.turnoCanceladoPorProfesional({ turno: turnoCancelado, motivo })
+        await EmailMethods.turnoCanceladoPorProfesional({ turno: turnoCancelado, motivo })
       } else {
-        await EmailService.turnoCanceladoPorCliente({ turno: turnoCancelado })
+        await EmailMethods.turnoCanceladoPorCliente({ turno: turnoCancelado })
       }
     } catch (err) {
       console.error("[email] Error al enviar aviso de cancelación:", err)

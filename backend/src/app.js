@@ -12,6 +12,7 @@ import { horariosRouter } from "./routes/horarios.routes.js"
 import { clientesRouter } from "./routes/clientes.routes.js"
 import { requireApiKey } from "./middlewares/apiKey.middleware.js"
 import { globalLimiter } from "./middlewares/rateLimit.middleware.js"
+import helmet from "helmet"
 export const app = express()
 
 // deployment middleware, express static
@@ -24,8 +25,9 @@ if (process.env.NODE_ENV !== 'production') {
     credentials: true,
   }))
 }
+app.use(helmet())
 app.disable("x-powered-by")
-app.use(express.json())
+app.use(express.json({ limit: '10kb' }))
 app.use(cookieParser())
 app.use("/api", requireApiKey, globalLimiter)
 
