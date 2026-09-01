@@ -136,7 +136,11 @@ export default function Horarios() {
   const { mutate: saveHorarios } = useMutation({
     mutationFn: async () => {
       const { toDelete, toPost, toPut } = buildSavePayload()
-
+      await Promise.all([
+        ...toDelete.map(id => deleteHorario({ id })),
+        ...toPut.map(slot => updateHorario({ ...slot })),
+        ...toPost.map(slot => createHorario({ ...slot, dni: user.dni })),
+      ])
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['horarios', user.dni] })

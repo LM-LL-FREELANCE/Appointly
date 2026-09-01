@@ -1,10 +1,17 @@
 const BASE_URL = import.meta.env.VITE_API_URL || ''
+const API_KEY = import.meta.env.VITE_API_KEY || import.meta.env.API_KEY || ''
 
 export async function request(path, options = {}) {
+  const headers = {
+    'Content-Type': 'application/json',
+    'x-api-key': API_KEY,
+    ...(options.headers || {})
+  }
+
   const res = await fetch(`${BASE_URL}${path}`, {
     credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
     ...options,
+    headers
   })
 
   if (!res.ok) {
