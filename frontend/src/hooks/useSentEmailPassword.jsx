@@ -3,6 +3,7 @@ import { sentEmailPassword } from "../api/api";
 
 export default function useSentEmailPassword() {
   return useMutation({
-    mutationFn: sentEmailPassword
+    mutationFn: sentEmailPassword,
+    meta: { silent: true }
   })
 }

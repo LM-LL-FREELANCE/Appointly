@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
-import { Group, Stack, Avatar, Button, Paper, TextInput, Grid, Select, Flex, FileButton, Notification } from '@mantine/core'
+import { Group, Stack, Avatar, Button, Paper, TextInput, Grid, Select, Flex, FileButton, } from '@mantine/core'
 import { DatePickerInput } from '@mantine/dates'
-import { IconLock, IconCalendar } from '@tabler/icons-react'
+import { IconLock, IconCalendar, IconCheck, IconX } from '@tabler/icons-react'
 import { PageHeader } from '../components/PageHeader.jsx'
 import { MultiSelectCombobox } from '../components/MultiSelectCombobox.jsx'
 import { useAuth } from '../hooks/useAuth.js'
@@ -14,7 +14,10 @@ import useUpdateProfesional from '../hooks/useUpdateAccProfesional.jsx'
 import useDeleteCliente from '../hooks/useDeleteCliente.jsx'
 import useDeleteProfesional from '../hooks/useDeleteProfesional.jsx'
 import { useIsDesktop } from '../hooks/useIsDesktop.js'
-
+import { notifications } from '@mantine/notifications';
+import useSentEmailPassword from '../hooks/useSentEmailPassword.jsx'
+import useNotificationCountDown from '../hooks/useNotificationCountDown.jsx'
+import { EnviarCorreo } from '../components/EmailModal.jsx'
 const OPCIONES_GENERO = ['Masculino', 'Femenino', 'Prefiero no decirlo']
 
 
@@ -81,8 +84,6 @@ export default function MiPerfil() {
       fecha_nacimiento: fechaFinal,
     }
 
-    const handleSuccess = () => setNotificacion({ tipo: 'success', titulo: '¡Actualizado!', mensaje: 'Tus datos se guardaron correctamente.' });
-    const handleError = (error) => setNotificacion({ tipo: 'error', titulo: 'Error al guardar', mensaje: error?.message || 'Hubo un problema al actualizar tu perfil.' });
 
     if (user?.role === "profesional") {
       mutateProfesional({
@@ -92,7 +93,20 @@ export default function MiPerfil() {
           especialidades: especialidadesSel,
           obras_sociales: obraSocialSel
         }
-      }, { onSuccess: handleSuccess, onError: handleError })
+      }, {
+        onSuccess: () => {
+          notifications.show({
+            id: "actualizado",
+            title: "Cambios realizados con exito",
+            position: 'top-right',
+            icon: <IconCheck />,
+            withCloseButton: false,
+            autoClose: 3000,
+            close: true,
+            color: 'green'
+          })
+        }
+      })
     } else {
       mutateCliente({
         dni: user.dni,
@@ -100,8 +114,71 @@ export default function MiPerfil() {
           ...baseData,
           obra_social: obraSocialSel.length > 0 && obraSocialSel[0] !== "Sin obra social" ? obraSocialSel[0] : undefined
         }
-      }, { onSuccess: handleSuccess, onError: handleError })
+      }, {
+        onSuccess: {
+          onSuccess: () => {
+            notifications.show({
+              id: "actualizado",
+              title: "Cambios realizados con exito",
+              position: 'top-right',
+              icon: <IconCheck />,
+              withCloseButton: false,
+              autoClose: 3000,
+              allowClose: true,
+              color: 'green'
+            })
+          }
+        }
+      })
     }
+  }
+  const { mutate: mutateEmail, isPending } = useSentEmailPassword()
+  const { startCountDown, time, stopCountDown } = useNotificationCountDown()
+  const notAvailable = time > 0
+  const [openedEmailModal, { open: openEmailModal, close: closeEmailModal }] = useDisclosure(false)
+  const handleCloseEmailModal = () => {
+    stopCountDown()
+    closeEmailModal()
+  }
+  const handleSentEmail = () => {
+    notifications.show({
+      id: "volverEnviar",
+      title: 'Espera un momento...',
+      message: 'Estamos enviando tu correo.',
+      position: 'top-right',
+      withCloseButton: false,
+      autoClose: false,
+      loading: true
+    })
+    setTimeout(() => {
+      mutateEmail({
+        correo: correo || user?.correo,
+        role: user?.role
+      }, {
+        onSuccess: () => {
+          startCountDown({
+            initialTime: 31, notificationConfig: {
+              id: "volverEnviar",
+              title: "Correo Enviado",
+              message: (tiempoRestante) => `Podras enviar otro correo en ${tiempoRestante}s`
+            }
+          })
+        },
+        onError: (err) => {
+          notifications.update({
+            id: 'volverEnviar',
+            title: 'Error al enviar',
+            message: err?.message || 'No se pudo enviar el correo, intenta nuevamente.',
+            color: 'red',
+            icon: <IconX size={16} />,
+            autoClose: 4000,
+            withCloseButton: true,
+            position: 'top-right',
+            loading: false,
+          })
+        }
+      })
+    }, 2000)
   }
   const perfilData = user?.role === "profesional" ? perfil : perfilCliente
   const [eliminar, { open: openEliminar, close: closeEliminar }] = useDisclosure(false)
@@ -186,16 +263,6 @@ export default function MiPerfil() {
         </Stack>
 
         <Paper withBorder p="xl" flex={1} radius="md" w="100%">
-          {notificacion && (
-            <Notification
-              color={notificacion.tipo === 'success' ? 'green' : 'red'}
-              title={notificacion.titulo}
-              onClose={() => setNotificacion(null)}
-              mb="md"
-            >
-              {notificacion.mensaje}
-            </Notification>
-          )}
           <Grid gutter="md">
             <Grid.Col span={{ base: 12, sm: 6 }}>
               <TextInput
@@ -270,23 +337,42 @@ export default function MiPerfil() {
               maxSelected={user?.role === "profesional" ? undefined : 1}
             />
           </Stack>
-
-          <Group justify="flex-end" gap="sm" mt="xl" wrap="wrap">
-            <Button color="red" onClick={openEliminar} variant="outline" size={inputSize} w={{ base: '100%', sm: 'auto' }}>
-              Eliminar cuenta
-            </Button>
-            <Button size={inputSize} w={{ base: '100%', sm: 'auto' }} onClick={handleSave} loading={isPendingProfesional || isPendingCliente}>
-              Guardar
-            </Button>
+          <Group gap="sm" mt="xl" wrap="wrap" justify='space-between'>
+            <Group w={{ base: '100%', sm: 'auto' }}>
+              <Button size={inputSize} w={{ base: '100%', sm: 'auto' }} onClick={openEmailModal} loading={isPendingProfesional || isPendingCliente}>
+                Cambiar contraseña
+              </Button>
+            </Group>
+            <Group w={{ base: '100%', sm: 'auto' }} justify="flex-end">
+              <Button color="red" onClick={openEliminar} variant="outline" size={inputSize} w={{ base: '100%', sm: 'auto' }}>
+                Eliminar cuenta
+              </Button>
+              <Button size={inputSize} w={{ base: '100%', sm: 'auto' }} onClick={handleSave} loading={isPendingProfesional || isPendingCliente}>
+                Guardar
+              </Button>
+            </Group>
           </Group>
         </Paper>
-      </Flex>
+      </Flex >
       {eliminar && (
         <EliminarCuentaModal
           opened={eliminar}
           onClose={closeEliminar}
           onConfirm={handleDeleteConfirm}
           isPending={isPendingDeleCliente || isPendingDeleProfesional}
+        />
+      )
+      }
+      {openedEmailModal && (
+        <EnviarCorreo
+          opened={openedEmailModal}
+          onClose={handleCloseEmailModal}
+          email={correo || user?.correo}
+          setEmail={setCorreo}
+          onSettings={true}
+          onConfirm={handleSentEmail}
+          isPending={isPending}
+          isNotAvailble={notAvailable}
         />
       )}
     </>

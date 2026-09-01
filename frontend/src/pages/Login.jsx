@@ -16,15 +16,15 @@ import { useAuth } from '../hooks/useAuth.js'
 import { EnviarCorreo } from '../components/EmailModal.jsx';
 import { notifications } from '@mantine/notifications';
 import '@mantine/notifications/styles.css';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import useSentEmailPassword from '../hooks/useSentEmailPassword.jsx';
-import { IconCheck, IconX } from '@tabler/icons-react';
+import { IconX } from '@tabler/icons-react';
+import useNotificationCountDown from '../hooks/useNotificationCountDown.jsx';
 
 export default function Login() {
   const [forgotPassWordModal, { open: openforgotPassWordModal, close: closeforgotPassWordModal }] =
     useDisclosure(false)
   const { login, isLoggingIn, loginError } = useAuth()
-  const [volverEnviar, setVolverEnviar] = useState(0)
   const [email, setEmail] = useState("")
   const navigate = useNavigate()
 
@@ -50,76 +50,56 @@ export default function Login() {
   })
 
   const { mutate: mutateEmail, isPending: isPendingEmail } = useSentEmailPassword()
+  const { startCountDown, time, setTime } = useNotificationCountDown()
+  const notAvailable = time > 0
 
   const handleConfirm = () => {
-    mutateEmail({
-      correo: email,
-      role: "cliente"
-    }, {
-      onSuccess: () => {
-        setVolverEnviar(60);
-        notifications.show({
-          id: "volverEnviar",
-          title: 'Correo enviado',
-          message: 'Podrás enviar otro correo en 60s',
-          position: 'top-center',
-          icon: <IconCheck />,
-          withCloseButton: false,
-          autoClose: false,
-          color: 'green'
-        });
-      },
-      onError: () => {
-        notifications.show({
-          id: 'errorEnviar',
-          title: 'Error al enviar',
-          message: 'Sucedió un error, verifica que todo lo que ingresaste es correcto.',
-          color: 'red',
-          icon: <IconX />,
-          autoClose: 3000,
-          withCloseButton: true,
-          position: 'top-center',
-        })
-      }
+    notifications.show({
+      id: "volverEnviar",
+      title: 'Espera un momento...',
+      message: 'Estamos enviando tu correo.',
+      position: 'top-right',
+      withCloseButton: false,
+      autoClose: false,
+      loading: true
     })
+    setTimeout(() => {
+      mutateEmail({
+        correo: email,
+        role: "cliente"
+      }, {
+        onSuccess: () => {
+          startCountDown({
+            initialTime: 31, notificationConfig: {
+              id: "volverEnviar",
+              title: "Correo Enviado",
+              message: (tiempoRestante) => `Podras enviar otro correo en ${tiempoRestante}s`
+            }
+          })
+        },
+        onError: () => {
+          notifications.update({
+            id: 'volverEnviar',
+            title: 'Error al enviar',
+            message: 'Sucedió un error, verifica que el correo al que quieres mandar tiene asociada una cuenta.',
+            color: 'red',
+            icon: <IconX />,
+            autoClose: 3000,
+            withCloseButton: true,
+            position: 'top-right',
+            loading: false,
+          })
+        }
+      })
+    }, 2000)
   }
 
   const closeModal = () => {
-    setVolverEnviar(0)
+    setTime(0)
     notifications.hide("volverEnviar")
     closeforgotPassWordModal()
   }
 
-  const relojActivo = volverEnviar > 0;
-
-  useEffect(() => {
-    if (!relojActivo) {
-      notifications.hide("volverEnviar");
-      return;
-    }
-
-    const reloj = setInterval(() => {
-      setVolverEnviar((prev) => {
-        const nuevoTiempo = prev - 1;
-
-        if (nuevoTiempo > 0) {
-          notifications.update({
-            id: "volverEnviar",
-            title: 'Correo enviado',
-            message: `Podrás enviar otro correo en ${nuevoTiempo}s`,
-            position: 'top-center',
-            withCloseButton: false,
-            autoClose: false,
-            color: 'green'
-          });
-        }
-
-        return nuevoTiempo;
-      });
-    }, 1000);
-
-    return () => clearInterval(reloj);
-  }, [relojActivo]);
 
   return (
     <>
@@ -187,7 +167,7 @@ export default function Login() {
           onClose={closeModal}
           onConfirm={handleConfirm}
           isPending={isPendingEmail}
-          isNotAvailble={volverEnviar}
+          isNotAvailble={notAvailable}
           email={email}
           setEmail={setEmail}
         />

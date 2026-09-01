@@ -1,6 +1,6 @@
 import { Button, Container, Title, Anchor, Group, Center, Modal, Text, TextInput, Stack } from '@mantine/core'
 import ButtonLay from './Button.jsx';
-export function EnviarCorreo({ opened, onClose, onConfirm, onSettings, isPending, isNotAvailble, email, setEmail, size = 'sm', ...props }) {
+export function EnviarCorreo({ msg = "¿Olvido su contraseña?", opened, onClose, onConfirm, onSettings, isPending, isNotAvailble, email, setEmail, size = 'sm', ...props }) {
   return (
     <Modal
       opened={opened}
@@ -15,7 +15,7 @@ export function EnviarCorreo({ opened, onClose, onConfirm, onSettings, isPending
       <Container size={460} my={30}>
         <Stack gap="md">
           <Title ta="center">
-            ¿Olvido su contraseña?
+            {msg}
           </Title>
           <Text c="dimmed" fz="sm" ta="center">
             Ingrese su mail y va a recibir un correo con un link, dirigiendose a ese link

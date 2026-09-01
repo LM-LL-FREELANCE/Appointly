@@ -12,6 +12,7 @@ import { useQuery, keepPreviousData } from "@tanstack/react-query"
 import { useNavigate } from 'react-router-dom'
 import useObrasSociales from '../hooks/useObraSociales'
 import { useIsDesktop } from "../hooks/useIsDesktop.js"
+import QueryError from "../components/QueryError.jsx"
 
 export default function Buscar() {
   const navigate = useNavigate()
@@ -21,24 +22,29 @@ export default function Buscar() {
   const [obraSocial, setObraSocial] = useState(null)
   const [vista, setVista] = useState('cards')
 
-  const { data: profesionales = [], isLoading: isLoadingProfesionales } = useQuery({
+  const { data: profesionales = [], isLoading: isLoadingProfesionales, isError: isErrorProfessionals, refetch: refetchProfesionals } = useQuery({
     queryKey: ["profesionales", especialidad, obraSocial],
     queryFn: () => getFilteredProfesional({ especialidad, obraSocial }),
     placeholderData: keepPreviousData,
   })
 
-  const { data: especialidades = [], isLoading: isLoadingEspecialidades } = useQuery({
+  const { data: especialidades = [], isLoading: isLoadingEspecialidades, isError: isErrorEspecialidades, refetch: refetchEspecialidades } = useQuery({
     queryKey: ["especialidades"],
     queryFn: getAllEspecialidades,
   })
 
-  const { data: obraSociales = [], isLoading: isLoadingObraSociales } = useObrasSociales()
+  const { data: obraSociales = [], isLoading: isLoadingObraSociales, isError: isErrorObras, refetch: refetchObras } = useObrasSociales()
 
   const doctoresFiltrados = profesionales.filter(doc =>
     `${doc.nombre} ${doc.apellido}`.toLowerCase().includes(busqueda.toLowerCase())
   )
   const isLoadingAll = isLoadingProfesionales && isLoadingEspecialidades && isLoadingObraSociales
-
+  const isError = isErrorEspecialidades || isErrorProfessionals || isErrorObras
+  const refetchAll = () => {
+    refetchProfesionals()
+    refetchEspecialidades()
+    refetchObras()
+  }
   if (isLoadingAll) {
     return (
       <Center h={200}>
@@ -60,7 +66,9 @@ export default function Buscar() {
           />
         )}
       />
-
+      {isError && (
+        <QueryError message="No se puedieron cargar todos los datos" onRetry={refetchAll} />
+      )}
       {!isDesktop && (
         <TextInput
           placeholder="Buscar por nombre..."

@@ -18,10 +18,11 @@ import professionalBg from "../assets/images/professionals-bg.svg"
 import { useDisclosure } from '@mantine/hooks'
 import { EnviarCorreo } from '../components/EmailModal.jsx'
 import useSentEmailPassword from '../hooks/useSentEmailPassword.jsx'
-import { IconCheck, IconX } from '@tabler/icons-react'
+import { IconX } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications';
 import '@mantine/notifications/styles.css';
-import { useState, useEffect } from "react"
+import { useState } from "react"
+import useNotificationCountDown from '../hooks/useNotificationCountDown.jsx'
 
 export default function ProfessionalLogin() {
 
@@ -29,40 +30,12 @@ export default function ProfessionalLogin() {
   const navigate = useNavigate()
   const [forgotPassWordModal, { open: openforgotPassWordModal, close: closeforgotPassWordModal }] = useDisclosure(false)
   const [email, setEmail] = useState("")
-  const [volverEnviar, setVolverEnviar] = useState(0)
-  const relojActivo = volverEnviar > 0
   const { mutate: mutateEmail, isPending: isPendingEmail } = useSentEmailPassword()
-  useEffect(() => {
-    if (!relojActivo) {
-      notifications.hide("volverEnviar");
-      return;
-    }
-
-    const reloj = setInterval(() => {
-      setVolverEnviar((prev) => {
-        const nuevoTiempo = prev - 1;
-
-        if (nuevoTiempo > 0) {
-          notifications.update({
-            id: "volverEnviar",
-            title: 'Correo enviado',
-            message: `Podrás enviar otro correo en ${nuevoTiempo}s`,
-            position: 'top-center',
-            withCloseButton: false,
-            autoClose: false,
-            color: 'green'
-          });
-        }
-
-        return nuevoTiempo;
-      });
-    }, 1000);
-
-    return () => clearInterval(reloj);
-  }, [relojActivo]);
+  const { startCountDown, time, setTime, stopCountDown } = useNotificationCountDown()
+  const notAvailable = time > 0
 
   const handleCloseModal = () => {
-    setVolverEnviar(0)
+    setTime(0)
     notifications.hide("volverEnviar")
     closeforgotPassWordModal()
   }
@@ -72,19 +45,16 @@ export default function ProfessionalLogin() {
       role: "profesional"
     }, {
       onSuccess: () => {
-        setVolverEnviar(60);
-        notifications.show({
-          id: "volverEnviar",
-          title: 'Correo enviado',
-          message: 'Podrás enviar otro correo en 60s',
-          position: 'top-center',
-          icon: <IconCheck />,
-          withCloseButton: false,
-          autoClose: false,
-          color: 'green'
-        });
+        startCountDown({
+          initialTime: 60, notificationConfig: {
+            id: "volverEnviar",
+            title: "Correo enviado",
+            message: (tiempoRestante) => `Podras enviar otro correo en ${tiempoRestante}s`
+          }
+        })
       },
       onError: () => {
+        stopCountDown()
         notifications.show({
           id: 'errorEnviar',
           title: 'Error al enviar',
@@ -93,7 +63,7 @@ export default function ProfessionalLogin() {
           icon: <IconX />,
           autoClose: 3000,
           withCloseButton: true,
-          position: 'top-center',
+          position: 'top-right',
         })
       }
     })
@@ -206,6 +176,7 @@ export default function ProfessionalLogin() {
           setEmail={setEmail}
           onConfirm={handleSend}
           isPending={isPendingEmail}
+          notAvailable={notAvailable}
         />
       )
       }

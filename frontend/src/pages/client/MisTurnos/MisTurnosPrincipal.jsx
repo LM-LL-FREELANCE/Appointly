@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query"
 import { getTurnosClienteByDni } from "../../../api/clientes.js"
 import { useAuth } from "../../../hooks/useAuth.js"
 import { useIsDesktop } from "../../../hooks/useIsDesktop.js"
-
+import QueryError from "../../../components/QueryError.jsx"
 export default function MisTurnos() {
   const { user } = useAuth()
 
@@ -16,7 +16,7 @@ export default function MisTurnos() {
   const [estado, setEstado] = useState(state?.tab ?? 'activo')
   const isDesktop = useIsDesktop()
 
-  const { data: [activos, pasados] = [[], []], isLoading, isError } = useQuery({
+  const { data: [activos, pasados] = [[], []], isLoading, isError, error, refetch } = useQuery({
     queryKey: ['turnos', user?.dni, ""],
     queryFn: () => getTurnosClienteByDni({ dni: user.dni, estado: "" }),
     enabled: !!user?.dni,
@@ -85,9 +85,7 @@ export default function MisTurnos() {
       )}
 
       {isError && (
-        <Alert color="red" mt="md">
-          Error al cargar los turnos
-        </Alert>
+        <QueryError message={error?.message} onRetry={refetch} />
       )}
 
       {user && !isLoading && !isError && (

@@ -4,5 +4,6 @@ import { createAccount } from "../api/clientes.js";
 export default function useCreateAccount() {
   return useMutation({
     mutationFn: createAccount,
+    meta: { silent: true }
   })
 }

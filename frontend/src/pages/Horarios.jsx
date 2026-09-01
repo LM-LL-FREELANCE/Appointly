@@ -1,14 +1,15 @@
 import { useState, useMemo } from "react"
 import { PageHeader } from "../components/PageHeader.jsx"
-import { Alert, Box, Button, Group, Paper, SimpleGrid, Stack, Switch, Text } from "@mantine/core"
+import { Box, Button, Group, Paper, SimpleGrid, Stack, Switch, Text } from "@mantine/core"
 import { useIsDesktop } from "../hooks/useIsDesktop.js"
 import TimeSlot from "../components/TimeSlot.jsx"
 import HorariosSkeleton from "../components/skeletons/HorariosSkeleton.jsx"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { getHorariosByDni, createHorario, updateHorario, deleteHorario } from "../api/profesionales.js"
 import { useAuth } from "../hooks/useAuth.js"
-import { IconExclamationCircle, IconCheck, IconX, IconPlus } from '@tabler/icons-react'
+import { IconCheck, IconX, IconPlus } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
+import QueryError from "../components/QueryError.jsx"
 
 const DIAS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
 
@@ -22,7 +23,7 @@ export default function Horarios() {
   const [edited, setEdited] = useState({})
   const [dayToggled, setDayToggled] = useState({}) // overrides explícitos del switch por día
 
-  const { data, isPending, isError } = useQuery({
+  const { data, isPending, isError, error, refetch } = useQuery({
     queryKey: ['horarios', user?.dni],
     queryFn: () => getHorariosByDni({ dni: user.dni }),
     enabled: !!user?.dni
@@ -135,11 +136,7 @@ export default function Horarios() {
   const { mutate: saveHorarios } = useMutation({
     mutationFn: async () => {
       const { toDelete, toPost, toPut } = buildSavePayload()
-      await Promise.all([
-        ...toDelete.map(id => deleteHorario({ id })),
-        ...toPut.map(slot => updateHorario({ ...slot })),
-        ...toPost.map(slot => createHorario({ ...slot, dni: user.dni })),
-      ])
+
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['horarios', user.dni] })
@@ -147,42 +144,29 @@ export default function Horarios() {
       setDeleted([])
       setEdited([])
       setDayToggled({})
-      ;(() => {
-        const id = notifications.show({
-          title: 'Espera un momento...',
-          message: 'Guardando cambios en tus horarios',
-          position: 'top-center',
-          withCloseButton: false,
-          autoClose: false,
-          loading: true,
-        })
-
-        setTimeout(() => {
-          notifications.update({
-            id,
-            title: 'Datos guardados',
-            message: 'Tus horarios fueron guardados correctamente',
-            icon: <IconCheck />,
-            loading: false,
-            autoClose: 3000,
-            allowClose: true,
+        ; (() => {
+          const id = notifications.show({
+            title: 'Espera un momento...',
+            message: 'Guardando cambios en tus horarios',
+            position: 'top-right',
+            withCloseButton: false,
+            autoClose: false,
+            loading: true,
           })
-        }, 1500)
-      })()
+
+          setTimeout(() => {
+            notifications.update({
+              id,
+              title: 'Datos guardados',
+              message: 'Tus horarios fueron guardados correctamente',
+              icon: <IconCheck />,
+              loading: false,
+              autoClose: 3000,
+              allowClose: true,
+            })
+          }, 1500)
+        })()
     },
-    onError: (err) => {
-      console.error('[Horarios] Error al guardar:', err.message)
-      notifications.show({
-        title: 'Error al guardar los horarios',
-        message: 'Verifica que los lapsos de tiempo no se superpongan',
-        color: 'red',
-        icon: <IconX />,
-        allowClose: true,
-        autoClose: 3000,
-        withCloseButton: false,
-        position: 'top-center',
-      })
-    }
   })
 
   return (
@@ -197,9 +181,7 @@ export default function Horarios() {
         {isPending && <HorariosSkeleton />}
 
         {isError && (
-          <Alert color="red" m="md" variant="light" icon={<IconExclamationCircle />}>
-            Hubo un error al cargar los horarios
-          </Alert>
+          <QueryError message={error?.message} onRetry={refetch} />
         )}
 
         {!isPending && !isError && (

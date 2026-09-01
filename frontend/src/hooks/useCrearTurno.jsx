@@ -7,6 +7,7 @@ export default function useCreateTurno() {
 
   return useMutation({
     mutationFn: createNewTurno,
+    meta: { silent: true },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['slots'] })
     },

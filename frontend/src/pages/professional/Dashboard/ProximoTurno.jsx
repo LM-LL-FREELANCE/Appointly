@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Group, Text, Stack, Avatar, Paper, Button, Badge, ThemeIcon, Divider } from "@mantine/core"
+import { Group, Text, Stack, Avatar, Paper, Button, Badge, Divider } from "@mantine/core"
 import { useDisclosure } from '@mantine/hooks'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { IconCalendarClock, IconCalendarOff, IconClock, IconCalendar, IconLogs, IconCancel } from '@tabler/icons-react'
@@ -32,6 +32,7 @@ export function ProximoTurno({ turno, isDesktop }) {
 
   const { mutate: cancelTurno, isPending: isCancelling } = useMutation({
     mutationFn: (id) => cancelTurnoById(id, user?.dni),
+    meta: { silent: true },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['turnos-profesional', user?.dni] })
       closeCancel()

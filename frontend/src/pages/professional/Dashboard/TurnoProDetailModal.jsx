@@ -1,6 +1,7 @@
 import { Badge, Box, Button, Divider, Grid, Group, Modal, Text } from '@mantine/core'
 import { useQuery } from '@tanstack/react-query'
 import { getTurnoById } from '../../../api/clientes.js'
+import QueryError from '../../../components/QueryError.jsx'
 
 function DetailRow({ label, children }) {
   return (
@@ -19,10 +20,10 @@ function DetailRow({ label, children }) {
 }
 
 export function TurnoProDetailModal({ opened, onClose, onCancelRequest, turno }) {
-  const { data: detail } = useQuery({
-    queryKey: ['turno', turno.id_turno],
-    queryFn: () => getTurnoById(turno.id_turno),
-    enabled: opened
+  const { data: detail, isError, error, refetch } = useQuery({
+    queryKey: ['turno', turno?.id_turno],
+    queryFn: () => getTurnoById(turno?.id_turno),
+    enabled: opened && !!turno?.id_turno
   })
 
   const badgeColor = turno.estado === 'activo' ? 'green' : 'red'
@@ -47,31 +48,37 @@ export function TurnoProDetailModal({ opened, onClose, onCancelRequest, turno })
       <Box px="lg" pt="lg" pb="md">
         <Text fw={700} fz="lg" mb="lg">Detalle del turno</Text>
         <Divider />
-        <DetailRow label="Paciente">
-          <Text fz="sm" fw={500}>
-            {detail ? `${detail.c_nombre} ${detail.c_apellido}` : `${turno.nombre} ${turno.apellido}`}
-          </Text>
-        </DetailRow>
-        {detail?.tipo && (
-          <DetailRow label="Especialidad">
-            <Text fz="sm" fw={500}>{detail.tipo}</Text>
-          </DetailRow>
-        )}
-        <DetailRow label="Fecha">
-          <Text fz="sm" fw={500}>{turno.fecha_turno?.slice(0, 10)}</Text>
-        </DetailRow>
-        <DetailRow label="Hora">
-          <Text fz="sm" fw={500}>{turno.hora_turno?.slice(0, 5)} hs</Text>
-        </DetailRow>
-        <DetailRow label="Estado">
-          <Badge variant="dot" color={badgeColor} size="md" radius="xl" tt="capitalize">
-            {turno.estado}
-          </Badge>
-        </DetailRow>
-        {reservadoEl && (
-          <DetailRow label="Reservado el">
-            <Text fz="sm" fw={500}>{reservadoEl}</Text>
-          </DetailRow>
+        {isError ? (
+          <QueryError message={error?.message || "No se pudo cargar el detalle del turno"} onRetry={refetch} />
+        ) : (
+          <>
+            <DetailRow label="Paciente">
+              <Text fz="sm" fw={500}>
+                {detail ? `${detail.c_nombre} ${detail.c_apellido}` : `${turno.nombre} ${turno.apellido}`}
+              </Text>
+            </DetailRow>
+            {detail?.tipo && (
+              <DetailRow label="Especialidad">
+                <Text fz="sm" fw={500}>{detail.tipo}</Text>
+              </DetailRow>
+            )}
+            <DetailRow label="Fecha">
+              <Text fz="sm" fw={500}>{turno.fecha_turno?.slice(0, 10)}</Text>
+            </DetailRow>
+            <DetailRow label="Hora">
+              <Text fz="sm" fw={500}>{turno.hora_turno?.slice(0, 5)} hs</Text>
+            </DetailRow>
+            <DetailRow label="Estado">
+              <Badge variant="dot" color={badgeColor} size="md" radius="xl" tt="capitalize">
+                {turno.estado}
+              </Badge>
+            </DetailRow>
+            {reservadoEl && (
+              <DetailRow label="Reservado el">
+                <Text fz="sm" fw={500}>{reservadoEl}</Text>
+              </DetailRow>
+            )}
+          </>
         )}
       </Box>
       <Box px="lg" py="md">

@@ -1,14 +1,17 @@
 import { useNavigate } from "react-router-dom"
-import { TextInput, Title, Button, Loader, Stack, Paper, SimpleGrid, Select, PasswordInput, Alert, Group } from "@mantine/core"
+import { TextInput, Title, Button, Loader, Stack, Paper, SimpleGrid, Select, PasswordInput } from "@mantine/core"
 import { DatePickerInput } from "@mantine/dates"
 import { useIsDesktop } from "../hooks/useIsDesktop.js"
-import { useState } from "react"
 import { matchesField, useForm } from "@mantine/form"
-import { IconCalendar, IconAlertCircle, IconCheck } from '@tabler/icons-react';
+import { IconCalendar, IconAlertCircle, IconX } from '@tabler/icons-react';
 import useObrasSociales from "../hooks/useObraSociales";
 import useCreateAccount from "../hooks/useRegisterAccount";
-import useLoginSession from "../hooks/useLoginSession";
+import { notifications } from '@mantine/notifications';
+import '@mantine/notifications/styles.css';
 import 'dayjs/locale/es';
+import useNotificationCountDown from "../hooks/useNotificationCountDown.jsx"
+import useGetErrosMsg from "../hooks/useGetErrosMsg.jsx"
+import { useAuth } from "../hooks/useAuth.js"
 
 export default function SignUp() {
   const navigate = useNavigate()
@@ -52,8 +55,9 @@ export default function SignUp() {
   })
 
   const { mutate, isPending, error: errorAcc } = useCreateAccount()
-  const { mutate: mutateLogin, isPending: isLoginIn, error: isErrorLoginIn } = useLoginSession()
-  const [accConfirm, setAccConfirm] = useState(false)
+  const { login, isLoggingIn } = useAuth()
+  const { startCountDown, stopCountDown } = useNotificationCountDown()
+  const { singingUp } = useGetErrosMsg()
 
   const getGeneroFormateado = (genero) => {
     if (genero === "Masculino") return "M";
@@ -62,32 +66,76 @@ export default function SignUp() {
   }
 
   const handleSubmit = (values) => {
-    mutate({
-      dni: values.dni,
-      nombre: values.nombre,
-      apellido: values.apellido,
-      correo: values.correo,
-      password: values.password,
-      confirm: values.confirm,
-      fecha_nacimiento: values.fecha_nacimiento,
-      genero: getGeneroFormateado(values.genero),
-      id_obra_social: values.id_obra_social ? Number(values.id_obra_social) : null
-    }, {
-      onSuccess: () => {
-        setAccConfirm(true)
-        mutateLogin({
-          dni: values.dni,
-          password: values.password,
-          role: "cliente"
-        }, {
-          onSuccess: () => {
-            setTimeout(() => {
-              navigate("/")
-            }, 1000)
-          },
-        })
-      }
+    notifications.show({
+      id: "registrandose",
+      title: 'Espera un momento...',
+      message: 'Estamos creando tu cuenta.',
+      position: 'top-right',
+      withCloseButton: false,
+      autoClose: false,
+      loading: true
     })
+    setTimeout(() => {
+      mutate({
+        dni: values.dni,
+        nombre: values.nombre,
+        apellido: values.apellido,
+        correo: values.correo,
+        password: values.password,
+        confirm: values.confirm,
+        fecha_nacimiento: values.fecha_nacimiento,
+        genero: getGeneroFormateado(values.genero),
+        id_obra_social: values.id_obra_social ? Number(values.id_obra_social) : null
+      }, {
+        onSuccess: () => {
+          startCountDown({
+            initialTime: 6, notificationConfig: {
+              id: "registrandose",
+              title: "Cuenta Registrada",
+              message: (tiempoRestante) => `Se iniciará sesión en ${tiempoRestante}s`
+            }
+          })
+          login({
+            dni: values.dni,
+            password: values.password,
+            role: "cliente"
+          })
+            .then(() => {
+              setTimeout(() => {
+                notifications.hide("registrandose")
+                navigate("/")
+              }, 6000)
+            })
+            .catch((err) => {
+              stopCountDown()
+              notifications.update({
+                id: "registrandose",
+                title: "Atención",
+                message: "Cuenta creada exitosamente, pero hubo un error al iniciar sesión automáticamente. Por favor, inicia sesión manualmente.",
+                color: 'yellow',
+                icon: <IconAlertCircle />,
+                loading: false,
+                autoClose: 4000,
+                withCloseButton: true,
+                position: 'top-right',
+              })
+            })
+        },
+        onError: (err) => {
+          notifications.update({
+            id: "registrandose",
+            title: err?.code === "DUPLICATE_DNI" || err?.code === "DUPLICATE_EMAIL" ? "Cuenta ya existente" : "Ocurrio un problema registrando su cuenta",
+            message: singingUp(err?.code),
+            color: 'red',
+            icon: <IconX />,
+            loading: false,
+            autoClose: 4000,
+            withCloseButton: true,
+            position: 'top-right',
+          })
+        }
+      })
+    }, 1000)
   }
 
   return (
@@ -175,34 +223,11 @@ export default function SignUp() {
                 <Button type="button" onClick={() => navigate("/login")} >Ya tengo una cuenta</Button>
                 <Button
                   type="submit"
-                  loading={isPending || isLoginIn}
+                  loading={isPending || isLoggingIn}
                 >
                   Registrarse
                 </Button>
               </SimpleGrid>
-              <Group align="center">
-                {accConfirm && (
-                  <Alert style={{ flex: 1 }} icon={<IconCheck size={16} />} color="green" title="¡Cuenta Creada!">
-                    Tu cuenta fue registrada exitosamente. Ya puedes iniciar sesión.
-                  </Alert>
-                )}
-
-                {errorAcc && (
-                  <Alert style={{ flex: 1 }} icon={<IconAlertCircle size={16} />} color="red" title="Error">
-                    {errorAcc?.code === "DUPLICATE_DNI"
-                      ? "Ya existe una cuenta registrada con este DNI. Si es tuyo, intenta iniciar sesión."
-                      : "Hubo un problema al registrar la cuenta. Por favor, intenta de nuevo."}
-                  </Alert>
-                )}
-                {isErrorLoginIn && (
-                  <>
-                    <Alert style={{ flex: 1 }} icon={<IconAlertCircle size={16} />} color="red" title="Error">
-                      A ocurrido un error al querer iniciar su sesion, porfavor aprete el siguiente boton para iniciar sesion con su cuenta.
-                    </Alert>
-                    <Button onClick={() => navigate("/login")}>Iniciar Sesion</Button>
-                  </>
-                )}
-              </Group>
             </Stack>
           </form>
         </Paper>
