@@ -117,16 +117,18 @@ export class ProfesionalesModel {
     if (especialidad) {
       conditions.push(`EXISTS (
     SELECT 1 FROM profesional_especialidad pe2 
-    WHERE pe2.dni_profesional = p.dni_profesional AND pe2.id_especialidad = ?
+    INNER JOIN especialidad e2 ON pe2.id_especialidad = e2.id_especialidad
+    WHERE pe2.dni_profesional = p.dni_profesional AND (pe2.id_especialidad = ? OR e2.tipo = ?)
   )`);
-      values.push(especialidad);
+      values.push(especialidad, especialidad);
     }
     if (obraSocial) {
       conditions.push(`EXISTS (
     SELECT 1 FROM obra_social_profesional obp2 
-    WHERE obp2.dni_profesional = p.dni_profesional AND obp2.id_obra_social = ?
+    INNER JOIN obra_social ob2 ON obp2.id_obra_social = ob2.id_obra_social
+    WHERE obp2.dni_profesional = p.dni_profesional AND (obp2.id_obra_social = ? OR ob2.nombre_obra_social = ?)
   )`);
-      values.push(obraSocial);
+      values.push(obraSocial, obraSocial);
     }
     if (conditions.length > 0) {
       query += ` WHERE ` + conditions.join(' AND ');

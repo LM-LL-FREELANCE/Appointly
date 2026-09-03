@@ -57,11 +57,9 @@ export class ProfesionalesController {
 
   static async filterBy(req, res, next) {
     try {
-      const { especialidad, obrasocial } = req.query
-      const profesionales = await ProfesionalesModel.filterBy({ especialidad, obraSocial: obrasocial })
-      if (profesionales.length === 0) {
-        throw new AppError("We couldn't find any professionals with the given filters", 404, "NOT_FOUND");
-      }
+      const { especialidad } = req.query
+      const obraSocial = req.query.obraSocial || req.query.obrasocial || req.query.obra_social
+      const profesionales = await ProfesionalesModel.filterBy({ especialidad, obraSocial })
       return res.json(profesionales)
     } catch (err) {
       next(err);
