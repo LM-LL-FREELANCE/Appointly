@@ -40,7 +40,7 @@ export class TurnosModel {
       INNER JOIN especialidad e ON e.id_especialidad = p_e.id_especialidad
       WHERE t.id_turno = ?
       GROUP BY t.id_turno, p_prof.apellido, p_prof.nombre, p_prof.dni_persona, pr_prof.correo,
-               p_cli.apellido, p_cli.nombre, pr_cli.correo, t.dni_cliente
+            p_cli.apellido, p_cli.nombre, pr_cli.correo, t.dni_cliente
     `, [id])
 
     return row[0] ?? null
@@ -59,7 +59,7 @@ export class TurnosModel {
   static async getTurnosByProfesional({ dni, desde, hasta, estado }) {
     let query = `
     SELECT t.id_turno, t.fecha_turno, t.hora_turno, t.estado, t.creado_en, t.completado_en, t.cancelado_en,
-           p.dni_persona AS dni, p.nombre, p.apellido
+          p.dni_persona AS dni, p.nombre, p.apellido
     FROM turno t
     INNER JOIN persona p ON p.dni_persona = t.dni_cliente
     WHERE t.dni_profesional = ? AND t.fecha_turno BETWEEN ? AND ?

@@ -8,15 +8,13 @@ import { CancelarTurnoProfModal } from './CancelarTurnoProfModal.jsx'
 
 const COLUMNS = ['Fecha', 'Hora', 'Paciente', 'Estado', 'Acciones']
 
-// Tabla de la agenda del profesional. Adaptada de la del cliente:
-// muestra el PACIENTE y cancela con rol 'profesional'.
 export default function TurnosTableProf({ turnos, dniProfesional, onCancelled }) {
   const [cancelOpened, { open: openCancel, close: closeCancel }] = useDisclosure(false)
   const [selectedItem, setSelectedItem] = useState(null)
 
   const queryClient = useQueryClient()
   const { mutate: cancelTurno, isPending: isCancelling } = useMutation({
-    mutationFn: ({ id_turno, motivo }) => cancelTurnoById(id_turno, dniProfesional, 'profesional', motivo),
+    mutationFn: ({ id_turno, motivo }) => cancelTurnoById({ id: id_turno, motivo }),
     onSuccess: (_data, { id_turno }) => {
       queryClient.invalidateQueries({ queryKey: ['agenda'] })
       onCancelled?.(id_turno)

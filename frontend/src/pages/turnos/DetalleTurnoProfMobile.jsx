@@ -31,7 +31,7 @@ export function DetalleTurnoProfMobile({ turno, dniProfesional, onVolver, onCanc
 
   const queryClient = useQueryClient()
   const { mutate: cancelar, isPending } = useMutation({
-    mutationFn: () => cancelTurnoById(turno.id_turno, dniProfesional, 'profesional', motivo.trim()),
+    mutationFn: () => cancelTurnoById({ id: turno.id_turno, motivo: motivo.trim() }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['agenda'] })
       onCancelled?.(turno.id_turno)

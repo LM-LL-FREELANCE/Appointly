@@ -31,7 +31,7 @@ export function ProximoTurno({ turno, isDesktop }) {
   const queryClient = useQueryClient()
 
   const { mutate: cancelTurno, isPending: isCancelling } = useMutation({
-    mutationFn: (id) => cancelTurnoById(id, user?.dni),
+    mutationFn: (motivo) => cancelTurnoById({ id: turno.id_turno, motivo }),
     meta: { silent: true },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['turnos-profesional', user?.dni] })
@@ -142,7 +142,7 @@ export function ProximoTurno({ turno, isDesktop }) {
             <CancelarTurnoProfesionalModal
               opened={cancelOpened}
               onClose={handleCloseCancel}
-              onConfirm={(_motivo) => cancelTurno(turno.id_turno)}
+              onConfirm={(motivo) => cancelTurno(motivo)}
               turno={turnoParaCancelar}
               isPending={isCancelling}
             />
