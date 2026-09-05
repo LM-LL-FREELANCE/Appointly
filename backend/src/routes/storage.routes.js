@@ -5,4 +5,17 @@ import { upload } from "../middlewares/upload.middleware.js"
 
 export const storageRouter = Router()
 
-storageRouter.post("/avatar/:dni", requireAuth, grantAccess(["profesional", "cliente"]), upload.single("avatar"), StorageController.uploadAvatar)
+storageRouter.post(
+  "/avatar/:dni",
+  requireAuth,
+  grantAccess(["profesional", "cliente", "admin"]),
+  upload.single("avatar"),
+  StorageController.uploadAvatar
+)
+
+storageRouter.delete(
+  "/avatar/:dni",
+  requireAuth,
+  grantAccess(["profesional", "cliente", "admin"]),
+  StorageController.deleteAvatar
+)

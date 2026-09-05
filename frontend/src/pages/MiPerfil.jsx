@@ -1,9 +1,11 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useState, useRef, useEffect } from 'react'
-import { Group, Stack, Avatar, Button, Paper, TextInput, Grid, Select, Flex, FileButton, } from '@mantine/core'
+import { Group, Stack, Button, Paper, TextInput, Grid, Select, Flex, FileButton } from '@mantine/core'
 import { DatePickerInput } from '@mantine/dates'
 import { IconLock, IconCalendar, IconCheck, IconX } from '@tabler/icons-react'
 import { PageHeader } from '../components/PageHeader.jsx'
 import { MultiSelectCombobox } from '../components/MultiSelectCombobox.jsx'
+import { UserAvatar } from '../components/UserAvatar.jsx'
 import { useAuth } from '../hooks/useAuth.js'
 import useGetCliente from '../hooks/useGetClienteData.jsx'
 import useGetProfesional from '../hooks/useGetProfesionalData.jsx'
@@ -41,8 +43,8 @@ export default function MiPerfil() {
   const [notificacion, setNotificacion] = useState(null)
   const { mutate: mutateProfesional, isPending: isPendingProfesional } = useUpdateProfesional()
   const { mutate: mutateCliente, isPending: isPendingCliente } = useUpdateCliente()
-  const { mutate: mutateDeleteCliente, isPesding: isPendingDeleCliente } = useDeleteCliente()
-  const { mutate: mutateDeleteProfesional, isPesding: isPendingDeleProfesional } = useDeleteProfesional()
+  const { mutate: mutateDeleteCliente, isPending: isPendingDeleCliente } = useDeleteCliente()
+  const { mutate: mutateDeleteProfesional, isPending: isPendingDeleProfesional } = useDeleteProfesional()
 
   const handleDeleteConfirm = () => {
     if (user?.role === "profesional") {
@@ -115,19 +117,17 @@ export default function MiPerfil() {
           obra_social: obraSocialSel.length > 0 && obraSocialSel[0] !== "Sin obra social" ? obraSocialSel[0] : undefined
         }
       }, {
-        onSuccess: {
-          onSuccess: () => {
-            notifications.show({
-              id: "actualizado",
-              title: "Cambios realizados con exito",
-              position: 'top-right',
-              icon: <IconCheck />,
-              withCloseButton: false,
-              autoClose: 3000,
-              allowClose: true,
-              color: 'green'
-            })
-          }
+        onSuccess: () => {
+          notifications.show({
+            id: "actualizado",
+            title: "Cambios realizados con exito",
+            position: 'top-right',
+            icon: <IconCheck />,
+            withCloseButton: false,
+            autoClose: 3000,
+            allowClose: true,
+            color: 'green'
+          })
         }
       })
     }
@@ -228,12 +228,27 @@ export default function MiPerfil() {
   }, [notificacion])
 
   const [foto, setFoto] = useState(null)
+  const [previewUrl, setPreviewUrl] = useState(null)
   const resetRef = useRef(null)
+
+  useEffect(() => {
+    if (!foto) return
+
+    const objectUrl = URL.createObjectURL(foto)
+    setPreviewUrl(objectUrl)
+
+    return () => {
+      URL.revokeObjectURL(objectUrl)
+      setPreviewUrl(null)
+    }
+  }, [foto])
+
   const clearFoto = () => {
     setFoto(null)
     resetRef.current?.()
   }
-  const avatarSrc = foto ? URL.createObjectURL(foto) : perfilData?.foto_url ?? undefined
+  const avatarSrc = previewUrl || perfilData?.foto_url || undefined
+  const currentName = `${nombre || user?.nombre || ''} ${apellido || user?.apellido || ''}`.trim()
 
   return (
     <>
@@ -243,7 +258,12 @@ export default function MiPerfil() {
         p="md" pb="xl">
         <Stack align="center" w={{ base: '100%', md: 220 }} gap="md">
           <Stack align="center" gap="sm">
-            <Avatar size={120} radius="50%" src={avatarSrc} />
+            <UserAvatar
+              size={120}
+              withLink={false}
+              src={avatarSrc}
+              name={currentName || undefined}
+            />
             <Group gap="xs">
               <FileButton resetRef={resetRef} onChange={setFoto} accept="image/png,image/jpeg,image/webp">
                 {(props) => (
