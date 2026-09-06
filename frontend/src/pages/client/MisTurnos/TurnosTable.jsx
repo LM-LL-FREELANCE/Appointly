@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Avatar, Box, Group, Table, Text, Menu, ActionIcon } from '@mantine/core'
+import { Box, Group, Table, Text, Menu, ActionIcon } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import { useQueryClient } from '@tanstack/react-query'
 import { TurnoDetailModal } from './TurnoDetailModal.jsx'
@@ -7,8 +7,9 @@ import { CancelarTurnoModal } from './CancelarTurnoModal.jsx'
 import useCancelTurno from '../../../hooks/useCancelTurno.jsx'
 import { EstadoTurnoBadge } from '../../../components/EstadoTurnoBadge.jsx'
 import { IconDotsVertical, IconEye, IconX } from '@tabler/icons-react'
+import { UserAvatar } from '../../../components/UserAvatar.jsx'
 
-const COLUMNS = ['Fecha', 'Hora', 'Profesional', 'Especialidad', 'Estado', ''];
+const COLUMNS = ['Fecha', 'Hora', 'Profesional', 'Especialidad', 'Estado', '']
 
 export default function TurnosTable({ turno }) {
   const [detailOpened, { open: openDetail, close: closeDetail }] = useDisclosure(false)
@@ -18,12 +19,11 @@ export default function TurnosTable({ turno }) {
 
   const queryClient = useQueryClient()
 
-
   const { mutate: mutateCancelTurno, isPending: isCancelling } = useCancelTurno()
   const onConfirmCancel = () => {
     mutateCancelTurno({
       id: selectedItem.id_turno,
-      motivo: ""
+      motivo: '',
     }, {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['turnos'] })
@@ -37,25 +37,9 @@ export default function TurnosTable({ turno }) {
           closeCancel()
           setCancelFromDetail(false)
         }
-      }
+      },
     })
   }
-  /*const { mutate: cancelTurno, isPending: isCancelling } = useMutation({
-    mutationFn: (id_turno) => cancelTurnoById(id_turno, dni, 'cliente'),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['turnos', dni] })
-      closeCancel()
-      setCancelFromDetail(false)
-      setSelectedItem(null)
-    },
-    onError: (err) => {
-      if (err.status === 409 && err.code === 'ALREADY_CANCELLED') {
-        queryClient.invalidateQueries({ queryKey: ['turnos', dni] })
-        closeCancel()
-        setCancelFromDetail(false)
-      }
-    },
-  })*/
 
   const handleOpenDetail = (item) => {
     setSelectedItem(item)
@@ -86,7 +70,6 @@ export default function TurnosTable({ turno }) {
       setCancelFromDetail(false)
       openDetail()
     } else {
-
       setSelectedItem(null)
     }
   }
@@ -98,7 +81,13 @@ export default function TurnosTable({ turno }) {
         <Table.Td><Text fz="sm">{item.hora_turno}</Text></Table.Td>
         <Table.Td>
           <Group gap="sm" wrap="nowrap">
-            <Avatar size={32} radius="xl" src={item.avatarSrc ?? null} />
+            <UserAvatar
+              size={32}
+              radius="100%"
+              withLink={false}
+              src={item.foto_url}
+              name={`${item.nombre ?? ''} ${item.apellido ?? ''}`.trim()}
+            />
             <Text fz="sm" fw={500}>{item.nombre} {item.apellido}</Text>
           </Group>
         </Table.Td>

@@ -1,35 +1,28 @@
-import { useNavigate } from "react-router-dom";
-import { Card, Stack, Text, Badge, Group, Image, Anchor, Box } from "@mantine/core";
+import { useNavigate } from 'react-router-dom'
+import { Card, Stack, Text, Badge, Group, Avatar, Anchor } from '@mantine/core'
 
 export default function DoctorTurno({ doctor }) {
-  const navigate = useNavigate();
-  const { nombre, apellido, especialidades = [], obrasSociales = [], foto } = doctor;
+  const navigate = useNavigate()
+  const { nombre, apellido, especialidades = [], obrasSociales = [], foto, foto_url } = doctor
+  const avatarPhoto = foto_url || foto || undefined
 
   return (
     <Card withBorder radius="md" padding="md" h="100%">
       <Stack gap="sm">
-        {foto ? (
-          <Image src={foto} height={140} radius="sm" alt={`${nombre} ${apellido}`} />
-        ) : (
-          <Box
-            h={140}
-            style={{
-              borderRadius: "var(--mantine-radius-sm)",
-              background:
-                "repeating-linear-gradient(45deg, #e9ecef, #e9ecef 10px, #f1f3f5 10px, #f1f3f5 20px)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Text size="sm" c="dimmed">foto del doctor</Text>
-          </Box>
-        )}
+        <Avatar
+          src={avatarPhoto}
+          name={`${nombre ?? ''} ${apellido ?? ''}`.trim()}
+          color="initials"
+          h={140}
+          w="100%"
+          radius="sm"
+          style={{ fontSize: '2.5rem' }}
+        />
 
         <Stack gap={4}>
           <Text fw={700}>{`${nombre} ${apellido}`}</Text>
           <Text size="sm" c="dimmed">
-            {especialidades.join(" · ")}
+            {especialidades.join(' · ')}
           </Text>
         </Stack>
 
@@ -46,12 +39,12 @@ export default function DoctorTurno({ doctor }) {
         <Anchor
           size="sm"
           ta="center"
-          onClick={() => navigate("/buscar")}
-          style={{ cursor: "pointer" }}
+          onClick={() => navigate('/buscar')}
+          style={{ cursor: 'pointer' }}
         >
           ← Cambiar profesional
         </Anchor>
       </Stack>
     </Card>
-  );
+  )
 }

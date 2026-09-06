@@ -16,6 +16,8 @@ export function UserAvatar({
 }) {
   const { user } = useAuth()
 
+  const isCurrentUser = name === undefined && src === undefined
+
   const resolvedName =
     name !== undefined
       ? name
@@ -24,7 +26,11 @@ export function UserAvatar({
         : ''
 
   const resolvedSrc =
-    src !== undefined ? src : user?.foto_url || undefined
+    src !== undefined
+      ? (src || undefined)
+      : isCurrentUser
+        ? (user?.foto_url || undefined)
+        : undefined
 
   const resolvedComponent =
     component !== undefined ? component : withLink ? Link : undefined

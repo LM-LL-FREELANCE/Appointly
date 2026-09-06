@@ -1,4 +1,4 @@
-import { Avatar, Box, Button, Drawer, Group, Paper, Stack, Text } from '@mantine/core'
+import { Box, Button, Drawer, Group, Paper, Stack, Text } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { IconAlertCircle } from '@tabler/icons-react'
@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom'
 import { cancelTurnoById } from '../../../api/clientes.js'
 import { useAuth } from '../../../hooks/useAuth.js'
 import { EstadoTurnoBadge } from '../../../components/EstadoTurnoBadge.jsx'
+import { UserAvatar } from '../../../components/UserAvatar.jsx'
 
 export function TurnoCard({ turno, estado }) {
   const { user } = useAuth()
@@ -31,7 +32,13 @@ export function TurnoCard({ turno, estado }) {
           </Group>
 
           <Group gap="sm" wrap="nowrap">
-            <Avatar size="md" radius="xl" />
+            <UserAvatar
+              size="md"
+              radius="100%"
+              withLink={false}
+              src={turno.foto_url}
+              name={`${turno.nombre ?? ''} ${turno.apellido ?? ''}`.trim()}
+            />
             <Stack gap={2}>
               <Text fw={600} fz="md">{turno.nombre} {turno.apellido}</Text>
               <Text fz="sm" c="dimmed">{turno.tipo}</Text>

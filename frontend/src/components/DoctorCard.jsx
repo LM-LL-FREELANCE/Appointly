@@ -1,19 +1,25 @@
-import { Card, Group, Avatar, Stack, Text, Badge, Button } from '@mantine/core'
+import { Card, Group, Stack, Text, Badge, Button } from '@mantine/core'
 import { IconArrowRight } from '@tabler/icons-react'
+import { UserAvatar } from './UserAvatar'
 
-export function DoctorCard({ keyDoctor, doctor, onVerDisponibilidad }) {
-
-
-  const { nombre, apellido, especialidades = [], correo, obrasSociales = [], foto } = doctor
+export function DoctorCard({ doctor, onVerDisponibilidad }) {
+  const { nombre, apellido, especialidades = [], correo, obrasSociales = [], foto, foto_url } = doctor
+  const avatarPhoto = foto_url || foto || undefined
 
   return (
-    <Card key={keyDoctor} withBorder radius="md" padding="md">
+    <Card withBorder radius="md" padding="md">
       <Stack gap="sm">
         <Group wrap="nowrap" align="flex-start">
-          <Avatar src={foto} alt={nombre} size="lg" radius="xl" />
+          <UserAvatar
+            size="lg"
+            radius="100%"
+            withLink={false}
+            src={avatarPhoto}
+            name={`${nombre ?? ''} ${apellido ?? ''}`.trim()}
+          />
           <Stack gap={2}>
             <Text fw={600}>{`${nombre} ${apellido}`}</Text>
-            {especialidades.map(esp => (
+            {especialidades.map((esp) => (
               <Text key={esp} size="sm" c="dimmed">{esp}</Text>
             ))}
             <Text size="sm" c="dimmed">{correo}</Text>
@@ -22,7 +28,7 @@ export function DoctorCard({ keyDoctor, doctor, onVerDisponibilidad }) {
 
         {obrasSociales.length > 0 && (
           <Group gap="xs">
-            {obrasSociales.map(os => (
+            {obrasSociales.map((os) => (
               <Badge key={os} variant="outline" color="gray" radius="sm">
                 {os}
               </Badge>
@@ -32,10 +38,10 @@ export function DoctorCard({ keyDoctor, doctor, onVerDisponibilidad }) {
 
         <Button
           rightSection={<IconArrowRight size={16} />}
-          onClick={() => onVerDisponibilidad?.(doctor)}>
+          onClick={() => onVerDisponibilidad?.(doctor)}
+        >
           Reservar
         </Button>
-
       </Stack>
     </Card>
   )

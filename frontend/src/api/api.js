@@ -3,7 +3,10 @@ const API_KEY = import.meta.env.VITE_API_KEY || import.meta.env.API_KEY || ''
 
 export async function request(path, options = {}) {
   const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData
-  const defaultHeaders = isFormData ? {} : { 'Content-Type': 'application/json' }
+  const defaultHeaders = {
+    ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
+    ...(API_KEY ? { 'x-api-key': API_KEY } : {}),
+  }
 
   const res = await fetch(`${BASE_URL}${path}`, {
     credentials: 'include',
