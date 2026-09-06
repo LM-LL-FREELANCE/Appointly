@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Group, Text, Stack, Avatar, Paper, Button, Badge, Divider } from "@mantine/core"
+import { Group, Text, Stack, Paper, Button, Badge, Divider } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { IconCalendarClock, IconCalendarOff, IconClock, IconCalendar, IconLogs, IconCancel } from '@tabler/icons-react'
@@ -8,6 +8,7 @@ import { CancelarTurnoProfesionalModal } from './CancelarTurnoProfesionalModal.j
 import { cancelTurnoById } from '../../../api/clientes.js'
 import { useAuth } from '../../../hooks/useAuth.js'
 import { aISO, fechaCorta, horaCorta } from '../../../utils/fechas.utils.js'
+import { UserAvatar } from '../../../components/UserAvatar.jsx'
 
 function labelRelativo(fechaISO) {
   const fecha = fechaISO?.slice(0, 10)
@@ -83,7 +84,13 @@ export function ProximoTurno({ turno, isDesktop }) {
         {turno ? (
           <>
             <Group gap="md" wrap="wrap">
-              <Avatar size="xl" name={`${turno.apellido}, ${turno.nombre}`} color='initials' />
+              <UserAvatar
+                size="xl"
+                radius="100%"
+                withLink={false}
+                src={turno.foto_url}
+                name={`${turno.nombre ?? ''} ${turno.apellido ?? ''}`.trim()}
+              />
               <Stack gap={4} style={{ flex: 1, minWidth: 0 }}>
                 <Group gap={6} wrap="wrap">
                   <Text fw={700} fz="md">{turno.nombre} {turno.apellido}</Text>

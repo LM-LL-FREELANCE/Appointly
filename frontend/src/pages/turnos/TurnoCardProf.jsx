@@ -1,8 +1,7 @@
-import { Avatar, Badge, Button, Group, Paper, Stack, Text } from '@mantine/core'
+import { Badge, Button, Group, Paper, Stack, Text } from '@mantine/core'
 import { fechaCorta, horaCorta } from '../../utils/fechas.utils.js'
+import { UserAvatar } from '../../components/UserAvatar.jsx'
 
-// Tarjeta de lista para mobile. Solo muestra el resumen del turno del paciente;
-// el detalle (y la cancelación) se abren al tocar "Ver detalle".
 export function TurnoCardProf({ turno, onVerDetalle }) {
   const badgeColor = turno.estado === 'activo' ? 'green' : turno.estado === 'cancelado' ? 'red' : 'gray'
   return (
@@ -16,7 +15,13 @@ export function TurnoCardProf({ turno, onVerDetalle }) {
         </Group>
 
         <Group gap="sm" wrap="nowrap">
-          <Avatar size="md" radius="xl" />
+          <UserAvatar
+            size="md"
+            radius="100%"
+            withLink={false}
+            src={turno.foto_url}
+            name={`${turno.nombre ?? ''} ${turno.apellido ?? ''}`.trim()}
+          />
           <Text fw={600} fz="md">{turno.nombre} {turno.apellido}</Text>
         </Group>
 
