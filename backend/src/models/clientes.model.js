@@ -63,7 +63,7 @@ export class ClientesModel {
 
   static async getClienteByDni({ dni }) {
     const [rows] = await pool.query(`
-        SELECT c.dni_cliente, p.nombre, p.apellido, pr.correo, p.fecha_nacimiento, p.genero, o.nombre_obra_social AS "obra_social" 
+        SELECT c.dni_cliente, p.nombre, p.apellido, pr.correo, p.foto_url, p.fecha_nacimiento, p.genero, o.nombre_obra_social AS "obra_social" 
         FROM cliente c
         INNER JOIN persona p ON p.dni_persona = c.dni_cliente
         INNER JOIN persona_rol pr ON pr.dni_persona = c.dni_cliente AND pr.id_rol = c.id_rol

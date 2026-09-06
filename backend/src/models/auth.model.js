@@ -1,8 +1,6 @@
 import { pool } from "../config/db.js"
 
-
 export class AuthModel {
-  //DONE
   static async findCredentialsByDniAndRole(dni, role) {
     const [rows] = await pool.query(`
         SELECT
@@ -10,6 +8,7 @@ export class AuthModel {
             pr.correo,
             p.nombre,
             p.apellido,
+            p.foto_url,
             pr.password_hash,
             r.nombre AS role
           FROM persona_rol pr
@@ -33,7 +32,7 @@ export class AuthModel {
 
     return rows.length > 0
   }
-  //DONE
+
   static async existeCorreoCliente(correo) {
     const [rows] = await pool.query(`
       SELECT 
@@ -59,7 +58,7 @@ export class AuthModel {
 
     return rows.length > 0
   }
-  //DONE
+
   static async existeCorreoProfesional(correo) {
     const [rows] = await pool.query(`
       SELECT 
@@ -74,15 +73,9 @@ export class AuthModel {
     return rows.length > 0
   }
 
-
   static async createClienteAccount({ data }) {
     const { dni, nombre, apellido, correo, password_hash, telefono, fecha_nacimiento, genero, id_obra_social, numero_afiliado } = data
-    /*const [result] = await pool.query(`
-      INSERT INTO cliente
-        (dni_cliente, nombre, apellido, correo, password_hash, telefono, fecha_nacimiento, genero, id_obra_social, numero_afiliado)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `, [dni, nombre, apellido, correo, password_hash, telefono ?? null, fecha_nacimiento, genero, id_obra_social ?? null, numero_afiliado ?? null])
-    */
+
     await pool.query(`
       INSERT IGNORE INTO 
         persona(dni_persona, nombre, apellido, fecha_nacimiento, genero, telefono) 
@@ -160,7 +153,7 @@ export class AuthModel {
       `, [correo, role])
     return rows[0]
   }
-  //not use anywhere just for testing
+
   static async getPersonaByCorreo({ correo, role }) {
     const [rows] = await pool.query(`
       SELECT 
@@ -177,6 +170,7 @@ export class AuthModel {
       `, [correo, role])
     return rows[0]
   }
+
   static async resetPassWord({ dni, password_hashed, role }) {
     const [rows] = await pool.query(`
       UPDATE persona_rol 
