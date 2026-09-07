@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { Group, Text, Stack, Paper, Box, SimpleGrid, Divider } from "@mantine/core"
+import { Group, Text, Stack, Paper, Box, SimpleGrid, Divider } from '@mantine/core'
 import { BarChart } from '@mantine/charts'
 import { PageHeader } from '../../../components/PageHeader.jsx'
 import { StatCard } from './StatCard.jsx'
@@ -13,7 +13,6 @@ import { useIsDesktop } from '../../../hooks/useIsDesktop.js'
 import { IconChartBar } from '@tabler/icons-react'
 import QueryError from '../../../components/QueryError.jsx'
 
-
 const DIA_LABEL = ['D', 'L', 'M', 'X', 'J', 'V', 'S']
 
 function buildBarData(turnos) {
@@ -23,7 +22,7 @@ function buildBarData(turnos) {
     const fecha = aISO(d)
     return {
       dia: DIA_LABEL[d.getDay()],
-      turnos: turnos.filter(t => t.fecha_turno?.slice(0, 10) === fecha && t.estado === 'activo').length,
+      turnos: turnos.filter((t) => t.fecha_turno?.slice(0, 10) === fecha && t.estado === 'activo').length,
     }
   })
 }
@@ -56,7 +55,6 @@ function TurnosPorDia({ data }) {
 }
 
 export default function Dashboard() {
-
   const { user } = useAuth()
 
   const { data: perfil, isError: isErrorPerfil, error: errorPerfil, refetch: refetchPerfil } = useQuery({
@@ -71,16 +69,15 @@ export default function Dashboard() {
 
   const startDateISO = aISO(startDate)
 
-
   const { data: slotData, isError: isErrorSlots, error: errorSlots, refetch: refetchSlots } = useSlots({
     dni: user?.dni,
     desde: startDateISO,
-    hasta: startDateISO
+    hasta: startDateISO,
   })
 
   const { data: turnos = [], isError: isErrorTurnos, error: errorTurnos, refetch: refetchTurnos } = useQuery({
     queryKey: ['turnos-profesional', user?.dni, startDateISO],
-    queryFn: () => getTurnosByProfesional({ dni_profesional: user?.dni, desde: startDateISO })
+    queryFn: () => getTurnosByProfesional({ dni_profesional: user?.dni, desde: startDateISO }),
   })
 
   const isError = isErrorPerfil || isErrorSlots || isErrorTurnos
@@ -91,23 +88,26 @@ export default function Dashboard() {
     refetchTurnos()
   }
 
-  const turnosHoy = turnos.filter(t => t.fecha_turno?.slice(0, 10) === startDateISO && t.estado === 'activo').length
-  const estaSemana = turnos.filter(t => t.estado === 'activo').length
-  const cancelados7d = turnos.filter(t => t.estado === 'cancelado').length
+  const turnosHoy = turnos.filter((t) => t.fecha_turno?.slice(0, 10) === startDateISO && t.estado === 'activo').length
+  const estaSemana = turnos.filter((t) => t.estado === 'activo').length
+  const cancelados7d = turnos.filter((t) => t.estado === 'cancelado').length
   const barData = buildBarData(turnos)
   const freeSlotsToday = slotData?.dias[0]?.slots.length ?? 0
 
   const turnosDeHoy = turnos
-    .filter(t => t.fecha_turno?.slice(0, 10) === startDateISO)
-    .map(t => ({
+    .filter((t) => t.fecha_turno?.slice(0, 10) === startDateISO)
+    .map((t) => ({
       id: t.id_turno,
       hora: t.hora_turno?.slice(0, 5),
       paciente: `${t.nombre} ${t.apellido}`,
+      foto_url: t.foto_url,
+      nombre: t.nombre,
+      apellido: t.apellido,
       estado: t.estado,
     }))
 
   const minAhora = new Date().getHours() * 60 + new Date().getMinutes()
-  const proximoTurno = turnos.find(t => {
+  const proximoTurno = turnos.find((t) => {
     if (t.estado !== 'activo') return false
     const fecha = t.fecha_turno?.slice(0, 10)
     if (fecha > startDateISO) return true
@@ -161,9 +161,6 @@ export default function Dashboard() {
           style={{
             flex: 1,
             display: 'grid',
-            // Las primeras 3 columnas (stats + TurnosDeHoy) achican con la pantalla
-            // o al abrir el sidebar; la última (ProximoTurno + gráfico) mantiene un
-            // ancho estable para que sus botones y contenido no se rompan.
             gridTemplateColumns: 'repeat(3, minmax(0, 1fr)) minmax(280px, 340px)',
             gridTemplateRows: 'auto 1fr',
             gap: 8,

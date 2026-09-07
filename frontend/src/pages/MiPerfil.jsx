@@ -1,9 +1,10 @@
-import { useState, useRef, useEffect } from 'react'
-import { Group, Stack, Avatar, Button, Paper, TextInput, Grid, Select, Flex, FileButton, } from '@mantine/core'
+import { useState, useRef } from 'react'
+import { Group, Stack, Button, Paper, TextInput, Grid, Select, Flex, FileButton } from '@mantine/core'
 import { DatePickerInput } from '@mantine/dates'
 import { IconLock, IconCalendar, IconCheck, IconX } from '@tabler/icons-react'
 import { PageHeader } from '../components/PageHeader.jsx'
 import { MultiSelectCombobox } from '../components/MultiSelectCombobox.jsx'
+import { UserAvatar } from '../components/UserAvatar.jsx'
 import { useAuth } from '../hooks/useAuth.js'
 import useGetCliente from '../hooks/useGetClienteData.jsx'
 import useGetProfesional from '../hooks/useGetProfesionalData.jsx'
@@ -13,155 +14,90 @@ import useUpdateCliente from '../hooks/useUpdateAccCliente.jsx'
 import useUpdateProfesional from '../hooks/useUpdateAccProfesional.jsx'
 import useDeleteCliente from '../hooks/useDeleteCliente.jsx'
 import useDeleteProfesional from '../hooks/useDeleteProfesional.jsx'
+import useUploadAvatar from '../hooks/useUploadAvatar.jsx'
+import useDeleteAvatar from '../hooks/useDeleteAvatar.jsx'
 import { useIsDesktop } from '../hooks/useIsDesktop.js'
-import { notifications } from '@mantine/notifications';
+import { notifications } from '@mantine/notifications'
 import useSentEmailPassword from '../hooks/useSentEmailPassword.jsx'
 import useNotificationCountDown from '../hooks/useNotificationCountDown.jsx'
 import { EnviarCorreo } from '../components/EmailModal.jsx'
+
 const OPCIONES_GENERO = ['Masculino', 'Femenino', 'Prefiero no decirlo']
 
-
-export default function MiPerfil() {
-  const { logout, user } = useAuth()
+function MiPerfilContent({ user, perfilData }) {
+  const { logout } = useAuth()
   const isDesktop = useIsDesktop('sm')
   const inputSize = isDesktop ? 'sm' : 'md'
 
-  const { data: perfil } = useGetProfesional({
-    dni: user ? user.dni : undefined,
-    rol: user ? user.role : undefined
-  })
-
-
-
-  const { data: perfilCliente } = useGetCliente({
-    dni: user ? user.dni : undefined,
-    rol: user ? user.role : undefined
-  })
-
-  const [notificacion, setNotificacion] = useState(null)
   const { mutate: mutateProfesional, isPending: isPendingProfesional } = useUpdateProfesional()
   const { mutate: mutateCliente, isPending: isPendingCliente } = useUpdateCliente()
-  const { mutate: mutateDeleteCliente, isPesding: isPendingDeleCliente } = useDeleteCliente()
-  const { mutate: mutateDeleteProfesional, isPesding: isPendingDeleProfesional } = useDeleteProfesional()
+  const { mutate: mutateDeleteCliente, isPending: isPendingDeleCliente } = useDeleteCliente()
+  const { mutate: mutateDeleteProfesional, isPending: isPendingDeleProfesional } = useDeleteProfesional()
+  const { mutate: mutateUploadAvatar, isPending: isUploadingAvatar } = useUploadAvatar()
+  const { mutate: mutateDeleteAvatar, isPending: isDeletingAvatar } = useDeleteAvatar()
 
-  const handleDeleteConfirm = () => {
-    if (user?.role === "profesional") {
-      mutateDeleteProfesional({
-        dni: user?.dni
-      }, {
-        onSuccess: logout
-      })
-    } else {
-      mutateDeleteCliente({
-        dni: user?.dni
-      }, { onSuccess: logout })
+  const [eliminar, { open: openEliminar, close: closeEliminar }] = useDisclosure(false)
+  const [openedEmailModal, { open: openEmailModal, close: closeEmailModal }] = useDisclosure(false)
+  const [previewUrl, setPreviewUrl] = useState(null)
+  const resetRef = useRef(null)
+
+  const [nombre, setNombre] = useState(perfilData?.nombre || '')
+  const [apellido, setApellido] = useState(perfilData?.apellido || '')
+  const [correo, setCorreo] = useState(perfilData?.correo || '')
+  const [genero, setGenero] = useState(() => {
+    if (perfilData?.genero === 'M') return 'Masculino'
+    if (perfilData?.genero === 'F') return 'Femenino'
+    if (perfilData?.genero === 'X') return 'Prefiero no decirlo'
+    return null
+  })
+  const [fechaNacimiento, setFechaNacimiento] = useState(() => {
+    return perfilData?.fecha_nacimiento ? new Date(perfilData.fecha_nacimiento) : null
+  })
+  const [especialidadesSel, setEspecialidadesSel] = useState(() => {
+    return perfilData?.especialidad ? perfilData.especialidad.map((e) => e.especialidad) : []
+  })
+  const [obraSocialSel, setObraSocialSel] = useState(() => {
+    if (perfilData?.obraSociales) {
+      return perfilData.obraSociales.map((o) => o.obra_sociales)
     }
-  }
-
-  const handleSave = () => {
-    let generoFinal = undefined;
-    if (genero === "Masculino") generoFinal = "M";
-    if (genero === "Femenino") generoFinal = "F";
-    if (genero === "Prefiero no decirlo") generoFinal = "X";
-
-    let fechaFinal = undefined;
-    if (fechaNacimiento) {
-      if (typeof fechaNacimiento === 'string') {
-        fechaFinal = fechaNacimiento.split('T')[0];
-      } else if (typeof fechaNacimiento.getFullYear === 'function') {
-        const year = fechaNacimiento.getFullYear();
-        const month = String(fechaNacimiento.getMonth() + 1).padStart(2, '0');
-        const day = String(fechaNacimiento.getDate()).padStart(2, '0');
-        fechaFinal = `${year}-${month}-${day}`;
-      }
+    if (user?.role === 'cliente') {
+      return perfilData?.obra_social ? [perfilData.obra_social] : ['Sin obra social']
     }
+    return []
+  })
 
-    const baseData = {
-      nombre,
-      apellido,
-      correo,
-      genero: generoFinal,
-      fecha_nacimiento: fechaFinal,
-    }
-
-
-    if (user?.role === "profesional") {
-      mutateProfesional({
-        dni: user.dni,
-        data: {
-          ...baseData,
-          especialidades: especialidadesSel,
-          obras_sociales: obraSocialSel
-        }
-      }, {
-        onSuccess: () => {
-          notifications.show({
-            id: "actualizado",
-            title: "Cambios realizados con exito",
-            position: 'top-right',
-            icon: <IconCheck />,
-            withCloseButton: false,
-            autoClose: 3000,
-            close: true,
-            color: 'green'
-          })
-        }
-      })
-    } else {
-      mutateCliente({
-        dni: user.dni,
-        data: {
-          ...baseData,
-          obra_social: obraSocialSel.length > 0 && obraSocialSel[0] !== "Sin obra social" ? obraSocialSel[0] : undefined
-        }
-      }, {
-        onSuccess: {
-          onSuccess: () => {
-            notifications.show({
-              id: "actualizado",
-              title: "Cambios realizados con exito",
-              position: 'top-right',
-              icon: <IconCheck />,
-              withCloseButton: false,
-              autoClose: 3000,
-              allowClose: true,
-              color: 'green'
-            })
-          }
-        }
-      })
-    }
-  }
   const { mutate: mutateEmail, isPending } = useSentEmailPassword()
   const { startCountDown, time, stopCountDown } = useNotificationCountDown()
   const notAvailable = time > 0
-  const [openedEmailModal, { open: openEmailModal, close: closeEmailModal }] = useDisclosure(false)
+
   const handleCloseEmailModal = () => {
     stopCountDown()
     closeEmailModal()
   }
+
   const handleSentEmail = () => {
     notifications.show({
-      id: "volverEnviar",
+      id: 'volverEnviar',
       title: 'Espera un momento...',
       message: 'Estamos enviando tu correo.',
       position: 'top-right',
       withCloseButton: false,
       autoClose: false,
-      loading: true
+      loading: true,
     })
     setTimeout(() => {
       mutateEmail({
         correo: correo || user?.correo,
-        role: user?.role
+        role: user?.role,
       }, {
         onSuccess: () => {
           startCountDown({
-            initialTime: 31, notificationConfig: {
-              id: "volverEnviar",
-              title: "Correo Enviado",
-              message: (tiempoRestante) => `Podras enviar otro correo en ${tiempoRestante}s`
-            }
+            initialTime: 31,
+            notificationConfig: {
+              id: 'volverEnviar',
+              title: 'Correo Enviado',
+              message: (tiempoRestante) => `Podras enviar otro correo en ${tiempoRestante}s`,
+            },
           })
         },
         onError: (err) => {
@@ -176,88 +112,179 @@ export default function MiPerfil() {
             position: 'top-right',
             loading: false,
           })
-        }
+        },
       })
     }, 2000)
   }
-  const perfilData = user?.role === "profesional" ? perfil : perfilCliente
-  const [eliminar, { open: openEliminar, close: closeEliminar }] = useDisclosure(false)
-  const [nombre, setNombre] = useState("")
-  const [apellido, setApellido] = useState("")
-  const [correo, setCorreo] = useState("")
-  const [genero, setGenero] = useState(null)
-  const [fechaNacimiento, setFechaNacimiento] = useState(null)
-  const [especialidadesSel, setEspecialidadesSel] = useState([])
-  const [obraSocialSel, setObraSocialSel] = useState([])
 
-  useEffect(() => {
-    if (perfilData) {
-      setNombre(perfilData.nombre || "")
-      setApellido(perfilData.apellido || "")
-      setCorreo(perfilData.correo || "")
-      if (perfilData.genero === "M") {
-        setGenero("Masculino")
-      } else if (perfilData.genero === "F") {
-        setGenero("Femenino")
-      } else if (perfilData.genero === "X") {
-        setGenero("Prefiero no decirlo")
-      } else {
-        setGenero(null)
-      }
-      if (perfilData.fecha_nacimiento) {
-        setFechaNacimiento(new Date(perfilData.fecha_nacimiento))
-      }
-      if (perfilData.especialidad) {
-        setEspecialidadesSel(perfilData.especialidad.map(e => e.especialidad))
-      }
-      if (perfilData.obraSociales) {
-        setObraSocialSel(perfilData.obraSociales.map(o => o.obra_sociales))
-      } else if (user?.role === 'cliente') {
-        setObraSocialSel(perfilData.obra_social ? [perfilData.obra_social] : ['Sin obra social'])
-      }
+  const handleDeleteConfirm = () => {
+    if (user?.role === 'profesional') {
+      mutateDeleteProfesional({
+        dni: user?.dni,
+      }, {
+        onSuccess: logout,
+      })
+    } else {
+      mutateDeleteCliente({
+        dni: user?.dni,
+      }, { onSuccess: logout })
     }
-  }, [perfilData, user?.role])
-
-  useEffect(() => {
-    if (notificacion) {
-      const timer = setTimeout(() => {
-        setNotificacion(null)
-      }, 2000)
-      return () => clearTimeout(timer)
-    }
-  }, [notificacion])
-
-  const [foto, setFoto] = useState(null)
-  const resetRef = useRef(null)
-  const clearFoto = () => {
-    setFoto(null)
-    resetRef.current?.()
   }
-  const avatarSrc = foto ? URL.createObjectURL(foto) : perfilData?.foto_url ?? undefined
+
+  const handleSave = () => {
+    let generoFinal = undefined
+    if (genero === 'Masculino') generoFinal = 'M'
+    if (genero === 'Femenino') generoFinal = 'F'
+    if (genero === 'Prefiero no decirlo') generoFinal = 'X'
+
+    let fechaFinal = undefined
+    if (fechaNacimiento) {
+      if (typeof fechaNacimiento === 'string') {
+        fechaFinal = fechaNacimiento.split('T')[0]
+      } else if (typeof fechaNacimiento.getFullYear === 'function') {
+        const year = fechaNacimiento.getFullYear()
+        const month = String(fechaNacimiento.getMonth() + 1).padStart(2, '0')
+        const day = String(fechaNacimiento.getDate()).padStart(2, '0')
+        fechaFinal = `${year}-${month}-${day}`
+      }
+    }
+
+    const baseData = {
+      nombre,
+      apellido,
+      correo,
+      genero: generoFinal,
+      fecha_nacimiento: fechaFinal,
+    }
+
+    if (user?.role === 'profesional') {
+      mutateProfesional({
+        dni: user.dni,
+        data: {
+          ...baseData,
+          especialidades: especialidadesSel,
+          obras_sociales: obraSocialSel,
+        },
+      }, {
+        onSuccess: () => {
+          notifications.show({
+            id: 'actualizado',
+            title: 'Cambios realizados con exito',
+            position: 'top-right',
+            icon: <IconCheck />,
+            withCloseButton: false,
+            autoClose: 3000,
+            close: true,
+            color: 'green',
+          })
+        },
+      })
+    } else {
+      mutateCliente({
+        dni: user.dni,
+        data: {
+          ...baseData,
+          obra_social: obraSocialSel.length > 0 && obraSocialSel[0] !== 'Sin obra social' ? obraSocialSel[0] : undefined,
+        },
+      }, {
+        onSuccess: () => {
+          notifications.show({
+            id: 'actualizado',
+            title: 'Cambios realizados con exito',
+            position: 'top-right',
+            icon: <IconCheck />,
+            withCloseButton: false,
+            autoClose: 3000,
+            allowClose: true,
+            color: 'green',
+          })
+        },
+      })
+    }
+  }
+
+  const handleFileChange = (file) => {
+    if (!file || !user?.dni) return
+    const objectUrl = URL.createObjectURL(file)
+    setPreviewUrl(objectUrl)
+    mutateUploadAvatar(
+      { dni: user.dni, file },
+      {
+        onSuccess: () => {
+          URL.revokeObjectURL(objectUrl)
+          setPreviewUrl(null)
+          resetRef.current?.()
+        },
+        onError: () => {
+          URL.revokeObjectURL(objectUrl)
+          setPreviewUrl(null)
+          resetRef.current?.()
+        },
+      }
+    )
+  }
+
+  const handleDeleteAvatar = () => {
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl)
+      setPreviewUrl(null)
+      resetRef.current?.()
+      return
+    }
+    if (user?.dni && perfilData?.foto_url) {
+      mutateDeleteAvatar({ dni: user.dni })
+    }
+  }
+
+  const avatarSrc = previewUrl || perfilData?.foto_url || undefined
+  const currentName = `${nombre || user?.nombre || ''} ${apellido || user?.apellido || ''}`.trim()
+  const hasPhoto = Boolean(previewUrl || perfilData?.foto_url)
 
   return (
     <>
       <PageHeader title="Mi perfil" withAvatar={false} />
 
-      <Flex direction={{ base: 'column', md: 'row' }} align={{ base: 'stretch', md: 'flex-start' }} gap="lg"
-        p="md" pb="xl">
+      <Flex
+        direction={{ base: 'column', md: 'row' }}
+        align={{ base: 'stretch', md: 'flex-start' }}
+        gap="lg"
+        p="md"
+        pb="xl"
+      >
         <Stack align="center" w={{ base: '100%', md: 220 }} gap="md">
           <Stack align="center" gap="sm">
-            <Avatar size={120} radius="50%" src={avatarSrc} />
+            <UserAvatar
+              size={120}
+              withLink={false}
+              src={avatarSrc}
+              name={currentName || undefined}
+            />
             <Group gap="xs">
-              <FileButton resetRef={resetRef} onChange={setFoto} accept="image/png,image/jpeg,image/webp">
+              <FileButton resetRef={resetRef} onChange={handleFileChange} accept="image/png,image/jpeg,image/webp">
                 {(props) => (
-                  <Button {...props} variant="outline" size={inputSize} color="dark">
+                  <Button {...props} variant="outline" size={inputSize} color="dark" loading={isUploadingAvatar}>
                     Cambiar foto
                   </Button>
                 )}
               </FileButton>
-              <Button variant="subtle" size={inputSize} color="red" disabled={!foto} onClick={clearFoto}>
+              <Button
+                variant="subtle"
+                size={inputSize}
+                color="red"
+                disabled={!hasPhoto}
+                loading={isDeletingAvatar}
+                onClick={handleDeleteAvatar}
+              >
                 Eliminar
               </Button>
             </Group>
           </Stack>
-          <TextInput label="DNI" size={inputSize} value={user?.dni ?? ''} readOnly w="100%"
+          <TextInput
+            label="DNI"
+            size={inputSize}
+            value={user?.dni ?? ''}
+            readOnly
+            w="100%"
             rightSection={<IconLock size={16} color="var(--mantine-color-yellow-6)" />}
           />
         </Stack>
@@ -316,7 +343,7 @@ export default function MiPerfil() {
           </Grid>
 
           <Stack gap="md" mt="md">
-            {user?.role === "profesional" && (
+            {user?.role === 'profesional' && (
               <MultiSelectCombobox
                 label="Especialidades"
                 size={inputSize}
@@ -328,16 +355,16 @@ export default function MiPerfil() {
             )}
 
             <MultiSelectCombobox
-              label={user?.role === "profesional" ? 'Obras sociales' : 'Obra Social'}
+              label={user?.role === 'profesional' ? 'Obras sociales' : 'Obra Social'}
               size={inputSize}
               data={obraSocialSel}
               value={obraSocialSel}
               onChange={setObraSocialSel}
               placeholder="+ agregar..."
-              maxSelected={user?.role === "profesional" ? undefined : 1}
+              maxSelected={user?.role === 'profesional' ? undefined : 1}
             />
           </Stack>
-          <Group gap="sm" mt="xl" wrap="wrap" justify='space-between'>
+          <Group gap="sm" mt="xl" wrap="wrap" justify="space-between">
             <Group w={{ base: '100%', sm: 'auto' }}>
               <Button size={inputSize} w={{ base: '100%', sm: 'auto' }} onClick={openEmailModal} loading={isPendingProfesional || isPendingCliente}>
                 Cambiar contraseña
@@ -353,7 +380,7 @@ export default function MiPerfil() {
             </Group>
           </Group>
         </Paper>
-      </Flex >
+      </Flex>
       {eliminar && (
         <EliminarCuentaModal
           opened={eliminar}
@@ -361,8 +388,7 @@ export default function MiPerfil() {
           onConfirm={handleDeleteConfirm}
           isPending={isPendingDeleCliente || isPendingDeleProfesional}
         />
-      )
-      }
+      )}
       {openedEmailModal && (
         <EnviarCorreo
           opened={openedEmailModal}
@@ -377,4 +403,23 @@ export default function MiPerfil() {
       )}
     </>
   )
+}
+
+export default function MiPerfil() {
+  const { user } = useAuth()
+
+  const { data: perfil } = useGetProfesional({
+    dni: user ? user.dni : undefined,
+    rol: user ? user.role : undefined,
+  })
+
+  const { data: perfilCliente } = useGetCliente({
+    dni: user ? user.dni : undefined,
+    rol: user ? user.role : undefined,
+  })
+
+  const perfilData = user?.role === 'profesional' ? perfil : perfilCliente
+  const formKey = `${user?.dni || 'guest'}-${perfilData ? 'loaded' : 'loading'}`
+
+  return <MiPerfilContent key={formKey} user={user} perfilData={perfilData} />
 }

@@ -1,36 +1,11 @@
 import { pool } from "../config/db.js"
 
 export class TurnosModel {
-
   static async getTurnoById(id) {
-    /*const [row] = await pool.query(`
-      SELECT
-        profesional.apellido AS "p_apellido",
-        profesional.nombre AS "p_nombre",
-        profesional.dni_profesional,
-        especialidad.tipo,
-        cliente.apellido AS "c_apellido",
-        cliente.nombre AS "c_nombre",
-        cliente.correo AS "c_correo",
-        cliente.dni_cliente,
-        profesional.correo AS "p_correo",
-        turno.fecha_turno,
-        turno.hora_turno,
-        turno.estado,
-        turno.creado_en,
-        turno.cancelado_en
-      FROM
-        turno
-        INNER JOIN cliente ON turno.dni_cliente = cliente.dni_cliente
-        INNER JOIN profesional ON turno.dni_profesional = profesional.dni_profesional
-        INNER JOIN profesional_especialidad ON profesional.dni_profesional = profesional_especialidad.dni_profesional
-        INNER JOIN especialidad ON especialidad.id_especialidad = profesional_especialidad.id_especialidad
-      WHERE turno.id_turno = ?`, [id])*/
-
     const [row] = await pool.query(`
       SELECT p_prof.apellido AS p_apellido, p_prof.nombre AS p_nombre, p_prof.dni_persona AS dni_profesional, pr_prof.correo AS p_correo, GROUP_CONCAT(e.tipo SEPARATOR ', ') AS tipo,
-             p_cli.apellido AS c_apellido, p_cli.nombre AS c_nombre, pr_cli.correo AS c_correo, t.dni_cliente,
-             t.fecha_turno, t.hora_turno,t.estado, t.motivo_cancelacion, t.creado_en, t.completado_en, t.cancelado_en
+             p_cli.apellido AS c_apellido, p_cli.nombre AS c_nombre, pr_cli.correo AS c_correo, p_cli.foto_url AS c_foto_url, t.dni_cliente,
+             t.fecha_turno, t.hora_turno, t.estado, t.motivo_cancelacion, t.creado_en, t.completado_en, t.cancelado_en
       FROM turno AS t
       INNER JOIN persona_rol pr_cli ON pr_cli.dni_persona = t.dni_cliente AND pr_cli.id_rol = 1
       INNER JOIN persona p_cli ON p_cli.dni_persona = t.dni_cliente
@@ -40,13 +15,12 @@ export class TurnosModel {
       INNER JOIN especialidad e ON e.id_especialidad = p_e.id_especialidad
       WHERE t.id_turno = ?
       GROUP BY t.id_turno, p_prof.apellido, p_prof.nombre, p_prof.dni_persona, pr_prof.correo,
-            p_cli.apellido, p_cli.nombre, pr_cli.correo, t.dni_cliente
+               p_cli.apellido, p_cli.nombre, pr_cli.correo, p_cli.foto_url, t.dni_cliente
     `, [id])
 
     return row[0] ?? null
   }
 
-  //CON MOTIVO
   static async cancelTurno(id, motivo = null) {
     await pool.query(`
       UPDATE turno SET estado = 'cancelado', cancelado_en = NOW(), motivo_cancelacion = ?
@@ -59,7 +33,7 @@ export class TurnosModel {
   static async getTurnosByProfesional({ dni, desde, hasta, estado }) {
     let query = `
     SELECT t.id_turno, t.fecha_turno, t.hora_turno, t.estado, t.creado_en, t.completado_en, t.cancelado_en,
-          p.dni_persona AS dni, p.nombre, p.apellido
+           p.dni_persona AS dni, p.nombre, p.apellido, p.foto_url
     FROM turno t
     INNER JOIN persona p ON p.dni_persona = t.dni_cliente
     WHERE t.dni_profesional = ? AND t.fecha_turno BETWEEN ? AND ?
@@ -86,7 +60,6 @@ export class TurnosModel {
   static async existeActivo({ dni, fecha, hora }) {
     const [rows] = await pool.query(`
       SELECT 1 FROM turno WHERE dni_profesional = ? AND fecha_turno = ? AND hora_turno = ? AND estado = 'activo'
-    
       `, [dni, fecha, hora])
 
     return rows.length > 0
@@ -104,22 +77,4 @@ export class TurnosModel {
     const [rows] = await pool.query(`SELECT * FROM turno WHERE id_turno = ?`, [id])
     return rows[0]
   }
-
-  /* static async getAgenda({ dni_profesional, desde, hasta, estado }) {
-    let query = `
-      SELECT t.id_turno, t.fecha_turno, t.hora_turno, t.estado, t.cancelado_en,
-          c.dni_cliente AS "dni", c.nombre, c.apellido
-      FROM turno t
-      INNER JOIN cliente c ON t.dni_cliente = c.dni_cliente
-      WHERE t.dni_profesional = ? AND t.fecha_turno BETWEEN ? AND ?
-    `
-    const params = [dni_profesional, desde, hasta]
-    if (estado) {
-      query += ` AND t.estado = ?`
-      params.push(estado)
-    }
-    query += ` ORDER BY t.fecha_turno, t.hora_turno`
-    const [rows] = await pool.query(query, params)
-    return rows
-  } */
 }

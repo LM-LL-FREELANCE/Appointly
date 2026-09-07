@@ -1,10 +1,18 @@
-import { Table, Badge, Text, Avatar, Group, Button } from "@mantine/core";
+import { Table, Badge, Text, Group, Button } from '@mantine/core'
 import { IconArrowRight } from '@tabler/icons-react'
+import { UserAvatar } from './UserAvatar'
+
 export default function DoctorTable({ profesionales, onVerDisponibilidad }) {
-  const rows = profesionales.map(prof => (
+  const rows = profesionales.map((prof) => (
     <Table.Tr key={prof.dni_profesional}>
       <Table.Td>
-        <Avatar src={prof.foto} alt={prof.nombre} radius="xl" />
+        <UserAvatar
+          size={38}
+          radius="100%"
+          withLink={false}
+          src={prof.foto_url || prof.foto}
+          name={`${prof.nombre ?? ''} ${prof.apellido ?? ''}`.trim()}
+        />
       </Table.Td>
       <Table.Td>
         <Text fw={600}>{`${prof.nombre} ${prof.apellido}`}</Text>
@@ -19,7 +27,7 @@ export default function DoctorTable({ profesionales, onVerDisponibilidad }) {
       </Table.Td>
       <Table.Td>
         <Group gap="xs">
-          {(prof.obrasSociales || []).map(obs => (
+          {(prof.obrasSociales || []).map((obs) => (
             <Badge key={obs} variant="outline" color="gray" radius="sm">
               {obs}
             </Badge>
@@ -29,12 +37,14 @@ export default function DoctorTable({ profesionales, onVerDisponibilidad }) {
       <Table.Td>
         <Button
           rightSection={<IconArrowRight size={14} />}
-          onClick={() => onVerDisponibilidad?.(prof)}>
+          onClick={() => onVerDisponibilidad?.(prof)}
+        >
           Reservar
         </Button>
       </Table.Td>
     </Table.Tr>
   ))
+
   return (
     <Table.ScrollContainer minWidth={700}>
       <Table striped highlightOnHover verticalSpacing="sm" horizontalSpacing="md">

@@ -1,6 +1,7 @@
-import { Group, Text, Avatar, Paper, Table, Badge, Anchor, Divider } from "@mantine/core"
+import { Group, Text, Paper, Table, Badge, Anchor, Divider } from '@mantine/core'
 import { Link } from 'react-router-dom'
 import { IconTable } from '@tabler/icons-react'
+import { UserAvatar } from '../../../components/UserAvatar.jsx'
 
 const estadoConfig = {
   activo: { color: 'green', label: 'Activo' },
@@ -32,7 +33,7 @@ export function TurnosDeHoy({ turnos = [] }) {
           Ver agenda →
         </Anchor>
       </Group>
-      <Divider size='xs' mt='xs' />
+      <Divider size="xs" mt="xs" />
 
       {turnos.length === 0 ? (
         <Text c="dimmed" fz="sm" ta="center" py="xl">No hay turnos para hoy</Text>
@@ -49,11 +50,16 @@ export function TurnosDeHoy({ turnos = [] }) {
                     </Table.Td>
                     <Table.Td>
                       <Group gap="sm" wrap="nowrap">
-                        <Avatar radius="xl" size="sm" visibleFrom="sm" />
+                        <UserAvatar
+                          size={32}
+                          radius="100%"
+                          withLink={false}
+                          src={t.foto_url}
+                          name={t.paciente}
+                        />
                         <Text fz="sm">{t.paciente}</Text>
                       </Group>
                     </Table.Td>
-                    {/* v2: reserved (e.g. specialty / reason) */}
                     <Table.Td visibleFrom="sm" />
                     <Table.Td w={120} ta="center">
                       <Badge

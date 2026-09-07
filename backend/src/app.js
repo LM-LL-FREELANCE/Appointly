@@ -13,6 +13,8 @@ import { clientesRouter } from "./routes/clientes.routes.js"
 import { requireApiKey } from "./middlewares/apiKey.middleware.js"
 import { globalLimiter } from "./middlewares/rateLimit.middleware.js"
 import helmet from "helmet"
+import { storageRouter } from "./routes/storage.routes.js"
+
 export const app = express()
 
 // deployment middleware, express static
@@ -47,6 +49,7 @@ app.use("/api/especialidades", especialidadesRouter)
 app.use("/api/horarios", horariosRouter)
 app.use("/api/turnos", turnosRouter)
 app.use("/api/clientes", clientesRouter)
+app.use("/api/storage", storageRouter)
 
 /*Error handler */
 app.use(errorHandler)

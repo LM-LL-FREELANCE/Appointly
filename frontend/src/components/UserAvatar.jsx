@@ -4,25 +4,59 @@ import { useAuth } from '../hooks/useAuth.js'
 
 export function UserAvatar({
   size,
-  radius = 'xl',
-  component = Link,
-  to = '/miperfil',
+  radius = '100%',
+  src,
+  name,
+  withLink = true,
+  component,
+  to,
   alt,
+  color,
   ...props
 }) {
   const { user } = useAuth()
-  const name = user ? `${user.nombre ?? ''} ${user.apellido ?? ''}`.trim() : ''
+
+  const isCurrentUser = name === undefined && src === undefined
+
+  const resolvedName =
+    name !== undefined
+      ? name
+      : user
+        ? `${user.nombre ?? ''} ${user.apellido ?? ''}`.trim()
+        : ''
+
+  const resolvedSrc =
+    src !== undefined
+      ? (src || undefined)
+      : isCurrentUser
+        ? (user?.foto_url || undefined)
+        : undefined
+
+  const resolvedComponent =
+    component !== undefined ? component : withLink ? Link : undefined
+
+  const resolvedTo =
+    to !== undefined ? to : withLink ? '/miperfil' : undefined
+
+  const resolvedAlt = alt || resolvedName || 'Avatar de usuario'
+
+  const resolvedColor =
+    color !== undefined
+      ? color
+      : resolvedName
+        ? 'initials'
+        : undefined
 
   return (
     <Avatar
       size={size}
       radius={radius}
-      component={component}
-      to={to}
-      src={user?.foto_url || undefined}
-      name={name || undefined}
-      color={name ? 'initials' : undefined}
-      alt={alt || name || 'Avatar de usuario'}
+      component={resolvedComponent}
+      to={resolvedTo}
+      src={resolvedSrc}
+      name={resolvedName || undefined}
+      color={resolvedColor}
+      alt={resolvedAlt}
       {...props}
     />
   )

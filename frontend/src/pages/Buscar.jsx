@@ -1,18 +1,18 @@
 import { useState } from 'react'
 import {
   Grid, Card, Stack, Group, Text,
-  Select, Button, TextInput, SegmentedControl, Title, Center, Loader
+  Select, Button, TextInput, SegmentedControl, Title, Center, Loader,
 } from '@mantine/core'
 import { IconSearch } from '@tabler/icons-react'
 import { PageHeader } from '../components/PageHeader'
 import { DoctorCard } from '../components/DoctorCard'
 import DoctorTable from '../components/DoctorTable'
 import { getFilteredProfesional, getAllEspecialidades } from '../api/profesionales.js'
-import { useQuery, keepPreviousData } from "@tanstack/react-query"
+import { useQuery, keepPreviousData } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import useObrasSociales from '../hooks/useObraSociales'
-import { useIsDesktop } from "../hooks/useIsDesktop.js"
-import QueryError from "../components/QueryError.jsx"
+import { useIsDesktop } from '../hooks/useIsDesktop.js'
+import QueryError from '../components/QueryError.jsx'
 
 export default function Buscar() {
   const navigate = useNavigate()
@@ -23,19 +23,19 @@ export default function Buscar() {
   const [vista, setVista] = useState('cards')
 
   const { data: profesionales = [], isLoading: isLoadingProfesionales, isError: isErrorProfessionals, refetch: refetchProfesionals } = useQuery({
-    queryKey: ["profesionales", especialidad, obraSocial],
+    queryKey: ['profesionales', especialidad, obraSocial],
     queryFn: () => getFilteredProfesional({ especialidad, obraSocial }),
     placeholderData: keepPreviousData,
   })
 
   const { data: especialidades = [], isLoading: isLoadingEspecialidades, isError: isErrorEspecialidades, refetch: refetchEspecialidades } = useQuery({
-    queryKey: ["especialidades"],
+    queryKey: ['especialidades'],
     queryFn: getAllEspecialidades,
   })
 
   const { data: obraSociales = [], isLoading: isLoadingObraSociales, isError: isErrorObras, refetch: refetchObras } = useObrasSociales()
 
-  const doctoresFiltrados = profesionales.filter(doc =>
+  const doctoresFiltrados = profesionales.filter((doc) =>
     `${doc.nombre} ${doc.apellido}`.toLowerCase().includes(busqueda.toLowerCase())
   )
   const isLoadingAll = isLoadingProfesionales && isLoadingEspecialidades && isLoadingObraSociales
@@ -45,6 +45,7 @@ export default function Buscar() {
     refetchEspecialidades()
     refetchObras()
   }
+
   if (isLoadingAll) {
     return (
       <Center h={200}>
@@ -52,6 +53,7 @@ export default function Buscar() {
       </Center>
     )
   }
+
   return (
     <Stack gap="md">
       <PageHeader
@@ -88,7 +90,7 @@ export default function Buscar() {
                 label="Especialidad"
                 placeholder="Todas"
                 clearable
-                data={especialidades.map(esp => ({ value: String(esp.id), label: esp.especialidad }))}
+                data={especialidades.map((esp) => ({ value: String(esp.id), label: esp.especialidad }))}
                 value={especialidad}
                 onChange={setEspecialidad}
               />
@@ -97,7 +99,7 @@ export default function Buscar() {
                 label="Obra social"
                 placeholder="Todas"
                 clearable
-                data={obraSociales.map(os => ({ value: String(os.id), label: os.obra_social }))}
+                data={obraSociales.map((os) => ({ value: String(os.id), label: os.obra_social }))}
                 value={obraSocial}
                 onChange={setObraSocial}
               />
@@ -145,9 +147,9 @@ export default function Buscar() {
                   No se encontraron profesionales con esos filtros.
                 </Text>
               ) : (
-                doctoresFiltrados.map(doc => (
+                doctoresFiltrados.map((doc) => (
                   <DoctorCard
-                    keyDoctor={doc.dni_profesional}
+                    key={doc.dni_profesional}
                     doctor={doc}
                     onVerDisponibilidad={(d) => navigate('/reservar', { state: { doctor: d } })}
                   />
@@ -159,10 +161,9 @@ export default function Buscar() {
                 onVerDisponibilidad={(d) => navigate('/reservar', { state: { doctor: d } })}
               />
             )}
-
           </Stack>
         </Grid.Col>
       </Grid>
-    </Stack >
+    </Stack>
   )
 }

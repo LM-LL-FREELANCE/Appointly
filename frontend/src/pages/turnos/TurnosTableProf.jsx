@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { Avatar, Badge, Box, Button, Group, Table, Text } from '@mantine/core'
+import { Badge, Box, Button, Group, Table, Text } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { cancelTurnoById } from '../../api/clientes.js'
 import { fechaCorta, horaCorta } from '../../utils/fechas.utils.js'
 import { CancelarTurnoProfModal } from './CancelarTurnoProfModal.jsx'
+import { UserAvatar } from '../../components/UserAvatar.jsx'
 
 const COLUMNS = ['Fecha', 'Hora', 'Paciente', 'Estado', 'Acciones']
 
@@ -42,7 +43,13 @@ export default function TurnosTableProf({ turnos, dniProfesional, onCancelled })
         <Table.Td><Text fz="sm">{horaCorta(item.hora_turno)}</Text></Table.Td>
         <Table.Td>
           <Group gap="sm" wrap="nowrap">
-            <Avatar size={32} radius="xl" />
+            <UserAvatar
+              size={32}
+              radius="100%"
+              withLink={false}
+              src={item.foto_url}
+              name={`${item.nombre ?? ''} ${item.apellido ?? ''}`.trim()}
+            />
             <Text fz="sm" fw={500}>{item.nombre} {item.apellido}</Text>
           </Group>
         </Table.Td>
