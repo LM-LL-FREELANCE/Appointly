@@ -51,68 +51,17 @@ This application centralizes appointment management in a web platform where:
 | **Express** | REST API framework |
 | **MySQL** | Relational database |
 | **JWT** | Token-based authentication |
-| **bcrypt** | Password hashing |
+| **bcrypt** | Hashing |
 | **Cookies** | Secure session token storage |
 | **Resend** | Notification emails |
 | **Zod** | Request data validation |
 
 ---
 
-## Installation and Usage
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/YOUR_USERNAME/YOUR_REPOSITORY.git
-cd YOUR_REPOSITORY
-```
-
-### 2. Set up the backend
-
-```bash
-cd backend
-npm install
-```
-
-Create a `.env` file in the backend folder with the following variables:
-
-```env
-PORT=3000
-DB_HOST=localhost
-DB_USER=your_user
-DB_PASSWORD=your_password
-DB_NAME=your_database_name
-JWT_SECRET=your_secret_key
-RESEND_API_KEY=your_resend_api_key
-```
-
-Start the server:
-
-```bash
-npm run dev
-```
-
-### 3. Set up the frontend
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
----
-
-## Security
-
-- Passwords are never stored in plain text: they are hashed with **bcrypt**.
-- Sessions are handled with **JWT** stored in **cookies**, avoiding exposure of the token in browser storage.
-- All incoming data is validated with **Zod** before being processed by the server.
-
----
-
 ## Authors
 
-- **Your Name** - [GitHub](https://github.com/YOUR_USERNAME)
+- **Luca Latigano** - [GitHub]([https://github.com/LucaLaatigano])
+- **Leandro Marín** - [GitHub]([https://github.com/leanmarin])
 
 ---
 
