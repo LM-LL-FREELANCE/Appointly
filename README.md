@@ -60,8 +60,8 @@ This application centralizes appointment management in a web platform where:
 
 ## Authors
 
-- **Luca Latigano** - [GitHub]([https://github.com/LucaLaatigano])
-- **Leandro Marín** - [GitHub]([https://github.com/leanmarin])
+- **Luca Latigano** - [GitHub](https://github.com/LucaLaatigano)
+- **Leandro Marín** - [GitHub](https://github.com/leanmarin)
 
 ---
 
