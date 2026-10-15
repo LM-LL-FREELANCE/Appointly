@@ -10,6 +10,7 @@ export class AuthModel {
             p.apellido,
             p.foto_url,
             pr.password_hash,
+            pr.estado,
             r.nombre AS role
           FROM persona_rol pr
           INNER JOIN persona p 

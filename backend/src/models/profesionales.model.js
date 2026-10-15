@@ -112,7 +112,7 @@ export class ProfesionalesModel {
       LEFT JOIN obra_social ob 
         ON obp.id_obra_social = ob.id_obra_social
 `;
-    const conditions = ['pr.eliminado_en IS NULL'];
+    const conditions = ['pr.eliminado_en IS NULL', "pr.estado = 'aprobado'"];
     const values = [];
     if (especialidad) {
       conditions.push(`EXISTS (
@@ -155,7 +155,7 @@ export class ProfesionalesModel {
                 ON prof.dni_profesional = p.dni_persona
               INNER JOIN persona_rol pr
                 ON prof.dni_profesional = pr.dni_persona AND prof.id_rol = pr.id_rol
-              WHERE prof.dni_profesional = ? AND pr.eliminado_en IS NULL
+              WHERE prof.dni_profesional = ? AND pr.eliminado_en IS NULL AND pr.estado = 'aprobado'
             `, [dni])
 
     const profesional = rows[0]
@@ -185,7 +185,7 @@ export class ProfesionalesModel {
     const [rows] = await pool.query(
       `SELECT 1 FROM profesional p 
         INNER JOIN persona_rol pr ON p.dni_profesional = pr.dni_persona AND p.id_rol = pr.id_rol
-        WHERE p.dni_profesional = ? AND pr.eliminado_en IS NULL LIMIT 1`,
+        WHERE p.dni_profesional = ? AND pr.eliminado_en IS NULL AND pr.estado = 'aprobado' LIMIT 1`,
       [dni]
     );
     return rows.length > 0;
