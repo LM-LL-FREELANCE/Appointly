@@ -28,7 +28,7 @@ Registro/existencia unificados y transaccionales. Branch: `feat/ap-register`. Si
 
 - [x] T1 (S8, S13) Migracion + schema: `persona_rol.estado`, tabla `invitacion`, `schema.sql`, `drop.sql`, migracion numerada, README. Route: inline. Commit: 80e05db (verificado: migracion sobre schema viejo con datos y schema nuevo desde cero, en MySQL descartable puerto 33061)
 - [x] T2 (S3, S4, S5, S6, S7, S8) `AccountService` unificado y transaccional + schema por rol + `es_admin`. Route: inline. Commit: 96ab05d (verificado: 14 casos HTTP y DB en MySQL descartable, incluida carrera por matricula y rollback)
-- [x] T3 (S8, S9) Login/sesion con estado; filtro de aprobados en busqueda, perfil y turnos. Route: inline. Commit: PENDING_T3 (verificado por HTTP: login pendiente 403 solo con password correcta, /me null, listado/perfil/slots/turno excluyen pendientes, aprobados intactos)
+- [x] T3 (S8, S9) Login/sesion con estado; filtro de aprobados en busqueda, perfil y turnos. Route: inline. Commit: a8eded8 (verificado por HTTP: login pendiente 403 solo con password correcta, /me null, listado/perfil/slots/turno excluyen pendientes, aprobados intactos)
 - [ ] T4 (S1, S10) Solicitudes: listar, aprobar, rechazar (admin). Route: inline. Commit: -
 - [ ] T5 (S2, S11, S12, S15, S17) Invitaciones: crear/listar/revocar/validar/registro; mail; script primer admin; Resend por env. Route: inline. Commit: -
 - [ ] T6 (S3, S14) Frontend registro: `RegisterForm` compartido, profesional "solicitud enviada", registro admin por invitacion, login por rol. Route: inline. Commit: -
