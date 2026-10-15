@@ -44,3 +44,5 @@ la idea es que la logica se comparta no se repita en codigo', mas alla de eso, m
 - L3: "que opinas de hacer invitacion para admins y solicitud + aprobacion para profesionales?" ... "(recien leo 2.admin y coincidimos! me parece bien eso)"
 - L4: "ok a todo lo anterior" ... "Nada de tests." ... "rechazo como vos recomendas, lo de la persona existente si lo veo logico".
 - L5: "Solicitud de profesional, ok. Invitacion de admin, ok. ... rate limit, si lo ves, entonces hacelo. ... hacelo una variable de entorno entonces (y cambialo en los otros que mencionaste antes) ... Plan final, ok. Y si, me parece bien que lleve dni fijo. Creo que ya estariamos listos para comenzar"
+
+- L6: "termina, me quede sin tokens en claude". Subagent gentle-ai-verify falló por límite de contexto/tokens del proveedor; reportado como no disponible por instrucción del usuario. Entorno descartable (mysqld, vite, backend, Chrome y /tmp/mysql-verify) completamente limpio.
