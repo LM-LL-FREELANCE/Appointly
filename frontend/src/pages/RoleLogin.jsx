@@ -23,8 +23,19 @@ import { notifications } from '@mantine/notifications';
 import '@mantine/notifications/styles.css';
 import { useState } from "react"
 import useNotificationCountDown from '../hooks/useNotificationCountDown.jsx'
+import useGetErrosMsg from '../hooks/useGetErrosMsg.jsx'
+import { HOME_BY_ROLE } from '../utils/roles.js'
 
-export default function ProfessionalLogin() {
+// Login screen shared by the roles that sign in outside the patient flow.
+// Only profesional can request an account from here; admins join by invitation.
+const ROLE_CONFIG = {
+  profesional: { signupPath: '/professional-signup' },
+  admin: { signupPath: null },
+}
+
+export default function RoleLogin({ role = 'profesional' }) {
+  const { signupPath } = ROLE_CONFIG[role]
+  const { errorMessage } = useGetErrosMsg()
 
   const { login, isLoggingIn, loginError } = useAuth()
   const navigate = useNavigate()
@@ -42,7 +53,7 @@ export default function ProfessionalLogin() {
   const handleSend = () => {
     mutateEmail({
       correo: email,
-      role: "profesional"
+      role
     }, {
       onSuccess: () => {
         startCountDown({
@@ -72,7 +83,7 @@ export default function ProfessionalLogin() {
   async function handleLogin(values) {
     try {
       await login(values)
-      navigate("/dashboard")
+      navigate(HOME_BY_ROLE[role])
     } catch (error) {
       console.error('Login fallido:', error)
     }
@@ -84,7 +95,7 @@ export default function ProfessionalLogin() {
     initialValues: {
       dni: '',
       password: '',
-      role: 'profesional'
+      role
     },
     validate: {
       dni: (value) => (/^\d{7,8}$/).test(value) ? null : 'El DNI debe tener 7 u 8 dígitos'
@@ -147,7 +158,7 @@ export default function ProfessionalLogin() {
 
           {loginError ? (
             <Text c="red" size="sm" mt="md" ta="center">
-              Credenciales no válidas
+              {loginError.code === 'ACCOUNT_PENDING' ? errorMessage('ACCOUNT_PENDING') : 'Credenciales no válidas'}
             </Text>
           ) : (
             <Text mb={51}></Text>
@@ -158,12 +169,14 @@ export default function ProfessionalLogin() {
                 onClick={openforgotPassWordModal}>
                 ¿Olvidaste tu contraseña?
               </Anchor>
-              <Text ta="center" size="sm">
-                ¿Todavía no tienes una cuenta? {' '}
-                <Anchor component={Link} to="/professional-signup" fw={500}>
-                  Regístrate
-                </Anchor>
-              </Text>
+              {signupPath && (
+                <Text ta="center" size="sm">
+                  ¿Todavía no tienes una cuenta? {' '}
+                  <Anchor component={Link} to={signupPath} fw={500}>
+                    Solicitá tu cuenta
+                  </Anchor>
+                </Text>
+              )}
             </Stack>
           </Center>
         </Paper>

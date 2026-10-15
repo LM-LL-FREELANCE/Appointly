@@ -17,8 +17,10 @@ import { ProtectedRoute } from './components/ProtectedRoute.jsx'
 /*Auth components (lazy loaded) */
 const Login = lazy(() => import('./pages/Login.jsx'))
 const SignUp = lazy(() => import('./pages/SignUp.jsx'))
-const ProfessionalLogin = lazy(() => import('./pages/ProfessionalLogin.jsx'))
+const RoleLogin = lazy(() => import('./pages/RoleLogin.jsx'))
 const ProfessionalSignUp = lazy(() => import('./pages/ProfessionalSignUp.jsx'))
+const SolicitudEnviada = lazy(() => import('./pages/SolicitudEnviada.jsx'))
+const AdminInvitation = lazy(() => import('./pages/AdminInvitation.jsx'))
 const ResetPassword = lazy(() => import('./pages/ResetPassword.jsx'))
 
 /*Other components (lazy loaded) */
@@ -59,8 +61,11 @@ export default function App() {
     <Suspense fallback={<Center h="100vh"><Loader /></Center>}>
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/professional-login" element={<ProfessionalLogin />} />
+        <Route path="/professional-login" element={<RoleLogin role="profesional" />} />
         <Route path="/professional-signup" element={<ProfessionalSignUp />} />
+        <Route path="/solicitud-enviada" element={<SolicitudEnviada />} />
+        <Route path="/admin-login" element={<RoleLogin role="admin" />} />
+        <Route path="/registro/invitacion/:token" element={<AdminInvitation />} />
         <Route path="/registrarse" element={<SignUp />} />
         <Route path="/resetear-contraseña/:token?" element={<ResetPassword />} />
 
