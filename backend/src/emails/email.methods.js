@@ -11,6 +11,22 @@ const getResend = () => {
   return resendClient;
 };
 
+const escapeHtml = (value) => String(value ?? '')
+  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+// Shared sender for the account/invitation emails: one place for the
+// from/error handling instead of repeating it per message.
+const sendMail = async ({ to, subject, html, errorLabel }) => {
+  const { data, error } = await getResend().emails.send({ from: process.env.EMAIL_FROM, to, subject, html });
+
+  if (error) {
+    console.error(`Error de Resend (${errorLabel}):`, error);
+    throw new Error(`No se pudo enviar el correo (${errorLabel}): ${error.message}`);
+  }
+
+  return data;
+};
+
 export class EmailMethods {
   static async sendTest() {
     await getResend().emails.send({
@@ -44,10 +60,10 @@ export class EmailMethods {
   }
 
   static async invitacionAdmin({ correo, link, horas }) {
-    const { data, error } = await getResend().emails.send({
-      from: process.env.EMAIL_FROM,
+    return sendMail({
       to: correo,
       subject: 'Invitación para administrar Appointly',
+      errorLabel: 'invitación',
       html: `
       <p>Hola, te invitaron a crear una cuenta de administrador en Appointly.</p>
       <p>Para completar el registro, hacé click en el siguiente enlace:</p>
@@ -55,15 +71,43 @@ export class EmailMethods {
       <p>El enlace es válido por ${horas} horas y solo puede usarse una vez.</p>
       <p>Si no esperabas esta invitación, ignorá este mensaje.</p>
       <p>Gracias, consultorio Appointly</p>
-      `
+      `,
     });
+  }
 
-    if (error) {
-      console.error("Error de Resend al enviar invitación:", error);
-      throw new Error(`No se pudo enviar el correo de invitación: ${error.message}`);
-    }
+  static async solicitudRecibida({ correo, nombre }) {
+    return sendMail({
+      to: correo,
+      subject: 'Recibimos tu solicitud de cuenta',
+      errorLabel: 'solicitud recibida',
+      html: `
+      <p>Hola <strong>${escapeHtml(nombre)}</strong>,</p>
+      <p>Recibimos tu solicitud de cuenta de profesional en Appointly. Estamos analizando tus datos.</p>
+      <p>Te vamos a avisar por este medio cuando tengamos una respuesta.</p>
+      <p>Saludos,<br>Equipo de Appointly</p>
+      `,
+    });
+  }
 
-    return data;
+  static async solicitudResuelta({ correo, nombre, accion }) {
+    const aprobada = accion === 'aprobar';
+
+    return sendMail({
+      to: correo,
+      subject: aprobada ? 'Tu cuenta fue confirmada' : 'No pudimos aprobar tu solicitud',
+      errorLabel: aprobada ? 'solicitud aprobada' : 'solicitud rechazada',
+      html: aprobada
+        ? `
+      <p>Hola <strong>${escapeHtml(nombre)}</strong>,</p>
+      <p>Tu cuenta de profesional en Appointly fue confirmada. Ya podés iniciar sesión.</p>
+      <p>Saludos,<br>Equipo de Appointly</p>
+      `
+        : `
+      <p>Hola <strong>${escapeHtml(nombre)}</strong>,</p>
+      <p>No pudimos aprobar tu solicitud de cuenta de profesional. Revisá que tus datos y tu matrícula estén bien y volvé a intentarlo.</p>
+      <p>Saludos,<br>Equipo de Appointly</p>
+      `,
+    });
   }
 
   static async turnoCanceladoPorProfesional({ turno, motivo }) {

@@ -2,6 +2,8 @@ import { z } from "zod"
 import { AppError } from "../utils/AppError.js"
 import { SolicitudesService } from "../services/solicitudes.service.js"
 import { solicitudParamsSchema } from "../schemas/solicitud.schema.js"
+import { EmailMethods } from "../emails/email.methods.js"
+import { bestEffort } from "../utils/bestEffort.js"
 
 export class SolicitudesController {
   static async list(req, res, next) {
@@ -23,6 +25,10 @@ export class SolicitudesController {
 
       const { dni, role } = params.data
       const resultado = await SolicitudesService.resolver({ dni, role, accion: req.body.accion })
+
+      bestEffort(() => EmailMethods.solicitudResuelta({
+        correo: resultado.correo, nombre: resultado.nombre, accion: resultado.accion,
+      }))
 
       return res.json({ dni: resultado.dni, role: resultado.role, accion: resultado.accion })
     } catch (error) {

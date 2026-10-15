@@ -2,6 +2,7 @@ import { AppError } from "../utils/AppError.js"
 import { passwordsSchema } from "../schemas/auth.schema.js"
 import { AuthService } from "../services/auth.service.js"
 import { AccountService } from "../services/account.service.js"
+import { bestEffort } from "../utils/bestEffort.js"
 import { cookieOptions } from "../validators/cookieOptions.js"
 import { EmailMethods } from "../emails/email.methods.js"
 
@@ -14,7 +15,11 @@ export class AuthController {
 
       const account = await AccountService.register({ role, data })
 
-      // A professional only files a request: tell the client it is pending.
+      // A professional only files a request: acknowledge it by email.
+      if (account.estado === "pendiente") {
+        bestEffort(() => EmailMethods.solicitudRecibida({ correo: account.correo, nombre: account.nombre }))
+      }
+
       res.set("Location", `/api/${role === "cliente" ? "clientes" : "profesionales"}/${account.dni}`)
       return res.status(201).json(account)
 
