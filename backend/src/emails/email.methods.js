@@ -1,10 +1,19 @@
 import { Resend } from 'resend';
 
-const resend = new Resend('re_BmALgMJT_6cdx3iBozFXTLKX4bgdXKNoe');
+// Created on first use so the server can boot without the key (e.g. in dev
+// without email) and only fails when an email is actually sent.
+let resendClient;
+const getResend = () => {
+  if (!process.env.RESEND_API_KEY) {
+    throw new Error('Falta la variable de entorno RESEND_API_KEY.');
+  }
+  resendClient ??= new Resend(process.env.RESEND_API_KEY);
+  return resendClient;
+};
 
 export class EmailMethods {
   static async sendTest() {
-    await resend.emails.send({
+    await getResend().emails.send({
       from: 'delivered@resend.dev',
       to: 'lucalatigano12@gmail.com',
       subject: 'Hello World',
@@ -13,7 +22,7 @@ export class EmailMethods {
   }
 
   static async resetPassWord({ correo, link }) {
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await getResend().emails.send({
       from: process.env.EMAIL_FROM,
       to: correo,
       subject: "Cambiar contraseña",
@@ -34,6 +43,29 @@ export class EmailMethods {
     return data;
   }
 
+  static async invitacionAdmin({ correo, link, horas }) {
+    const { data, error } = await getResend().emails.send({
+      from: process.env.EMAIL_FROM,
+      to: correo,
+      subject: 'Invitación para administrar Appointly',
+      html: `
+      <p>Hola, te invitaron a crear una cuenta de administrador en Appointly.</p>
+      <p>Para completar el registro, hacé click en el siguiente enlace:</p>
+      <a href="${link}">${link}</a>
+      <p>El enlace es válido por ${horas} horas y solo puede usarse una vez.</p>
+      <p>Si no esperabas esta invitación, ignorá este mensaje.</p>
+      <p>Gracias, consultorio Appointly</p>
+      `
+    });
+
+    if (error) {
+      console.error("Error de Resend al enviar invitación:", error);
+      throw new Error(`No se pudo enviar el correo de invitación: ${error.message}`);
+    }
+
+    return data;
+  }
+
   static async turnoCanceladoPorProfesional({ turno, motivo }) {
     const fecha = new Date(turno.fecha_turno).toLocaleDateString('es-AR', {
       day: 'numeric',
@@ -43,7 +75,7 @@ export class EmailMethods {
     });
     const hora = turno.hora_turno?.slice(0, 5);
 
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await getResend().emails.send({
       from: process.env.EMAIL_FROM,
       to: turno.c_correo,
       subject: 'Tu turno fue cancelado',
@@ -73,7 +105,7 @@ export class EmailMethods {
     });
     const hora = turno.hora_turno?.slice(0, 5);
 
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await getResend().emails.send({
       from: process.env.EMAIL_FROM,
       to: turno.c_correo,
       subject: 'Cancelaste tu turno',

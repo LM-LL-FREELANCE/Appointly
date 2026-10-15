@@ -35,12 +35,12 @@ CREATE TABLE invitacion (
     dni_persona INT UNSIGNED NOT NULL,
     correo VARCHAR(255) NOT NULL,
     id_rol INT UNSIGNED NOT NULL,
-    creado_por INT UNSIGNED NOT NULL,
+    creado_por INT UNSIGNED NULL,
     creada_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     expira_en TIMESTAMP NOT NULL,
     usada_en TIMESTAMP NULL DEFAULT NULL,
     revocada_en TIMESTAMP NULL DEFAULT NULL,
     FOREIGN KEY (id_rol) REFERENCES rol(id_rol),
-    FOREIGN KEY (creado_por) REFERENCES persona(dni_persona) ON DELETE CASCADE,
+    FOREIGN KEY (creado_por) REFERENCES persona(dni_persona) ON DELETE SET NULL,
     INDEX idx_invitacion_dni_rol (dni_persona, id_rol)
 );

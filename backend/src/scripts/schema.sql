@@ -163,6 +163,7 @@ CREATE TABLE turno (
 -- valida si usada_en IS NULL, revocada_en IS NULL y expira_en > NOW().
 -- Se consume con un UPDATE atomico dentro de la misma transaccion que crea la
 -- cuenta. dni_persona no tiene FK: la persona puede no existir todavia.
+-- creado_por es NULL para invitaciones emitidas desde consola (primer admin).
 
 CREATE TABLE invitacion (
     id_invitacion INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -170,12 +171,12 @@ CREATE TABLE invitacion (
     dni_persona INT UNSIGNED NOT NULL,
     correo VARCHAR(255) NOT NULL,
     id_rol INT UNSIGNED NOT NULL,
-    creado_por INT UNSIGNED NOT NULL,
+    creado_por INT UNSIGNED NULL,
     creada_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     expira_en TIMESTAMP NOT NULL,
     usada_en TIMESTAMP NULL DEFAULT NULL,
     revocada_en TIMESTAMP NULL DEFAULT NULL,
     FOREIGN KEY (id_rol) REFERENCES rol(id_rol),
-    FOREIGN KEY (creado_por) REFERENCES persona(dni_persona) ON DELETE CASCADE,
+    FOREIGN KEY (creado_por) REFERENCES persona(dni_persona) ON DELETE SET NULL,
     INDEX idx_invitacion_dni_rol (dni_persona, id_rol)
 );

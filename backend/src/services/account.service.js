@@ -66,8 +66,11 @@ export class AccountService {
    * @param {boolean} [params.identityVerified] - true when something else already
    *   proved who the requester is (an invitation token), so the existing-account
    *   password check is skipped.
+   * @param {(db) => Promise<void>} [params.inTransaction] - runs first inside the
+   *   same transaction (e.g. consuming an invitation token); if it throws, the
+   *   whole registration rolls back.
    */
-  static async register({ role, data, identityVerified = false }) {
+  static async register({ role, data, identityVerified = false, inTransaction }) {
     if (!AccountService.isRegistrableRole(role)) {
       throw new AppError("Rol inválido.", 400, "BAD_REQUEST")
     }
@@ -96,8 +99,9 @@ export class AccountService {
 
     try {
       await withTransaction(async (db) => {
+        await inTransaction?.(db)
         // For an existing person the stored personal data is kept untouched.
-        await AuthModel.insertPersona(data, db)
+        if (!personaExistente) await AuthModel.insertPersona(data, db)
         await AuthModel.insertCuenta({ dni, correo, password_hash, role, estado }, db)
         await rules.insertPerfil(data, db)
       })

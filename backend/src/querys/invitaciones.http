@@ -1,0 +1,33 @@
+### Requiere sesion de admin (cookie). Inicia sesion primero con role "admin".
+
+### invitar a un admin (DNI + correo; el link llega por mail y vale 24h, un solo uso)
+POST http://localhost:4000/api/invitaciones
+Content-Type: application/json
+
+{
+  "dni": "40111222",
+  "correo": "nueva.admin@example.com"
+}
+
+### listar invitaciones (pendiente / usada / revocada / vencida)
+GET http://localhost:4000/api/invitaciones
+
+### revocar una invitacion pendiente
+DELETE http://localhost:4000/api/invitaciones/1
+
+### validar un token sin consumirlo (publico)
+GET http://localhost:4000/api/invitaciones/validar/TOKEN_DEL_LINK
+
+### aceptar la invitacion y crear la cuenta admin (publico; DNI y correo salen de la invitacion)
+### Persona nueva: hay que mandar datos personales. Persona existente: solo password.
+POST http://localhost:4000/api/auth/registro/invitacion/TOKEN_DEL_LINK
+Content-Type: application/json
+
+{
+  "password": "miclave123",
+  "confirm": "miclave123",
+  "nombre": "Nueva",
+  "apellido": "Admin",
+  "genero": "F",
+  "fecha_nacimiento": "1992-03-04"
+}

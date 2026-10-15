@@ -15,6 +15,7 @@ import { globalLimiter } from "./middlewares/rateLimit.middleware.js"
 import helmet from "helmet"
 import { storageRouter } from "./routes/storage.routes.js"
 import { solicitudesRouter } from "./routes/solicitudes.routes.js"
+import { invitacionesRouter } from "./routes/invitaciones.routes.js"
 
 export const app = express()
 
@@ -52,6 +53,7 @@ app.use("/api/turnos", turnosRouter)
 app.use("/api/clientes", clientesRouter)
 app.use("/api/storage", storageRouter)
 app.use("/api/solicitudes", solicitudesRouter)
+app.use("/api/invitaciones", invitacionesRouter)
 
 /*Error handler */
 app.use(errorHandler)
