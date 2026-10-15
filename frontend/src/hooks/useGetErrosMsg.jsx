@@ -7,6 +7,9 @@ const MESSAGES = {
   INVITATION_INVALID: 'El enlace de invitación no es válido o fue revocado.',
   INVITATION_EXPIRED: 'La invitación venció. Pedile a un administrador que te envíe una nueva.',
   INVITATION_USED: 'Esta invitación ya fue usada. Si ya creaste tu cuenta, iniciá sesión.',
+  ADMIN_ALREADY_EXISTS: 'Esa persona ya tiene una cuenta de administrador.',
+  EMAIL_SEND_FAILED: 'No pudimos enviar el correo. Probá de nuevo en unos minutos.',
+  NOT_FOUND: 'Ese elemento ya no está disponible. Actualizá la lista.',
   ACCOUNT_PENDING: 'Tu solicitud todavía está pendiente de aprobación.',
   ACTION_RATE_LIMIT_EXCEEDED: 'Hiciste demasiados intentos. Esperá un rato e intentá de nuevo.',
 }

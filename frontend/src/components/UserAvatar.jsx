@@ -36,7 +36,7 @@ export function UserAvatar({
     component !== undefined ? component : withLink ? Link : undefined
 
   const resolvedTo =
-    to !== undefined ? to : withLink ? '/miperfil' : undefined
+    to !== undefined ? to : withLink ? (user?.role === 'admin' ? '/admin/configuracion' : '/miperfil') : undefined
 
   const resolvedAlt = alt || resolvedName || 'Avatar de usuario'
 
