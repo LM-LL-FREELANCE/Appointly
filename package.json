@@ -8,6 +8,7 @@
     "build": "pnpm --filter frontend build",
     "db:schema": "pnpm --filter backend run db:schema",
     "db:seed": "pnpm --filter backend run db:seed",
+    "db:migrate": "pnpm --filter backend run db:migrate",
     "db:reset": "pnpm --filter backend run db:reset"
   },
   "packageManager": "pnpm@12.3.4"

@@ -10,6 +10,7 @@
     "start": "node src/server.js",
     "db:schema": "node --env-file=.env src/scripts/run_sql.js schema.sql",
     "db:seed": "node --env-file=.env src/scripts/run_sql.js seed.sql",
+    "db:migrate": "node --env-file=.env src/scripts/run_sql.js",
     "db:reset": "node --env-file=.env src/scripts/run_sql.js drop.sql && pnpm run db:schema && pnpm run db:seed"
   },
   "keywords": [],

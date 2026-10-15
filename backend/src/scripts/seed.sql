@@ -123,17 +123,20 @@ INSERT INTO persona_rol (dni_persona, id_rol, correo, password_hash) VALUES
 (44902344, 1, 'rocio.figueroa@mail.com',    '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG');
 
 
+-- Cuentas de prueba: todas activas (el default del schema es 'pendiente').
+UPDATE persona_rol SET estado = 'aprobado';
+
+
 -- profesional
 -- numero_matricula: matricula profesional provincial (ficticia).
--- estado_validacion: todos ya validados, son datos de prueba activos.
 
 INSERT INTO profesional
-(dni_profesional, numero_matricula, estado_validacion, duracion_turno_min) VALUES
-(27845123, 'MP-10234', 'aprobado', 30),
-(30156789, 'MP-10589', 'aprobado', 30),
-(28934567, 'MP-20147', 'aprobado', 30),
-(33412890, 'MP-30456', 'aprobado', 30),
-(31678234, 'MP-40812', 'aprobado', 30);
+(dni_profesional, numero_matricula, duracion_turno_min) VALUES
+(27845123, 'MP-10234', 30),
+(30156789, 'MP-10589', 30),
+(28934567, 'MP-20147', 30),
+(33412890, 'MP-30456', 30),
+(31678234, 'MP-40812', 30);
 
 
 -- profesional_especialidad
