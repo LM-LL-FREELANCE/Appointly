@@ -1,7 +1,6 @@
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import { AuthModel } from "../models/auth.model.js"
-import { ObraSocialesModel } from "../models/obra-sociales.model.js"
 import { AppError } from "../utils/AppError.js"
 import { isKnownRole } from "../utils/userPermission.js"
 import { SALT_ROUNDS } from "../config/constants.js"
@@ -50,63 +49,8 @@ export class AuthService {
       apellido: userFound.apellido,
       correo: userFound.correo,
       foto_url: userFound.foto_url,
-      es_admin: userFound.es_admin,
+      es_admin: userFound.role === "admin",
     }
-  }
-
-  static async registerCliente({ dni, correo, nombre, apellido, telefono, fecha_nacimiento, genero, password, id_obra_social, numero_afiliado }) {
-    if (await AuthModel.existeDniCliente(dni)) {
-      throw new AppError("Ya existe una cuenta con ese DNI.", 409, "DUPLICATE_DNI")
-    }
-
-    if (await AuthModel.existeCorreoCliente(correo)) {
-      throw new AppError("Ya existe una cuenta con ese correo.", 409, "DUPLICATE_EMAIL")
-    }
-
-    if (id_obra_social != null) {
-      const existeObraSocial = await ObraSocialesModel.existe({ id_obra_social })
-
-      if (!existeObraSocial) {
-        throw new AppError("La obra social indicada no existe.", 422, "REFERENCE_NOT_FOUND")
-      }
-    }
-
-    const password_hash = await bcrypt.hash(password, SALT_ROUNDS)
-
-    await AuthModel.createClienteAccount({
-      data: {
-        dni, nombre, apellido, correo, password_hash,
-        telefono: telefono ?? null,
-        fecha_nacimiento, genero,
-        id_obra_social: id_obra_social ?? null,
-        numero_afiliado: numero_afiliado ?? null,
-      },
-    })
-
-    return { dni, nombre, apellido, correo, fecha_nacimiento, genero, id_obra_social: id_obra_social ?? null }
-  }
-
-  static async registerProfesional({ dni, correo, nombre, apellido, telefono, fecha_nacimiento, genero, password, numero_matricula }) {
-    if (await AuthModel.existeDniProfesional(dni)) {
-      throw new AppError("Ya existe una cuenta con ese DNI.", 409, "DUPLICATE_DNI")
-    }
-
-    if (await AuthModel.existeCorreoProfesional(correo)) {
-      throw new AppError("Ya existe una cuenta con ese correo.", 409, "DUPLICATE_EMAIL")
-    }
-
-    const password_hash = await bcrypt.hash(password, SALT_ROUNDS)
-
-    await AuthModel.createProfesionalAccount({
-      data: {
-        dni, nombre, apellido, correo, password_hash,
-        telefono: telefono ?? null,
-        fecha_nacimiento, genero,
-        numero_matricula,
-      },
-    })
-
-    return { dni, nombre, apellido, correo, fecha_nacimiento, genero, numero_matricula }
   }
 
   static async forgotPassword({ correo, role }) {

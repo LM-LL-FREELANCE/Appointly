@@ -1,43 +1,22 @@
 import { AppError } from "../utils/AppError.js"
-import { registerSchema, registerProfesionalSchema, passwordsSchema } from "../schemas/auth.schema.js"
+import { passwordsSchema } from "../schemas/auth.schema.js"
 import { AuthService } from "../services/auth.service.js"
+import { AccountService } from "../services/account.service.js"
 import { cookieOptions } from "../validators/cookieOptions.js"
 import { EmailMethods } from "../emails/email.methods.js"
 
 export class AuthController {
+  // Public registration for every role that can self-register. The body is
+  // already validated by the route (see registerSchema).
   static async register(req, res, next) {
-
     try {
-      const parsedSchema = registerSchema.safeParse(req.body)
+      const { role, ...data } = req.body
 
-      if (!parsedSchema.success) {
-        throw new AppError('invalid', 400, 'VALIDATION_FAILED', parsedSchema.error.flatten().fieldErrors);
-      }
+      const account = await AccountService.register({ role, data })
 
-      const cliente = await AuthService.registerCliente(parsedSchema.data)
-
-      res.set("Location", `/api/clientes/${cliente.dni}`)
-      return res.status(201).json(cliente)
-
-    } catch (error) {
-      next(error)
-    }
-  }
-
-  static async registerProfesional(req, res, next) {
-
-    try {
-      const parsedSchema = registerProfesionalSchema.safeParse(req.body)
-
-      if (!parsedSchema.success) {
-        throw new AppError('invalid', 400, 'VALIDATION_FAILED', parsedSchema.error.flatten().fieldErrors);
-      }
-
-      const profesional = await AuthService.registerProfesional(parsedSchema.data)
-
-      res.set("Location", `/api/profesionales/${profesional.dni}`)
-
-      return res.status(201).json(profesional)
+      // A professional only files a request: tell the client it is pending.
+      res.set("Location", `/api/${role === "cliente" ? "clientes" : "profesionales"}/${account.dni}`)
+      return res.status(201).json(account)
 
     } catch (error) {
       next(error)

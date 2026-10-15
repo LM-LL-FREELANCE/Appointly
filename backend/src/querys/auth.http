@@ -42,6 +42,41 @@ Content-Type: application/json
   "genero": "M"
 }
 
+### solicitud de registro de profesional (queda pendiente hasta que un admin la apruebe)
+POST http://localhost:4000/api/auth/registro
+Content-Type: application/json
+
+{
+  "role": "profesional",
+  "dni": "40111222",
+  "nombre": "Ana",
+  "apellido": "Paz",
+  "correo": "ana.paz@example.com",
+  "password": "miclave123",
+  "confirm": "miclave123",
+  "fecha_nacimiento": "1990-05-10",
+  "genero": "F",
+  "numero_matricula": "MP-99999"
+}
+
+### idem, pero el DNI ya tiene otra cuenta: hay que probar quien sos con su contraseña
+POST http://localhost:4000/api/auth/registro
+Content-Type: application/json
+
+{
+  "role": "profesional",
+  "dni": "22456789",
+  "nombre": "Ricardo",
+  "apellido": "Sosa",
+  "correo": "ricardo.pro@example.com",
+  "password": "miclave123",
+  "confirm": "miclave123",
+  "fecha_nacimiento": "1971-02-14",
+  "genero": "M",
+  "numero_matricula": "MP-88888",
+  "password_cuenta_existente": "la-contraseña-de-su-cuenta-cliente"
+}
+
 ###forgot password mail
 POST http://localhost:4000/api/auth/forgot-password
 Content-Type: application/json

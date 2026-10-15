@@ -26,8 +26,8 @@ Registro/existencia unificados y transaccionales. Branch: `feat/ap-register`. Si
 
 ## Tasks
 
-- [ ] T1 (S8, S13) Migracion + schema: `persona_rol.estado`, tabla `invitacion`, `schema.sql`, `drop.sql`, migracion numerada, README. Route: inline. Commit: -
-- [ ] T2 (S3, S4, S5, S6, S7, S8) `AccountService` unificado y transaccional + schema por rol + `es_admin`. Route: inline. Commit: -
+- [x] T1 (S8, S13) Migracion + schema: `persona_rol.estado`, tabla `invitacion`, `schema.sql`, `drop.sql`, migracion numerada, README. Route: inline. Commit: 80e05db (verificado: migracion sobre schema viejo con datos y schema nuevo desde cero, en MySQL descartable puerto 33061)
+- [x] T2 (S3, S4, S5, S6, S7, S8) `AccountService` unificado y transaccional + schema por rol + `es_admin`. Route: inline. Commit: 281fdea (verificado: 14 casos HTTP y DB en MySQL descartable, incluida carrera por matricula y rollback)
 - [ ] T3 (S8, S9) Login/sesion con estado; filtro de aprobados en busqueda, perfil y turnos. Route: inline. Commit: -
 - [ ] T4 (S1, S10) Solicitudes: listar, aprobar, rechazar (admin). Route: inline. Commit: -
 - [ ] T5 (S2, S11, S12, S15, S17) Invitaciones: crear/listar/revocar/validar/registro; mail; script primer admin; Resend por env. Route: inline. Commit: -
