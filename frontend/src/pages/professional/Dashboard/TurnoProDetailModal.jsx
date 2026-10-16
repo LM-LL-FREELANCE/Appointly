@@ -1,7 +1,9 @@
-import { Badge, Box, Button, Divider, Grid, Group, Modal, Text } from '@mantine/core'
+import { Box, Button, Divider, Grid, Group, Modal, Text } from '@mantine/core'
 import { useQuery } from '@tanstack/react-query'
 import { getTurnoById } from '../../../api/clientes.js'
 import QueryError from '../../../components/QueryError.jsx'
+import { EstadoTurnoBadge } from '../../../components/EstadoTurnoBadge.jsx'
+import { esCancelable } from '../../../utils/estadosTurno.js'
 
 function DetailRow({ label, children }) {
   return (
@@ -25,8 +27,6 @@ export function TurnoProDetailModal({ opened, onClose, onCancelRequest, turno })
     queryFn: () => getTurnoById(turno?.id_turno),
     enabled: opened && !!turno?.id_turno
   })
-
-  const badgeColor = turno.estado === 'activo' ? 'green' : 'red'
 
   const reservadoEl = detail?.creado_en
     ? new Date(detail.creado_en).toLocaleString('es-AR', {
@@ -69,9 +69,7 @@ export function TurnoProDetailModal({ opened, onClose, onCancelRequest, turno })
               <Text fz="sm" fw={500}>{turno.hora_turno?.slice(0, 5)} hs</Text>
             </DetailRow>
             <DetailRow label="Estado">
-              <Badge variant="dot" color={badgeColor} size="md" radius="xl" tt="capitalize">
-                {turno.estado}
-              </Badge>
+              <EstadoTurnoBadge estado={turno.estado} />
             </DetailRow>
             {reservadoEl && (
               <DetailRow label="Reservado el">
@@ -83,7 +81,7 @@ export function TurnoProDetailModal({ opened, onClose, onCancelRequest, turno })
       </Box>
       <Box px="lg" py="md">
         <Group justify="flex-end" gap="sm">
-          {turno.estado === 'activo' && (
+          {esCancelable(turno.estado) && (
             <Button variant="subtle" color="red" onClick={onCancelRequest}>Cancelar turno</Button>
           )}
           <Button variant="default" onClick={onClose}>Cerrar</Button>

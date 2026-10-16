@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useLocation } from "react-router-dom"
 import { PageHeader } from "../../../components/PageHeader.jsx"
-import { Stack, Group, SegmentedControl, Box, Alert, Loader } from "@mantine/core"
+import { Stack, Group, SegmentedControl, Box, Loader } from "@mantine/core"
 import { TurnoCard } from "./TurnoCard.jsx"
 import TurnosTable from "./TurnosTable.jsx"
 import { useQuery } from "@tanstack/react-query"
@@ -9,21 +9,22 @@ import { getTurnosClienteByDni } from "../../../api/clientes.js"
 import { useAuth } from "../../../hooks/useAuth.js"
 import { useIsDesktop } from "../../../hooks/useIsDesktop.js"
 import QueryError from "../../../components/QueryError.jsx"
+import { esAbierto } from "../../../utils/estadosTurno.js"
 export default function MisTurnos() {
   const { user } = useAuth()
 
   const { state } = useLocation()
-  const [estado, setEstado] = useState(state?.tab ?? 'activo')
+  const [estado, setEstado] = useState(state?.tab ?? 'proximos')
   const isDesktop = useIsDesktop()
 
-  const { data: [activos, pasados] = [[], []], isLoading, isError, error, refetch } = useQuery({
+  const { data: [proximos, historial] = [[], []], isLoading, isError, error, refetch } = useQuery({
     queryKey: ['turnos', user?.dni, ""],
     queryFn: () => getTurnosClienteByDni({ dni: user.dni, estado: "" }),
     enabled: !!user?.dni,
     select: (data) => {
       const now = new Date()
       return data.reduce(
-        ([activos, pasados], t) => {
+        ([proximos, historial], t) => {
           const baseDate = new Date(t.fecha_turno)
           const [h, m] = t.hora_turno.split(':')
           const turnoDate = new Date(
@@ -42,14 +43,17 @@ export default function MisTurnos() {
               month: 'short',
             }),
             hora_turno: t.hora_turno.slice(0, 5),
+            // A turno whose time already passed can no longer be cancelled by the client.
+            esPasado: turnoDate < now,
           }
 
-          if (t.estado === 'cancelado' || turnoDate < now) {
-            const estado = t.estado === 'cancelado' ? 'cancelado' : 'completado'
-            return [activos, [...pasados, { ...mapped, estado }]]
+          // "Próximos" = still open and not yet past; everything else is history,
+          // always showing the real estado from the API.
+          if (esAbierto(t.estado) && turnoDate >= now) {
+            return [[...proximos, mapped], historial]
           }
 
-          return [[...activos, mapped], pasados]
+          return [proximos, [...historial, mapped]]
         },
         [[], []]
       )
@@ -66,17 +70,10 @@ export default function MisTurnos() {
             radius="lg"
             value={estado}
             onChange={setEstado}
-            data={[{ label: 'Próximos', value: 'activo' }, { label: 'Historial', value: 'cancelado' }]}
-            disabled={!user}
+            data={[{ label: 'Próximos', value: 'proximos' }, { label: 'Historial', value: 'historial' }]}
           />
         )}
       />
-
-      {!user && (
-        <Alert color="yellow" mt="md">
-          Debes iniciar sesión para ver tus turnos
-        </Alert>
-      )}
 
       {isLoading && (
         <Group justify="center" mt="xl">
@@ -88,23 +85,23 @@ export default function MisTurnos() {
         <QueryError message={error?.message} onRetry={refetch} />
       )}
 
-      {user && !isLoading && !isError && (
+      {!isLoading && !isError && (
         <>
           {isDesktop && (
             <Box px={{ base: 0, md: 'xl' }}>
-              {estado === 'activo' ? (
-                <TurnosTable turno={activos} dni={user?.dni} />
+              {estado === 'proximos' ? (
+                <TurnosTable turno={proximos} dni={user?.dni} />
               ) : (
-                <TurnosTable turno={pasados} dni={user?.dni} />
+                <TurnosTable turno={historial} dni={user?.dni} />
               )}
             </Box>
           )}
 
           {!isDesktop && (
             <Stack gap="sm" pb={10}>
-              <SegmentedControl fullWidth size="md" radius="lg" value={estado} onChange={setEstado} data={[{ label: 'Próximos', value: 'activo' }, { label: 'Historial', value: 'cancelado' }]} />
-              {(estado === 'activo' ? activos : pasados).map((turno, index) => (
-                <TurnoCard key={index} turno={turno} estado={estado} />
+              <SegmentedControl fullWidth size="md" radius="lg" value={estado} onChange={setEstado} data={[{ label: 'Próximos', value: 'proximos' }, { label: 'Historial', value: 'historial' }]} />
+              {(estado === 'proximos' ? proximos : historial).map((turno, index) => (
+                <TurnoCard key={index} turno={turno} tab={estado} />
               ))}
             </Stack>
           )}

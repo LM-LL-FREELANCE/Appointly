@@ -1,10 +1,12 @@
 import { useState } from 'react'
-import { Badge, Box, Button, Divider, Drawer, Grid, Group, Paper, Stack, Text, Textarea } from '@mantine/core'
+import { Box, Button, Divider, Drawer, Grid, Group, Paper, Stack, Text, Textarea } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { IconAlertCircle } from '@tabler/icons-react'
 import { cancelTurnoById } from '../../api/clientes.js'
 import { fechaCorta, horaCorta } from '../../utils/fechas.utils.js'
+import { EstadoTurnoBadge } from '../../components/EstadoTurnoBadge.jsx'
+import { esCancelable } from '../../utils/estadosTurno.js'
 
 function DetailRow({ label, children }) {
   return (
@@ -40,8 +42,6 @@ export function DetalleTurnoProfMobile({ turno, dniProfesional, onVolver, onCanc
     },
   })
 
-  const badgeColor = turno.estado === 'activo' ? 'green' : turno.estado === 'cancelado' ? 'red' : 'gray'
-
   return (
     <>
       <Stack gap="md">
@@ -56,13 +56,11 @@ export function DetalleTurnoProfMobile({ turno, dniProfesional, onVolver, onCanc
             <Text fz="md" fw={600}>{horaCorta(turno.hora_turno)} hs</Text>
           </DetailRow>
           <DetailRow label="Estado">
-            <Badge variant="light" color={badgeColor} radius="xl" size="md" tt="uppercase">
-              {turno.estado}
-            </Badge>
+            <EstadoTurnoBadge estado={turno.estado} />
           </DetailRow>
         </Paper>
 
-        {turno.estado === 'activo' && (
+        {esCancelable(turno.estado) && (
           <Button variant="light" color="red" size="md" radius="md" fullWidth onClick={openDrawer}>
             Cancelar turno
           </Button>

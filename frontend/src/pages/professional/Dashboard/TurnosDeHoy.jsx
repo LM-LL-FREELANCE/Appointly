@@ -1,12 +1,8 @@
-import { Group, Text, Paper, Table, Badge, Anchor, Divider } from '@mantine/core'
+import { Group, Text, Paper, Table, Anchor, Divider } from '@mantine/core'
 import { Link } from 'react-router-dom'
 import { IconTable } from '@tabler/icons-react'
 import { UserAvatar } from '../../../components/UserAvatar.jsx'
-
-const estadoConfig = {
-  activo: { color: 'green', label: 'Activo' },
-  cancelado: { color: 'red', label: 'Cancelado' },
-}
+import { EstadoTurnoBadge } from '../../../components/EstadoTurnoBadge.jsx'
 
 export function TurnosDeHoy({ turnos = [] }) {
   return (
@@ -42,7 +38,6 @@ export function TurnosDeHoy({ turnos = [] }) {
           <Table verticalSpacing="sm">
             <Table.Tbody>
               {turnos.map((t) => {
-                const { color, label } = estadoConfig[t.estado] ?? { color: 'gray', label: t.estado }
                 return (
                   <Table.Tr key={t.id}>
                     <Table.Td w={80}>
@@ -61,16 +56,11 @@ export function TurnosDeHoy({ turnos = [] }) {
                       </Group>
                     </Table.Td>
                     <Table.Td visibleFrom="sm" />
-                    <Table.Td w={120} ta="center">
-                      <Badge
-                        variant="dot"
-                        color={color}
-                        radius="xl"
-                        tt="uppercase"
+                    <Table.Td w={220} ta="center">
+                      <EstadoTurnoBadge
+                        estado={t.estado}
                         style={{ minWidth: 90, justifyContent: 'center' }}
-                      >
-                        {label}
-                      </Badge>
+                      />
                     </Table.Td>
                   </Table.Tr>
                 )

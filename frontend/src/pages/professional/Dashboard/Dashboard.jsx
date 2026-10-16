@@ -12,6 +12,7 @@ import useSlots from '../../../hooks/useSlots.jsx'
 import { useIsDesktop } from '../../../hooks/useIsDesktop.js'
 import { IconChartBar } from '@tabler/icons-react'
 import QueryError from '../../../components/QueryError.jsx'
+import { esAbierto } from '../../../utils/estadosTurno.js'
 
 const DIA_LABEL = ['D', 'L', 'M', 'X', 'J', 'V', 'S']
 
@@ -22,7 +23,7 @@ function buildBarData(turnos) {
     const fecha = aISO(d)
     return {
       dia: DIA_LABEL[d.getDay()],
-      turnos: turnos.filter((t) => t.fecha_turno?.slice(0, 10) === fecha && t.estado === 'activo').length,
+      turnos: turnos.filter((t) => t.fecha_turno?.slice(0, 10) === fecha && esAbierto(t.estado)).length,
     }
   })
 }
@@ -88,8 +89,8 @@ export default function Dashboard() {
     refetchTurnos()
   }
 
-  const turnosHoy = turnos.filter((t) => t.fecha_turno?.slice(0, 10) === startDateISO && t.estado === 'activo').length
-  const estaSemana = turnos.filter((t) => t.estado === 'activo').length
+  const turnosHoy = turnos.filter((t) => t.fecha_turno?.slice(0, 10) === startDateISO && esAbierto(t.estado)).length
+  const estaSemana = turnos.filter((t) => esAbierto(t.estado)).length
   const cancelados7d = turnos.filter((t) => t.estado === 'cancelado').length
   const barData = buildBarData(turnos)
   const freeSlotsToday = slotData?.dias[0]?.slots.length ?? 0
@@ -108,7 +109,7 @@ export default function Dashboard() {
 
   const minAhora = new Date().getHours() * 60 + new Date().getMinutes()
   const proximoTurno = turnos.find((t) => {
-    if (t.estado !== 'activo') return false
+    if (!esAbierto(t.estado)) return false
     const fecha = t.fecha_turno?.slice(0, 10)
     if (fecha > startDateISO) return true
     if (fecha === startDateISO) {

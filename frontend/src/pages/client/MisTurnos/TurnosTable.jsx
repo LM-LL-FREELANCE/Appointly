@@ -6,6 +6,7 @@ import { TurnoDetailModal } from './TurnoDetailModal.jsx'
 import { CancelarTurnoModal } from './CancelarTurnoModal.jsx'
 import useCancelTurno from '../../../hooks/useCancelTurno.jsx'
 import { EstadoTurnoBadge } from '../../../components/EstadoTurnoBadge.jsx'
+import { esCancelable } from '../../../utils/estadosTurno.js'
 import { IconDotsVertical, IconEye, IconX } from '@tabler/icons-react'
 import { UserAvatar } from '../../../components/UserAvatar.jsx'
 
@@ -111,7 +112,7 @@ export default function TurnosTable({ turno }) {
                 Ver detalle
               </Menu.Item>
 
-              {item.estado === 'activo' && (
+              {esCancelable(item.estado) && !item.esPasado && (
                 <Menu.Item
                   color="red"
                   leftSection={<IconX size={14} />}
