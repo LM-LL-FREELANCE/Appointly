@@ -5,8 +5,14 @@ import { requireAuth } from "../middlewares/auth.middleware.js"
 
 export const turnosRouter = Router();
 
+const TODOS = ["cliente", "profesional", "admin"]
+const STAFF = ["profesional", "admin"]
+
 /* turnosRouter.get("/", requireAuth, grantAccess(["profesional"]), TurnosController.getAgenda) */ //working
-turnosRouter.get("/", requireAuth, grantAccess(["profesional"]), TurnosController.getTurnos) //working
-turnosRouter.get("/:id", requireAuth, grantAccess(["cliente", "profesional"]), TurnosController.getTurnoById) //working
-turnosRouter.post("/:id/cancelacion", requireAuth, grantAccess(["cliente", "profesional"]), TurnosController.cancelTurnoById) //working
-turnosRouter.post("/", requireAuth, grantAccess(["cliente", "profesional"]), TurnosController.crearTurno)//working
+turnosRouter.get("/", requireAuth, grantAccess(STAFF), TurnosController.getTurnos) //working
+turnosRouter.get("/eventos", requireAuth, grantAccess(STAFF), TurnosController.getEventos) // must stay before "/:id"
+turnosRouter.get("/:id", requireAuth, grantAccess(TODOS), TurnosController.getTurnoById) //working
+turnosRouter.get("/:id/eventos", requireAuth, grantAccess(STAFF), TurnosController.getEventosTurno)
+turnosRouter.patch("/:id/estado", requireAuth, grantAccess(TODOS), TurnosController.cambiarEstado)
+turnosRouter.post("/:id/cancelacion", requireAuth, grantAccess(TODOS), TurnosController.cancelTurnoById) //working
+turnosRouter.post("/", requireAuth, grantAccess(TODOS), TurnosController.crearTurno)//working
