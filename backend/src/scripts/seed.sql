@@ -123,10 +123,6 @@ INSERT INTO persona_rol (dni_persona, id_rol, correo, password_hash) VALUES
 (44902344, 1, 'rocio.figueroa@mail.com',    '$2b$10$3aKwowEcj3qxrox5ctRVxeS3t6Wvmali84NvMekl14kOklQvSzSGG');
 
 
--- Cuentas de prueba: todas activas (el default del schema es 'pendiente').
-UPDATE persona_rol SET estado = 'aprobado';
-
-
 -- profesional
 -- numero_matricula: matricula profesional provincial (ficticia).
 

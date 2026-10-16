@@ -48,17 +48,14 @@ CREATE TABLE persona (
 -- Como se autentica una persona en un rol. Una fila = una cuenta.
 -- PK compuesta (dni_persona, id_rol): una sola cuenta por persona y rol.
 -- UNIQUE (correo, id_rol): el mismo correo puede reusarse en otro rol.
--- estado: 'pendiente' = solicitud esperando aprobacion de un admin (no puede
--- iniciar sesion ni aparecer publicamente); 'aprobado' = cuenta activa. El
--- default es 'pendiente' a proposito (falla cerrado): quien crea la cuenta
--- decide explicitamente. cliente y admin (por invitacion) nacen 'aprobado'.
+-- No hay estado de aprobacion: cliente se registra solo, y profesional y admin
+-- se crean unicamente desde una invitacion, que ya es la autorizacion.
 
 CREATE TABLE persona_rol (
     dni_persona INT UNSIGNED NOT NULL,
     id_rol INT UNSIGNED NOT NULL,
     correo VARCHAR(255) NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
-    estado ENUM('pendiente', 'aprobado') NOT NULL DEFAULT 'pendiente',
     eliminado_en TIMESTAMP NULL DEFAULT NULL,
     creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     actualizado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

@@ -36,11 +36,15 @@ pnpm db:migrate migrations/001_estado_cuenta_e_invitacion.sql
 |---|---|---|
 | 001 | `001_estado_cuenta_e_invitacion.sql` | `persona_rol.estado` (`pendiente`/`aprobado`) reemplaza `profesional.estado_validacion`, asi el estado de aprobacion tambien aplica al admin. Agrega la tabla `invitacion` (token con hash, 24h, un solo uso) para altas de admin. Las cuentas existentes quedan `aprobado`, salvo profesionales no aprobados. |
 
-## Modelo de estados (desde 001)
+> **Obsoleta en parte**: `persona_rol.estado` se elimino despues (registro por
+> invitacion para profesional y admin), antes de que el modelo de aprobacion
+> llegara a ningun entorno real. No se agrego una migracion para quitarlo: una DB
+> que haya corrido la 001 solo tiene datos de prueba y se rehace con
+> `pnpm db:reset`. La tabla `invitacion` que crea la 001 sigue vigente.
 
-- `cliente`: nace `aprobado`.
-- `profesional`: nace `pendiente`; un admin lo aprueba o lo rechaza (el rechazo
-  borra la cuenta del rol).
-- `admin`: se crea solo por invitacion, nace `aprobado` (la invitacion ya es la
-  autorizacion).
-- Una cuenta `pendiente` no inicia sesion y su perfil no es publico.
+## Modelo de altas
+
+- `cliente`: se registra solo desde la web.
+- `profesional` y `admin`: se crean unicamente desde una invitacion que emite un
+  admin (token con hash, 24h, un solo uso). La invitacion es la autorizacion, asi
+  que la cuenta nace activa y no existe un estado de aprobacion.
