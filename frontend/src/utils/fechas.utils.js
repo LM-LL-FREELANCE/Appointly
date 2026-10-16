@@ -30,3 +30,35 @@ export const fechaCorta = (iso) =>
 
 // hora_turno viene con segundos ("09:00:00"); nos quedamos con HH:MM.
 export const horaCorta = (hora) => hora?.slice(0, 5);
+
+// Time zone of every time rule on turnos (same as the backend TIMEZONE).
+export const ZONA_HORARIA = 'America/Argentina/Buenos_Aires';
+
+const formatoZona = new Intl.DateTimeFormat('en-CA', {
+  timeZone: ZONA_HORARIA,
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  hourCycle: 'h23',
+});
+
+// Date and time of an instant in Buenos Aires: { fecha: 'YYYY-MM-DD', hora: 'HH:MM' }.
+export function ahoraEnZona(instante = new Date()) {
+  const p = Object.fromEntries(formatoZona.formatToParts(instante).map((x) => [x.type, x.value]));
+  return { fecha: `${p.year}-${p.month}-${p.day}`, hora: `${p.hour}:${p.minute}` };
+}
+
+// Calendar day (YYYY-MM-DD) of the fecha_turno the API returns ("2026-07-03T03:00:00.000Z").
+export const fechaISODeApi = (valor) => (valor ? String(valor).slice(0, 10) : '');
+
+const MESES_CORTOS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+
+// "15 jun 2026 · 10:30 hs" in Buenos Aires time, for timestamps such as creado_en.
+export function formatearFechaHoraEvento(iso) {
+  if (!iso) return '';
+  const { fecha, hora } = ahoraEnZona(new Date(iso));
+  const [anio, mes, dia] = fecha.split('-').map(Number);
+  return `${dia} ${MESES_CORTOS[mes - 1]} ${anio} · ${hora} hs`;
+}
