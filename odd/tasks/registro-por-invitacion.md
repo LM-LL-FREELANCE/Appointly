@@ -44,12 +44,12 @@ S15. `CLAUDE.md` and the `.http` files describe the new routes.
 
 | ID | Specs | Route | Commit |
 |----|-------|-------|--------|
-| T1 | S6 | inline | |
-| T2 | S4, S5, S11 | inline | |
-| T3 | S1, S3, S7, S8, S9, S10 | inline | |
-| T4 | S8, S14 | inline | |
-| T5 | S12, S13 | inline | |
-| T6 | S15 + manual verification | inline | |
+| T1 | S6 | inline | `c207014` |
+| T2 | S4, S5, S11 | inline | `1912dfc` |
+| T3 | S1, S3, S7, S8, S9, S10 | inline | `2181f29` |
+| T4 | S8, S14 | inline | `e1265d0` |
+| T5 | S12, S13 | inline | `f8f09c3` |
+| T6 | S15 + manual verification | inline | `05e842b` |
 
 ## Log
 
