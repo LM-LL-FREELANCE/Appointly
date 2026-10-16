@@ -27,9 +27,9 @@ import useGetErrosMsg from '../hooks/useGetErrosMsg.jsx'
 import { HOME_BY_ROLE } from '../utils/roles.js'
 
 // Login screen shared by the roles that sign in outside the patient flow.
-// Only profesional can request an account from here; admins join by invitation.
+// Both profesional and admin join exclusively by invitation.
 const ROLE_CONFIG = {
-  profesional: { signupPath: '/professional-signup' },
+  profesional: { signupPath: null },
   admin: { signupPath: null },
 }
 
@@ -158,7 +158,7 @@ export default function RoleLogin({ role = 'profesional' }) {
 
           {loginError ? (
             <Text c="red" size="sm" mt="md" ta="center">
-              {loginError.code === 'ACCOUNT_PENDING' ? errorMessage('ACCOUNT_PENDING') : 'Credenciales no válidas'}
+              Credenciales no válidas
             </Text>
           ) : (
             <Text mb={51}></Text>

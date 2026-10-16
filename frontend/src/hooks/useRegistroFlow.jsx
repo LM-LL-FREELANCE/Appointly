@@ -5,15 +5,15 @@ import useRegistroNotifications from './useRegistroNotifications.jsx'
 
 /**
  * Shared submit logic for every registration screen.
- * - cliente / profesional: POST /api/auth/registro with the role in the body.
- * - admin: accepts the invitation `token` (the account is created from it).
+ * - cliente: POST /api/auth/registro.
+ * - profesional / admin: accepts the invitation `token`.
  * The screen only decides what happens on success.
  */
-export default function useRegistroFlow({ role, token }) {
+export default function useRegistroFlow({ role = 'cliente', token }) {
   const { showLoading, showError } = useRegistroNotifications()
 
   const mutation = useMutation({
-    mutationFn: (payload) => (role === 'admin'
+    mutationFn: (payload) => (token
       ? aceptarInvitacion({ token, data: payload })
       : registrarCuenta({ ...payload, role })),
     meta: { silent: true },

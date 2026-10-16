@@ -28,13 +28,21 @@ export default function AdminInvitation() {
 
   if (isPending) return <Center mih="100vh"><Loader size="xl" /></Center>
 
-  if (invalid) {
+  const rolIncompatible = invitacion && invitacion.role !== 'admin'
+
+  if (invalid || rolIncompatible) {
     return (
       <Screen>
         <Stack align="center" gap="md" ta="center">
           <Title order={2} size="h3">No pudimos usar esta invitación</Title>
-          <Text c="dimmed">{errorMessage(invalid.code)}</Text>
-          <Button onClick={() => navigate('/admin-login')}>Ir a iniciar sesión</Button>
+          <Text c="dimmed">
+            {rolIncompatible
+              ? 'Este enlace corresponde a una invitación de profesional, no de administrador.'
+              : errorMessage(invalid?.code)}
+          </Text>
+          <Button onClick={() => navigate(rolIncompatible ? `/registro/profesional/${token}` : '/admin-login')}>
+            {rolIncompatible ? 'Ir al registro de profesional' : 'Ir a iniciar sesión'}
+          </Button>
         </Stack>
       </Screen>
     )
