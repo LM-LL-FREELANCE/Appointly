@@ -7,14 +7,12 @@ import { SALT_ROUNDS } from "../config/constants.js"
 
 /**
  * Per-role registration rules. Adding a role means adding one entry here:
- * - estadoInicial: 'aprobado' = active right away, 'pendiente' = waits for an admin.
  * - validar: role-specific checks that run before the transaction.
  * - insertPerfil: writes the role's subtype row (if any) inside the transaction.
  * - extra: role-specific fields echoed back in the response.
  */
 const ROLES = {
   cliente: {
-    estadoInicial: "aprobado",
     async validar({ id_obra_social }) {
       if (id_obra_social != null && !(await ObraSocialesModel.existe({ id_obra_social }))) {
         throw new AppError("La obra social indicada no existe.", 422, "REFERENCE_NOT_FOUND")
@@ -24,7 +22,6 @@ const ROLES = {
     extra: ({ id_obra_social }) => ({ id_obra_social: id_obra_social ?? null }),
   },
   profesional: {
-    estadoInicial: "aprobado", // only created through an invitation, which is the authorization
     async validar({ numero_matricula }) {
       if (await AuthModel.existeMatricula({ numero_matricula })) {
         throw new AppError("Ya existe una cuenta con esa matrícula.", 409, "DUPLICATE_MATRICULA")
@@ -34,7 +31,6 @@ const ROLES = {
     extra: ({ numero_matricula }) => ({ numero_matricula }),
   },
   admin: {
-    estadoInicial: "aprobado", // only created through an invitation, which is the authorization
     async validar() {},
     insertPerfil: async () => {}, // admin has no subtype table
     extra: () => ({}),
@@ -95,14 +91,13 @@ export class AccountService {
     }
 
     const password_hash = await bcrypt.hash(password, SALT_ROUNDS)
-    const estado = rules.estadoInicial
 
     try {
       await withTransaction(async (db) => {
         await inTransaction?.(db)
         // For an existing person the stored personal data is kept untouched.
         if (!personaExistente) await AuthModel.insertPersona(data, db)
-        await AuthModel.insertCuenta({ dni, correo, password_hash, role, estado }, db)
+        await AuthModel.insertCuenta({ dni, correo, password_hash, role }, db)
         await rules.insertPerfil(data, db)
       })
     } catch (error) {
@@ -115,7 +110,6 @@ export class AccountService {
       apellido: personaExistente?.apellido ?? data.apellido,
       correo,
       role,
-      estado,
       ...rules.extra(data),
     }
   }

@@ -13,12 +13,6 @@ export class AuthService {
 
     if (!isMatch) throw new AppError("Credenciales inválidas", 401, "INVALID_CREDENTIALS")
 
-    // Checked after the password on purpose: the account state is only revealed
-    // to someone who proved they know the credentials.
-    if (userFound.estado !== "aprobado") {
-      throw new AppError("Tu cuenta todavía está pendiente de aprobación.", 403, "ACCOUNT_PENDING")
-    }
-
     if (typeof userFound.role !== "string" || userFound.role.length === 0) {
       throw new AppError("No se pudo determinar el rol de la cuenta.", 500, "ROLE_RESOLUTION_FAILED")
     }
@@ -46,7 +40,7 @@ export class AuthService {
     if (!isKnownRole(role)) return null
 
     const userFound = await AuthModel.findCredentialsByDniAndRole(dni, role)
-    if (!userFound || userFound.estado !== "aprobado") return null
+    if (!userFound) return null
 
     return {
       dni: userFound.dni,

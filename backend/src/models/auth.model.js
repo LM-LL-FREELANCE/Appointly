@@ -10,7 +10,6 @@ export class AuthModel {
             p.apellido,
             p.foto_url,
             pr.password_hash,
-            pr.estado,
             r.nombre AS role
           FROM persona_rol pr
           INNER JOIN persona p 
@@ -71,14 +70,13 @@ export class AuthModel {
     return rows[0] ?? null
   }
 
-  // Active (approved, not deleted) accounts of a person: used to prove identity
+  // Active (not deleted) accounts of a person: used to prove identity
   // when a DNI that already exists registers a new role.
   static async getCuentasActivas(dni, db = pool) {
     const [rows] = await db.query(`
       SELECT pr.password_hash
         FROM persona_rol pr
         WHERE pr.dni_persona = ?
-          AND pr.estado = 'aprobado'
           AND pr.eliminado_en IS NULL
       `, [dni])
 
@@ -98,13 +96,13 @@ export class AuthModel {
       `, [dni, nombre, apellido, fecha_nacimiento, genero, telefono ?? null])
   }
 
-  static async insertCuenta({ dni, correo, password_hash, role, estado }, db) {
+  static async insertCuenta({ dni, correo, password_hash, role }, db) {
     await db.query(`
       INSERT INTO persona_rol
-        (dni_persona, correo, password_hash, estado, id_rol)
+        (dni_persona, correo, password_hash, id_rol)
       VALUES
-        (?,?,?,?, (SELECT id_rol FROM rol WHERE nombre = ?))
-      `, [dni, correo, password_hash, estado, role])
+        (?,?,?, (SELECT id_rol FROM rol WHERE nombre = ?))
+      `, [dni, correo, password_hash, role])
   }
 
   static async insertPerfilCliente({ dni, id_obra_social, numero_afiliado }, db) {

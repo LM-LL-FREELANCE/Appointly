@@ -2,25 +2,19 @@ import { AppError } from "../utils/AppError.js"
 import { passwordsSchema } from "../schemas/auth.schema.js"
 import { AuthService } from "../services/auth.service.js"
 import { AccountService } from "../services/account.service.js"
-import { bestEffort } from "../utils/bestEffort.js"
 import { cookieOptions } from "../validators/cookieOptions.js"
 import { EmailMethods } from "../emails/email.methods.js"
 
 export class AuthController {
-  // Public registration for every role that can self-register. The body is
+  // Public registration for client accounts. The body is
   // already validated by the route (see registerSchema).
   static async register(req, res, next) {
     try {
-      const { role, ...data } = req.body
+      const { role = "cliente", ...data } = req.body
 
       const account = await AccountService.register({ role, data })
 
-      // A professional only files a request: acknowledge it by email.
-      if (account.estado === "pendiente") {
-        bestEffort(() => EmailMethods.solicitudRecibida({ correo: account.correo, nombre: account.nombre }))
-      }
-
-      res.set("Location", `/api/${role === "cliente" ? "clientes" : "profesionales"}/${account.dni}`)
+      res.set("Location", `/api/clientes/${account.dni}`)
       return res.status(201).json(account)
 
     } catch (error) {

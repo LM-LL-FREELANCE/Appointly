@@ -34,24 +34,17 @@ const clienteShape = {
   numero_afiliado: z.string().trim().max(30).nullish(),
 }
 
-const profesionalShape = {
-  ...baseAccountShape,
-  role: z.literal("profesional"),
-  numero_matricula: z.string().trim().min(1, "La matrícula es obligatoria").max(30),
-}
-
-// Public registration. `role` defaults to "cliente" so existing clients of the
-// endpoint (which never sent it) keep working. Admin accounts are NOT here:
-// they are only created through an invitation.
+// Public registration: only `cliente` can self-register. Profesional and admin
+// accounts are created exclusively through invitations.
 export const registerSchema = z.preprocess(
   (body) => (body && typeof body === "object" && !("role" in body) ? { ...body, role: "cliente" } : body),
-  z.discriminatedUnion("role", [
-    z.strictObject(clienteShape),
-    z.strictObject(profesionalShape),
-  ])
+  z.strictObject({
+    ...clienteShape,
+    role: z.literal("cliente"),
+  })
     .refine(passwordsMatch, passwordsMatchError)
     .refine((data) => {
-      if (data.role !== "cliente" || !data.numero_afiliado) return true
+      if (!data.numero_afiliado) return true
       return data.id_obra_social != null
     }, {
       error: "El número de afiliado requiere una obra social",
