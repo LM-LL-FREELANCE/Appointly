@@ -22,6 +22,12 @@ export const cambiarEstadoSchema = z.object({
 })
 
 
+// Cancel body: motivo is optional, trimmed, at most 255 chars (turno.motivo_cancelacion is
+// VARCHAR(255)); an empty or blank one is stored as NULL.
+export const cancelarTurnoSchema = z.object({
+  motivo: z.string().trim().max(255).nullish().transform((m) => m || null),
+})
+
 const esFechaReal = (s) => fechaEnDias(0, s) === s // rejects 2030-02-30 (Date would roll it over)
 
 export const reprogramarTurnoSchema = z.object({

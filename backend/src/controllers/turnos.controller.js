@@ -4,7 +4,7 @@ import { HorariosModel } from "../models/horarios.model.js"
 import { ProfesionalesModel } from "../models/profesionales.model.js"
 import { calcularSlotsDisponibles, slotsDelDia } from "../utils/helperSlots.js"
 import { ESTADOS_TURNO, MAX_RANGE_DAYS, SLOT_DURATION_MIN } from "../config/constants.js"
-import { crearTurnoSchema, cambiarEstadoSchema, reprogramarTurnoSchema } from "../schemas/turno.schema.js"
+import { crearTurnoSchema, cambiarEstadoSchema, reprogramarTurnoSchema, cancelarTurnoSchema } from "../schemas/turno.schema.js"
 import { ClientesModel } from "../models/clientes.model.js"
 import { AppError } from "../utils/AppError.js"
 
@@ -157,10 +157,15 @@ export class TurnosController {
     const { id } = req.params
     const requesterDni = req.user.dni
     const requesterRol = req.user.role
-    const { motivo } = req.body ?? {}
 
     try {
-      const turno = await TurnosService.cancelTurnoById(id, requesterDni, requesterRol, motivo)
+      const parsed = cancelarTurnoSchema.safeParse(req.body ?? {})
+
+      if (!parsed.success) {
+        throw new AppError('invalid', 400, 'VALIDATION_FAILED', parsed.error.flatten().fieldErrors);
+      }
+
+      const turno = await TurnosService.cancelTurnoById(id, requesterDni, requesterRol, parsed.data.motivo)
       res.status(200).json(turno)
     } catch (err) {
       next(err)
@@ -232,10 +237,6 @@ export class TurnosController {
 
       if (!slotsDelDia({ horarios: horarios, fecha: fecha_turno }).includes(hora_turno)) {
         throw new AppError('the horarios is out of the profesional', 409, 'OUT_OF_SCHEDULE');
-      }
-
-      if (await TurnosModel.existeOcupado({ dni: dni_profesional, fecha: fecha_turno, hora: hora_turno })) {
-        throw new AppError('that turno has just been taken', 409, 'SLOT_TAKEN');
       }
 
       const idTurno = await TurnosService.crearTurno({ dni_profesional, dni_cliente, fecha_turno, hora_turno, actor: req.user })

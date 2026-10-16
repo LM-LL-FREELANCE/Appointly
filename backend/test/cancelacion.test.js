@@ -184,6 +184,64 @@ test("cancel: a concurrent change after the read is 409 STATE_CHANGED and writes
   }
 })
 
+// --- cancel motivo validation ---------------------------------------------------------
+
+test("cancel: a motivo longer than 255 characters is 400 VALIDATION_FAILED on motivo and changes nothing", async () => {
+  const id = await t.insertTurno({ ...futuro(), estado: "confirmado" })
+  const turnosAntes = (await t.pool.query("SELECT COUNT(*) AS n FROM turno_evento"))[0][0].n
+
+  const res = await cancelar(id, "cliente", { motivo: "x".repeat(256) })
+
+  assertError(res, 400, "VALIDATION_FAILED")
+  assert.ok(res.body.fieldErrors.motivo, "fieldErrors names motivo")
+  const fila = await t.getTurno(id)
+  assert.equal(fila.estado, "confirmado")
+  assert.equal(fila.motivo_cancelacion, null)
+  assert.equal(fila.cancelado_en, null)
+  assert.deepEqual(await t.getEventos(id), [])
+  assert.equal((await t.pool.query("SELECT COUNT(*) AS n FROM turno_evento"))[0][0].n, turnosAntes)
+})
+
+test("cancel: a motivo of exactly 255 characters is accepted and stored in full", async () => {
+  const id = await t.insertTurno({ ...futuro(), estado: "confirmado" })
+  const motivo = "m".repeat(255)
+
+  const res = await cancelar(id, "profesional", { motivo })
+
+  assert.equal(res.status, 200)
+  assert.equal(res.body.motivo_cancelacion, motivo)
+  assert.equal((await t.getTurno(id)).motivo_cancelacion, motivo)
+  assert.equal((await t.getEventos(id))[0].motivo, motivo)
+})
+
+test("cancel: motivo is trimmed, and an empty or blank one is stored as NULL", async () => {
+  const recortado = await t.insertTurno({ ...futuro(), estado: "confirmado" })
+  const vacio = await t.insertTurno({ ...futuro(), estado: "confirmado" })
+  const nulo = await t.insertTurno({ ...futuro(), estado: "confirmado" })
+
+  assert.equal((await cancelar(recortado, "cliente", { motivo: "  Me mudo  " })).status, 200)
+  assert.equal((await cancelar(vacio, "cliente", { motivo: "   " })).status, 200)
+  assert.equal((await cancelar(nulo, "cliente", { motivo: null })).status, 200)
+
+  assert.equal((await t.getTurno(recortado)).motivo_cancelacion, "Me mudo")
+  assert.equal((await t.getEventos(recortado))[0].motivo, "Me mudo")
+  for (const id of [vacio, nulo]) {
+    assert.equal((await t.getTurno(id)).motivo_cancelacion, null)
+    assert.equal((await t.getEventos(id))[0].motivo, null)
+  }
+})
+
+test("cancel: a non-string motivo is 400 VALIDATION_FAILED and changes nothing", async () => {
+  const id = await t.insertTurno({ ...futuro(), estado: "confirmado" })
+
+  const res = await cancelar(id, "cliente", { motivo: { texto: "hola" } })
+
+  assertError(res, 400, "VALIDATION_FAILED")
+  assert.ok(res.body.fieldErrors.motivo)
+  assert.equal((await t.getTurno(id)).estado, "confirmado")
+  assert.deepEqual(await t.getEventos(id), [])
+})
+
 // --- GET /api/turnos/:id -----------------------------------------------------------------
 
 test("GET /:id (previous behavior): the cliente and the profesional of the turno read it", async () => {

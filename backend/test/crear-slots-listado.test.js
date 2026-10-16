@@ -139,6 +139,61 @@ for (const [i, estado] of LIBERAN.entries()) {
   })
 }
 
+// --- concurrency: crear takes the professional lock and re-checks the slot inside the transaction ---
+
+const LUNES_CARRERA = proximoDiaSemana(1, 70)
+let ronda = 0
+/** A free Monday 19:30 slot nobody else uses: a fresh week per call. */
+const slotDeCarrera = () => ({ fecha_turno: fechaEnDias(7 * ronda++, LUNES_CARRERA), hora_turno: "19:30" })
+const contarEventosDeSlot = async (fecha, hora) => {
+  const [[{ n }]] = await t.pool.query(
+    `SELECT COUNT(*) AS n FROM turno_evento e JOIN turno tu ON tu.id_turno = e.id_turno
+     WHERE tu.dni_profesional = ? AND tu.fecha_turno = ? AND tu.hora_turno = ? AND tu.estado = 'confirmado'`,
+    [PROF, fecha, hora],
+  )
+  return n
+}
+
+test("crear: two simultaneous creates for the same free slot -> exactly one 201, the other 409 SLOT_TAKEN", async () => {
+  for (let i = 0; i < 10; i++) {
+    const destino = slotDeCarrera()
+    const body = { dni_profesional: PROF, ...destino }
+
+    const [a, b] = await Promise.all([
+      t.api("POST", "/api/turnos", { as: { dni: CLIENTE, role: "cliente" }, body }),
+      t.api("POST", "/api/turnos", { as: { dni: OTRO_CLIENTE, role: "cliente" }, body }),
+    ])
+
+    const ganador = [a, b].find((r) => r.status === 201)
+    const perdedor = [a, b].find((r) => r.status !== 201)
+    assert.ok(ganador && perdedor, `round ${i}: statuses ${a.status}/${b.status}`)
+    assertError(perdedor, 409, "SLOT_TAKEN")
+    assert.equal(perdedor.body.message, "that turno has just been taken")
+    assert.equal(await contarTurnos(PROF, destino.fecha_turno, "19:30:00"), 1, `round ${i}: one turno row`)
+    assert.equal(await contarEventosDeSlot(destino.fecha_turno, "19:30:00"), 1, `round ${i}: one initial event`)
+  }
+})
+
+test("crear racing a reprogramacion to the same free slot -> exactly one wins, the other is 409 SLOT_TAKEN", async () => {
+  for (let i = 0; i < 10; i++) {
+    const destino = slotDeCarrera()
+    const original = await t.insertTurno({ fecha: fechaEnDias(3), hora: "10:00", estado: "confirmado", cliente: OTRO_CLIENTE })
+
+    const [creacion, reprogramacion] = await Promise.all([
+      t.api("POST", "/api/turnos", { as: { dni: CLIENTE, role: "cliente" }, body: { dni_profesional: PROF, ...destino } }),
+      t.api("POST", `/api/turnos/${original}/reprogramacion`, { as: ACTORES.profesional, body: destino }),
+    ])
+
+    const resultados = [creacion, reprogramacion]
+    assert.equal(resultados.filter((r) => r.status === 201).length, 1, `round ${i}: statuses ${creacion.status}/${reprogramacion.status}`)
+    assertError(resultados.find((r) => r.status !== 201), 409, "SLOT_TAKEN")
+    assert.equal(await contarTurnos(PROF, destino.fecha_turno, "19:30:00"), 1, `round ${i}: one turno row`)
+    // If the create lost, the original must be untouched; if the reprogramacion lost, too.
+    const fila = await t.getTurno(original)
+    assert.equal(fila.estado, reprogramacion.status === 201 ? "reprogramado" : "confirmado")
+  }
+})
+
 const slotsDelLunes = async (fecha = LUNES_SLOTS) => {
   const res = await t.api("GET", `/api/profesionales/${PROF}/slots?desde=${fecha}&hasta=${fecha}`, { as: ACTORES.cliente })
   assert.equal(res.status, 200)

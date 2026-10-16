@@ -264,9 +264,19 @@ export class TurnosService {
     return { original, nuevo }
   }
 
-  /** Creates a `confirmado` turno and its initial event (estado_anterior NULL) atomically. */
+  /**
+   * Creates a `confirmado` turno and its initial event (estado_anterior NULL) atomically.
+   * Takes the professional's row lock first and re-checks the slot under it, so concurrent
+   * creates (or a create racing a reprogramación) cannot book the same slot.
+   */
   static async crearTurno({ dni_profesional, dni_cliente, fecha_turno, hora_turno, actor }) {
     return withTransaction(async (conn) => {
+      await TurnosModel.lockProfesional(dni_profesional, conn)
+
+      if (await TurnosModel.existeOcupado({ dni: dni_profesional, fecha: fecha_turno, hora: hora_turno }, conn)) {
+        throw new AppError("that turno has just been taken", 409, "SLOT_TAKEN")
+      }
+
       const id = await TurnosModel.crearTurno({ dni_profesional, dni_cliente, fecha_turno, hora_turno }, conn)
 
       await TurnosModel.insertEvento({

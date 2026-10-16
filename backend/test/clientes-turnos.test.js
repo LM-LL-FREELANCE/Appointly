@@ -74,3 +74,24 @@ test("client activos: /turnos/activos keeps its URL and returns the open states"
     assert.ok(campo in res.body.data[0], `missing field ${campo}`)
   }
 })
+
+test("client activos: another cliente is 403 FORBIDDEN and gets no data", async () => {
+  // CLIENTE is a logged-in cliente asking for the open turnos of CLIENTE_AISLADO.
+  const res = await t.api("GET", `/api/clientes/${CLIENTE_AISLADO}/turnos/activos`, { as: { dni: CLIENTE, role: "cliente" } })
+
+  assertError(res, 403, "FORBIDDEN")
+  assert.equal(res.body.message, "No tienes permiso para realizar esta acción")
+  assert.equal("data" in res.body, false)
+  assert.equal(JSON.stringify(res.body).includes("id_turno"), false, "no turno data leaks")
+})
+
+test("client activos (previous behavior): the owner without turnos keeps getting the generic 500", async () => {
+  const DNI = 10000003
+  await t.pool.query("INSERT INTO persona (dni_persona, nombre, apellido, fecha_nacimiento, genero) VALUES (?, 'Vacio', 'Sin Turnos', '1990-01-01', 'X')", [DNI])
+  await t.pool.query("INSERT INTO persona_rol (dni_persona, id_rol, correo, password_hash) VALUES (?, 1, 'vacio@test.dev', 'x')", [DNI])
+  await t.pool.query("INSERT INTO cliente (dni_cliente) VALUES (?)", [DNI])
+
+  const res = await t.api("GET", `/api/clientes/${DNI}/turnos/activos`, { as: { dni: DNI, role: "cliente" } })
+
+  assertError(res, 500, "INTERNAL_ERROR")
+})
