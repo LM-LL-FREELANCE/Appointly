@@ -10,7 +10,6 @@ import {
   IconSearch,
   IconCalendarPlus,
   IconCalendarEvent,
-  IconUserCheck,
   IconMailPlus,
 } from '@tabler/icons-react'
 import { useAuth } from './hooks/useAuth.js'
@@ -37,7 +36,6 @@ const User = lazy(() => import('./pages/User.jsx'))
 const MiPerfil = lazy(() => import('./pages/MiPerfil.jsx'))
 const Inicio = lazy(() => import('./pages/Inicio.jsx'))
 const AdminInicio = lazy(() => import('./pages/admin/AdminInicio.jsx'))
-const AdminSolicitudes = lazy(() => import('./pages/admin/AdminSolicitudes.jsx'))
 const AdminInvitaciones = lazy(() => import('./pages/admin/AdminInvitaciones.jsx'))
 const AdminConfiguracion = lazy(() => import('./pages/admin/AdminConfiguracion.jsx'))
 
@@ -56,7 +54,6 @@ export default function App() {
 
   const linksForAdmin = [
     { label: "Inicio", path: "/admin", element: <AdminInicio />, icon: IconLayoutDashboard },
-    { label: "Solicitudes", path: "/admin/solicitudes", element: <AdminSolicitudes />, icon: IconUserCheck },
     { label: "Invitaciones", path: "/admin/invitaciones", element: <AdminInvitaciones />, icon: IconMailPlus },
   ]
   // "Configuración" is not listed here: the sidebar footer already links to it

@@ -1,4 +1,4 @@
-import { Badge, Button, Center, Group, Loader, Paper, ScrollArea, SimpleGrid, Stack, Table, Text, TextInput } from '@mantine/core'
+import { Badge, Button, Center, Group, Loader, Paper, ScrollArea, Select, SimpleGrid, Stack, Table, Text, TextInput } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { notifications } from '@mantine/notifications'
 import { IconCheck, IconMailPlus } from '@tabler/icons-react'
@@ -23,10 +23,11 @@ export default function AdminInvitaciones() {
 
   const form = useForm({
     mode: 'uncontrolled',
-    initialValues: { dni: '', correo: '' },
+    initialValues: { dni: '', correo: '', role: 'profesional' },
     validate: {
       dni: (v) => (/^\d{7,8}$/.test(v.trim()) ? null : 'El DNI debe tener 7 u 8 dígitos'),
       correo: (v) => (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) ? null : 'Formato de email incorrecto'),
+      role: (v) => (v === 'profesional' || v === 'admin' ? null : 'Seleccioná un rol válido'),
     },
   })
 
@@ -34,8 +35,8 @@ export default function AdminInvitaciones() {
     notifications.show({ color: 'red', title, message: errorMessage(err.code), position: 'top-right' })
 
   // `dni` can be a number (rows from the API) or a string (the form).
-  const invitar = ({ dni, correo }, { reset = false } = {}) => crear(
-    { dni: String(dni).trim(), correo: correo.trim() },
+  const invitar = ({ dni, correo, role = 'profesional' }, { reset = false } = {}) => crear(
+    { dni: String(dni).trim(), correo: correo.trim(), role },
     {
       onSuccess: () => {
         if (reset) form.reset()
@@ -59,11 +60,12 @@ export default function AdminInvitaciones() {
     content = (
       <Paper withBorder radius="md">
         <ScrollArea>
-          <Table verticalSpacing="sm" highlightOnHover miw={680}>
+          <Table verticalSpacing="sm" highlightOnHover miw={760}>
             <Table.Thead>
               <Table.Tr>
                 <Table.Th>DNI</Table.Th>
                 <Table.Th>Correo</Table.Th>
+                <Table.Th>Rol</Table.Th>
                 <Table.Th>Enviada</Table.Th>
                 <Table.Th>Vence</Table.Th>
                 <Table.Th>Estado</Table.Th>
@@ -78,6 +80,11 @@ export default function AdminInvitaciones() {
                   <Table.Tr key={inv.id}>
                     <Table.Td>{inv.dni}</Table.Td>
                     <Table.Td>{inv.correo}</Table.Td>
+                    <Table.Td>
+                      <Badge variant="outline" color={inv.role === 'admin' ? 'violet' : 'teal'}>
+                        {inv.role === 'admin' ? 'Admin' : 'Profesional'}
+                      </Badge>
+                    </Table.Td>
                     <Table.Td>{formatFechaHora(inv.creada_en)}</Table.Td>
                     <Table.Td>{formatFechaHora(inv.expira_en)}</Table.Td>
                     <Table.Td><Badge variant="light" color={badge.color}>{badge.label}</Badge></Table.Td>
@@ -108,13 +115,24 @@ export default function AdminInvitaciones() {
 
   return (
     <>
-      <PageHeader title="Invitaciones" subtitle="Invitá a una persona a ser administradora. El enlace vale 24 horas y se usa una sola vez." />
+      <PageHeader title="Invitaciones" subtitle="Invitá a una persona a ser profesional o administradora. El enlace vale 24 horas y se usa una sola vez." />
       <Stack gap="lg">
         <Paper withBorder radius="md" p="md">
           <form onSubmit={form.onSubmit((values) => invitar(values, { reset: true }))} noValidate>
-            <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md" style={{ alignItems: 'flex-end' }}>
+            <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing="md" style={{ alignItems: 'flex-end' }}>
               <TextInput label="DNI" placeholder="Ej: 12345678" required key={form.key('dni')} {...form.getInputProps('dni')} />
               <TextInput label="Correo" placeholder="Ej: persona@correo.com" required key={form.key('correo')} {...form.getInputProps('correo')} />
+              <Select
+                label="Rol"
+                data={[
+                  { value: 'profesional', label: 'Profesional' },
+                  { value: 'admin', label: 'Administrador' },
+                ]}
+                required
+                allowDeselect={false}
+                key={form.key('role')}
+                {...form.getInputProps('role')}
+              />
               <Button type="submit" leftSection={<IconMailPlus size={18} />} loading={isCreating}>Enviar invitación</Button>
             </SimpleGrid>
           </form>
