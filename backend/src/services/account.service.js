@@ -24,7 +24,7 @@ const ROLES = {
     extra: ({ id_obra_social }) => ({ id_obra_social: id_obra_social ?? null }),
   },
   profesional: {
-    estadoInicial: "pendiente",
+    estadoInicial: "aprobado", // only created through an invitation, which is the authorization
     async validar({ numero_matricula }) {
       if (await AuthModel.existeMatricula({ numero_matricula })) {
         throw new AppError("Ya existe una cuenta con esa matrícula.", 409, "DUPLICATE_MATRICULA")

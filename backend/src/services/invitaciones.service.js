@@ -7,38 +7,47 @@ import { AppError } from "../utils/AppError.js"
 import { INVITACION_TTL_HORAS } from "../config/constants.js"
 import { datosPersonaSchema } from "../schemas/invitacion.schema.js"
 
-const ROL = "admin"
+const ROLES_INVITABLES = ["admin", "profesional"]
 
 // Only the hash is stored: a leaked database does not leak usable links.
 const hashToken = (token) => createHash("sha256").update(token).digest("hex")
 
 export class InvitacionesService {
   /**
-   * Creates an admin invitation bound to a DNI and a correo and returns the
-   * plain token (shown only once, to be sent to that correo). Re-inviting the
-   * same DNI revokes its previous pending invitations.
+   * Creates an invitation bound to a DNI, a correo and a role (profesional | admin),
+   * and returns the plain token (shown only once, to be sent to that correo).
+   * Re-inviting the same DNI for the same role revokes previous pending invitations.
    */
-  static async emitir({ dni, correo, creadoPor = null }) {
-    if (await AuthModel.existeCuenta({ dni, role: ROL })) {
-      throw new AppError("Esa persona ya tiene una cuenta de administrador.", 409, "ADMIN_ALREADY_EXISTS")
+  static async emitir({ dni, correo, role = "admin", creadoPor = null }) {
+    if (!ROLES_INVITABLES.includes(role)) {
+      throw new AppError("Rol de invitación inválido.", 400, "BAD_REQUEST")
     }
 
-    if (await AuthModel.existeCorreo({ correo, role: ROL })) {
-      throw new AppError("Ya existe una cuenta de administrador con ese correo.", 409, "DUPLICATE_EMAIL")
+    if (await AuthModel.existeCuenta({ dni, role })) {
+      const msg = role === "admin"
+        ? "Esa persona ya tiene una cuenta de administrador."
+        : "Esa persona ya tiene una cuenta de profesional."
+      const code = role === "admin" ? "ADMIN_ALREADY_EXISTS" : "PROFESIONAL_ALREADY_EXISTS"
+      throw new AppError(msg, 409, code)
     }
 
-    await InvitacionesModel.revokePendientesByDni(dni)
+    if (await AuthModel.existeCorreo({ correo, role })) {
+      throw new AppError("Ya existe una cuenta con ese correo para ese rol.", 409, "DUPLICATE_EMAIL")
+    }
+
+    await InvitacionesModel.revokePendientesByDni(dni, role)
 
     const token = randomBytes(32).toString("base64url")
     const id = await InvitacionesModel.insert({
       tokenHash: hashToken(token),
       dni,
       correo,
+      role,
       creadoPor,
       ttlHoras: INVITACION_TTL_HORAS,
     })
 
-    return { id, token, dni, correo, horas: INVITACION_TTL_HORAS }
+    return { id, token, dni, correo, role, horas: INVITACION_TTL_HORAS }
   }
 
   static list() {
@@ -59,19 +68,19 @@ export class InvitacionesService {
     return {
       dni: invitacion.dni,
       correo: invitacion.correo,
-      role: ROL,
+      role: invitacion.role,
       persona: persona ? { nombre: persona.nombre, apellido: persona.apellido } : null,
     }
   }
 
   /**
-   * Creates the admin account and consumes the token in ONE transaction: if
+   * Creates the account and consumes the token in ONE transaction: if
    * anything fails the token stays valid, and two requests with the same token
    * can never both succeed.
    */
   static async aceptar(token, { password, ...personal }) {
     const invitacion = await InvitacionesService.#findValida(token)
-    const { dni, correo } = invitacion
+    const { dni, correo, role } = invitacion
     const persona = await AuthModel.getPersona(dni)
 
     let datosPersona = {}
@@ -84,10 +93,20 @@ export class InvitacionesService {
       datosPersona = parsed.data
     }
 
+    if (role === "profesional") {
+      const matricula = String(personal.numero_matricula ?? "").trim()
+      if (!matricula) {
+        throw new AppError("La matrícula es obligatoria.", 400, "BAD_REQUEST", {
+          fieldErrors: { numero_matricula: ["La matrícula es obligatoria"] },
+        })
+      }
+      datosPersona.numero_matricula = matricula
+    }
+
     const tokenHash = hashToken(token)
 
     return AccountService.register({
-      role: ROL,
+      role,
       data: { ...datosPersona, dni, correo, password },
       identityVerified: true,
       inTransaction: async (db) => {

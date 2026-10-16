@@ -59,13 +59,19 @@ export class EmailMethods {
     return data;
   }
 
-  static async invitacionAdmin({ correo, link, horas }) {
+  static async invitacion({ correo, role = 'admin', link, horas }) {
+    const esProfesional = role === 'profesional';
+    const rolTexto = esProfesional ? 'profesional' : 'administrador';
+    const subject = esProfesional
+      ? 'Invitación para sumarte como profesional en Appointly'
+      : 'Invitación para administrar Appointly';
+
     return sendMail({
       to: correo,
-      subject: 'Invitación para administrar Appointly',
+      subject,
       errorLabel: 'invitación',
       html: `
-      <p>Hola, te invitaron a crear una cuenta de administrador en Appointly.</p>
+      <p>Hola, te invitaron a crear una cuenta de ${rolTexto} en Appointly.</p>
       <p>Para completar el registro, hacé click en el siguiente enlace:</p>
       <a href="${link}">${link}</a>
       <p>El enlace es válido por ${horas} horas y solo puede usarse una vez.</p>
@@ -73,6 +79,10 @@ export class EmailMethods {
       <p>Gracias, consultorio Appointly</p>
       `,
     });
+  }
+
+  static async invitacionAdmin(params) {
+    return EmailMethods.invitacion({ ...params, role: 'admin' });
   }
 
   static async solicitudRecibida({ correo, nombre }) {

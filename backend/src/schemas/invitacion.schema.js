@@ -6,6 +6,7 @@ const dni = baseAccountShape.dni
 export const crearInvitacionSchema = z.strictObject({
   dni,
   correo: baseAccountShape.correo,
+  role: z.enum(["profesional", "admin"]).default("admin"),
 })
 
 export const idInvitacionSchema = z.coerce.number().int().positive()
@@ -28,4 +29,5 @@ export const aceptarInvitacionSchema = z.strictObject({
   genero: z.string().optional(),
   fecha_nacimiento: z.string().optional(),
   telefono: z.string().nullish(),
+  numero_matricula: z.string().optional(),
 }).refine(passwordsMatch, passwordsMatchError)

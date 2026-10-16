@@ -7,13 +7,14 @@ import { AppError } from "../utils/AppError.js"
 export class InvitacionesController {
   static async crear(req, res, next) {
     try {
-      const { dni, correo } = req.body
-      const invitacion = await InvitacionesService.emitir({ dni, correo, creadoPor: req.user.dni })
+      const { dni, correo, role = "admin" } = req.body
+      const invitacion = await InvitacionesService.emitir({ dni, correo, role, creadoPor: req.user.dni })
 
       try {
-        await EmailMethods.invitacionAdmin({
+        await EmailMethods.invitacion({
           correo,
-          link: buildInvitacionLink(invitacion.token),
+          role: invitacion.role,
+          link: buildInvitacionLink(invitacion.token, invitacion.role),
           horas: invitacion.horas,
         })
       } catch (mailError) {
@@ -24,7 +25,7 @@ export class InvitacionesController {
       }
 
       // The token is never returned: it only travels by email.
-      return res.status(201).json({ id: invitacion.id, dni, correo, horas: invitacion.horas })
+      return res.status(201).json({ id: invitacion.id, dni, correo, role: invitacion.role, horas: invitacion.horas })
     } catch (error) {
       next(error)
     }

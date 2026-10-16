@@ -1,2 +1,2 @@
-export const buildInvitacionLink = (token) =>
-  `${process.env.WEB_FROM}/registro/invitacion/${token}`
+export const buildInvitacionLink = (token, role = "admin") =>
+  `${process.env.WEB_FROM}/registro/${role === "profesional" ? "profesional" : "admin"}/${token}`
