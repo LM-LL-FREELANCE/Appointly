@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { fechaEnDias, yaComenzo } from '../utils/time.js';
 
 export const crearTurnoSchema = z.object({
   dni_profesional: z.coerce.number().int().positive(),
@@ -19,3 +20,17 @@ export const cambiarEstadoSchema = z.object({
   estado: z.enum(ESTADOS_SETEABLES),
   motivo: z.string().trim().max(255).optional(),
 })
+
+
+const esFechaReal = (s) => fechaEnDias(0, s) === s // rejects 2030-02-30 (Date would roll it over)
+
+export const reprogramarTurnoSchema = z.object({
+  fecha_turno: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'fecha debe ser YYYY-MM-DD')
+    .refine(esFechaReal, 'la fecha no existe'),
+  hora_turno: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'hora debe ser HH:MM'),
+  motivo: z.string().trim().max(255).nullish().transform((m) => m || null),
+})
+  .refine(
+    (d) => !yaComenzo(d.fecha_turno, d.hora_turno),
+    { message: 'la nueva fecha y hora deben ser futuras', path: ['fecha_turno'] }
+  );

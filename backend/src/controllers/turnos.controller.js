@@ -4,7 +4,7 @@ import { HorariosModel } from "../models/horarios.model.js"
 import { ProfesionalesModel } from "../models/profesionales.model.js"
 import { calcularSlotsDisponibles, slotsDelDia } from "../utils/helperSlots.js"
 import { ESTADOS_TURNO, MAX_RANGE_DAYS, SLOT_DURATION_MIN } from "../config/constants.js"
-import { crearTurnoSchema, cambiarEstadoSchema } from "../schemas/turno.schema.js"
+import { crearTurnoSchema, cambiarEstadoSchema, reprogramarTurnoSchema } from "../schemas/turno.schema.js"
 import { ClientesModel } from "../models/clientes.model.js"
 import { AppError } from "../utils/AppError.js"
 
@@ -120,6 +120,21 @@ export class TurnosController {
 
       const turno = await TurnosService.cambiarEstado(req.params.id, parsed.data, req.user)
       res.status(200).json(turno)
+    } catch (err) {
+      next(err)
+    }
+  }
+
+  static async reprogramar(req, res, next) {
+    try {
+      const parsed = reprogramarTurnoSchema.safeParse(req.body ?? {})
+
+      if (!parsed.success) {
+        throw new AppError('invalid', 400, 'VALIDATION_FAILED', parsed.error.flatten().fieldErrors);
+      }
+
+      const resultado = await TurnosService.reprogramar(req.params.id, parsed.data, req.user)
+      res.status(201).json(resultado)
     } catch (err) {
       next(err)
     }

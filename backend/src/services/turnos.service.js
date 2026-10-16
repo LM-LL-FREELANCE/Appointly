@@ -1,11 +1,16 @@
 import { AppError } from "../utils/AppError.js"
 import { TurnosModel } from "../models/turnos.model.js"
 import { EmailMethods } from "../emails/email.methods.js"
+import { HorariosModel } from "../models/horarios.model.js"
 import { withTransaction } from "../config/db.js"
 import { ahoraEnTimezone, esHoy, yaComenzo } from "../utils/time.js"
+import { slotsDelDia } from "../utils/helperSlots.js"
+import { bestEffort } from "../utils/bestEffort.js"
 
 const TODOS = ["cliente", "profesional", "admin"]
 const ESTADOS_CANCELABLES = ["pendiente_confirmacion", "confirmado"]
+// `ausente` is reprogrammed by booking a linked new turno; the original stays ausente.
+const ESTADOS_REPROGRAMABLES = ["pendiente_confirmacion", "confirmado", "ausente"]
 
 // Time rules of a transition, evaluated against "now" in TIMEZONE.
 const REGLAS_TIEMPO = {
@@ -68,24 +73,26 @@ export class TurnosService {
   }
 
   /**
-   * Runs the guarded UPDATE (`actualizar` must return the affected rows) and writes
-   * the turno_evento row in one transaction. STATE_CHANGED if another change won.
+   * Inside a transaction: runs the guarded UPDATE (`actualizar` must return the
+   * affected rows) and writes the turno_evento row. STATE_CHANGED if another change won.
    */
-  static async #cambiarConEvento({ turno, estadoNuevo, actor, motivo, actualizar }) {
-    await withTransaction(async (conn) => {
-      if (await actualizar(conn) !== 1) {
-        throw new AppError("El turno cambió de estado mientras se procesaba la solicitud.", 409, "STATE_CHANGED")
-      }
+  static async #aplicarCambio(conn, { turno, estadoNuevo, actor, motivo, actualizar }) {
+    if (await actualizar(conn) !== 1) {
+      throw new AppError("El turno cambió de estado mientras se procesaba la solicitud.", 409, "STATE_CHANGED")
+    }
 
-      await TurnosModel.insertEvento({
-        id_turno: turno.id_turno,
-        estado_anterior: turno.estado,
-        estado_nuevo: estadoNuevo,
-        dni_actor: Number(actor.dni),
-        rol_actor: actor.role,
-        motivo: motivo || null,
-      }, conn)
-    })
+    await TurnosModel.insertEvento({
+      id_turno: turno.id_turno,
+      estado_anterior: turno.estado,
+      estado_nuevo: estadoNuevo,
+      dni_actor: Number(actor.dni),
+      rol_actor: actor.role,
+      motivo: motivo || null,
+    }, conn)
+  }
+
+  static async #cambiarConEvento(params) {
+    await withTransaction((conn) => this.#aplicarCambio(conn, params))
   }
 
   static async getTurnoById(id, requesterDni, requesterRol) {
@@ -178,6 +185,83 @@ export class TurnosService {
     }
 
     return turnoCancelado
+  }
+
+  /**
+   * Moves a turno to a new date/time: the original becomes `reprogramado` (or stays
+   * `ausente`) and a linked `confirmado` turno is booked, all in one transaction that
+   * first locks the professional's row so two bookings of the same slot cannot both pass.
+   */
+  static async reprogramar(id, { fecha_turno, hora_turno, motivo }, actor) {
+
+    const turno = await this.#getTurnoOrFail(id)
+
+    if (!["profesional", "admin"].includes(actor.role)) {
+      throw new AppError("Acceso denegado.", 403, "FORBIDDEN")
+    }
+    this.#assertOwnership(turno, actor.dni, actor.role)
+
+    if (!ESTADOS_REPROGRAMABLES.includes(turno.estado)) {
+      throw new AppError("Solo se puede reprogramar un turno pendiente de confirmación, confirmado o ausente.", 409, "NOT_REPROGRAMMABLE")
+    }
+
+    const dni_profesional = turno.dni_profesional
+    const horarios = await HorariosModel.getHorariosByProfesional({ dni: dni_profesional })
+
+    if (!slotsDelDia({ horarios, fecha: fecha_turno }).includes(hora_turno)) {
+      throw new AppError("El horario está fuera de la agenda del profesional.", 409, "OUT_OF_SCHEDULE")
+    }
+
+    const idNuevo = await withTransaction(async (conn) => {
+      await TurnosModel.lockProfesional(dni_profesional, conn)
+
+      // An ausente turno is recovered once: a live successor blocks another one. Under the
+      // lock, so a double submit is serialized and the second attempt sees the first.
+      if (turno.estado === "ausente" && await TurnosModel.existeSucesorOcupante(id, conn)) {
+        throw new AppError("El turno ausente ya fue reprogramado.", 409, "ALREADY_REPROGRAMMED")
+      }
+
+      // Checked before touching the original, which still holds its own slot.
+      if (await TurnosModel.existeOcupado({ dni: dni_profesional, fecha: fecha_turno, hora: hora_turno }, conn)) {
+        throw new AppError("Ese horario ya fue tomado.", 409, "SLOT_TAKEN")
+      }
+
+      if (turno.estado !== "ausente") {
+        await this.#aplicarCambio(conn, {
+          turno,
+          estadoNuevo: "reprogramado",
+          actor,
+          motivo,
+          actualizar: (c) => TurnosModel.cambiarEstado({ id, estadoOrigen: turno.estado, estadoNuevo: "reprogramado" }, c),
+        })
+      }
+
+      const nuevoId = await TurnosModel.crearTurno({
+        dni_profesional,
+        dni_cliente: turno.dni_cliente,
+        fecha_turno,
+        hora_turno,
+        id_turno_origen: turno.id_turno,
+      }, conn)
+
+      await TurnosModel.insertEvento({
+        id_turno: nuevoId,
+        estado_anterior: null,
+        estado_nuevo: "confirmado",
+        dni_actor: Number(actor.dni),
+        rol_actor: actor.role,
+        motivo,
+      }, conn)
+
+      return nuevoId
+    })
+
+    const [original, nuevo] = await Promise.all([TurnosModel.getTurnoById(id), TurnosModel.getTurnoById(idNuevo)])
+
+    // `turno` still holds the old date/time (read before the move).
+    bestEffort(() => EmailMethods.turnoReprogramado({ original: turno, nuevo, motivo }))
+
+    return { original, nuevo }
   }
 
   /** Creates a `confirmado` turno and its initial event (estado_anterior NULL) atomically. */

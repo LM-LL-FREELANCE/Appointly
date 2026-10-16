@@ -14,5 +14,6 @@ turnosRouter.get("/eventos", requireAuth, grantAccess(STAFF), TurnosController.g
 turnosRouter.get("/:id", requireAuth, grantAccess(TODOS), TurnosController.getTurnoById) //working
 turnosRouter.get("/:id/eventos", requireAuth, grantAccess(STAFF), TurnosController.getEventosTurno)
 turnosRouter.patch("/:id/estado", requireAuth, grantAccess(TODOS), TurnosController.cambiarEstado)
+turnosRouter.post("/:id/reprogramacion", requireAuth, grantAccess(STAFF), TurnosController.reprogramar)
 turnosRouter.post("/:id/cancelacion", requireAuth, grantAccess(TODOS), TurnosController.cancelTurnoById) //working
 turnosRouter.post("/", requireAuth, grantAccess(TODOS), TurnosController.crearTurno)//working

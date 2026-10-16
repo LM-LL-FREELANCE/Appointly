@@ -72,12 +72,13 @@ export async function startTestApp() {
     import("../../src/config/db.js"),
     import("../../src/middlewares/error.middleware.js"),
   ])
-  const [{ turnosRouter }, { clientesRouter }, { TurnosController }, { TurnosModel }, { requireAuth }] = await Promise.all([
+  const [{ turnosRouter }, { clientesRouter }, { TurnosController }, { TurnosModel }, { requireAuth }, { EmailMethods }] = await Promise.all([
     import("../../src/routes/turnos.routes.js"),
     import("../../src/routes/clientes.routes.js"),
     import("../../src/controllers/turnos.controller.js"),
     import("../../src/models/turnos.model.js"),
     import("../../src/middlewares/auth.middleware.js"),
+    import("../../src/emails/email.methods.js"),
   ])
 
   const [[{ db }]] = await pool.query("SELECT DATABASE() AS db")
@@ -158,5 +159,5 @@ export async function startTestApp() {
     await admin.end()
   }
 
-  return { api, pool, TurnosModel, insertTurno, insertEvento, getTurno, getEventos, close }
+  return { api, pool, TurnosModel, EmailMethods, insertTurno, insertEvento, getTurno, getEventos, close }
 }

@@ -128,20 +128,35 @@ export class TurnosModel {
     return rows
   }
 
-  static async existeOcupado({ dni, fecha, hora }) {
-    const [rows] = await pool.query(`
+  static async existeOcupado({ dni, fecha, hora }, conn = pool) {
+    const [rows] = await conn.query(`
       SELECT 1 FROM turno WHERE dni_profesional = ? AND fecha_turno = ? AND hora_turno = ? AND estado IN (?)
       `, [dni, fecha, hora, ESTADOS_OCUPAN_SLOT])
 
     return rows.length > 0
   }
 
-  static async crearTurno({ dni_profesional, dni_cliente, fecha_turno, hora_turno }, conn = pool) {
+  static async crearTurno({ dni_profesional, dni_cliente, fecha_turno, hora_turno, id_turno_origen = null }, conn = pool) {
     const [result] = await conn.query(`
-      INSERT INTO turno (fecha_turno, hora_turno, estado, dni_profesional, dni_cliente) VALUES (?, ?, 'confirmado', ?, ?)
-      `, [fecha_turno, hora_turno, dni_profesional, dni_cliente])
+      INSERT INTO turno (fecha_turno, hora_turno, estado, dni_profesional, dni_cliente, id_turno_origen) VALUES (?, ?, 'confirmado', ?, ?, ?)
+      `, [fecha_turno, hora_turno, dni_profesional, dni_cliente, id_turno_origen])
 
     return result.insertId
+  }
+
+  /** True when some turno born from `id` (id_turno_origen) still holds a slot (not cancelado/reprogramado). */
+  static async existeSucesorOcupante(id, conn = pool) {
+    const [rows] = await conn.query(
+      `SELECT 1 FROM turno WHERE id_turno_origen = ? AND estado IN (?) LIMIT 1`,
+      [id, ESTADOS_OCUPAN_SLOT],
+    )
+
+    return rows.length > 0
+  }
+
+  /** Row lock on the professional: serializes concurrent bookings of the same agenda until commit. */
+  static async lockProfesional(dni, conn) {
+    await conn.query(`SELECT dni_profesional FROM profesional WHERE dni_profesional = ? FOR UPDATE`, [dni])
   }
 
   static async getById({ id }) {
