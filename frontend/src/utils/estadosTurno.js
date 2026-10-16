@@ -35,6 +35,11 @@ export const esAbierto = (estado) => ESTADOS_ABIERTOS.includes(estado)
 
 export const esCancelable = (estado) => ESTADOS_CANCELABLES.includes(estado)
 
+// An `ausente` turno is also reprogrammable: the original stays ausente and a linked new one is created.
+const ESTADOS_REPROGRAMABLES = ['pendiente_confirmacion', 'confirmado', 'ausente']
+
+export const esReprogramable = (estado) => ESTADOS_REPROGRAMABLES.includes(estado)
+
 export const estadoLabel = (estado) => ESTADO_LABEL[estado] ?? estado ?? ''
 
 // --- Actions of the professional on a turno -----------------------------------------------
@@ -42,7 +47,7 @@ export const estadoLabel = (estado) => ESTADO_LABEL[estado] ?? estado ?? ''
 // authoritative: if the UI is out of sync its 409 message is shown.
 //
 // `ahora` is { fecha: 'YYYY-MM-DD', hora: 'HH:MM' } in Buenos Aires (injectable for tests).
-// Returns the ordered actions: { estado, label, confirmar? } or { cancelar: true, label }.
+// Returns the ordered actions: { estado, label, confirmar? }, { reprogramar: true, label } or { cancelar: true, label }.
 export function accionesProfesional(turno, ahora = ahoraEnZona()) {
   const { estado } = turno
   const enAtencion = estado === 'confirmado' || estado === 'en_espera'
@@ -56,10 +61,15 @@ export function accionesProfesional(turno, ahora = ahoraEnZona()) {
   if (estado === 'en_curso' || (enAtencion && yaComenzo)) {
     acciones.push({ estado: 'completado', label: 'Marcar completado', confirmar: true })
   }
+  // Any date/time: the backend is authoritative (it rejects other states with 409).
+  if (esReprogramable(estado)) acciones.push({ reprogramar: true, label: 'Reprogramar' })
   if (esCancelable(estado)) acciones.push({ cancelar: true, label: 'Cancelar turno' })
 
   return acciones
 }
+
+// Stable key of an action (React key, icon lookup): its target estado, 'reprogramar' or 'cancelar'.
+export const claveAccion = (accion) => accion.estado ?? (accion.reprogramar ? 'reprogramar' : 'cancelar')
 
 // --- History (turno_evento) -----------------------------------------------------------------
 
@@ -77,4 +87,25 @@ export function describirEvento(e) {
     motivo: e.motivo || null,
     estadoNuevo: e.estado_nuevo,
   }
+}
+
+// --- Reprogramar: which days/slots can be offered -----------------------------------------
+
+// Free slots from GET /profesionales/:dni/slots (`dias`: [{ fecha, slots: ['HH:MM'] }]) that can
+// still be booked: drops past days, today's slots that are not strictly in the future (the backend
+// rejects them), the original turno's own date+time, and days left with no slots.
+export function diasReprogramables({ dias, ahora = ahoraEnZona(), original }) {
+  const propiaFecha = original ? fechaISODeApi(original.fecha_turno) : null
+  const propiaHora = original ? String(original.hora_turno).slice(0, 5) : null
+
+  return (dias ?? [])
+    .filter((dia) => dia.fecha >= ahora.fecha)
+    .map((dia) => ({
+      fecha: dia.fecha,
+      slots: dia.slots.filter((hora) => {
+        if (dia.fecha === ahora.fecha && hora <= ahora.hora) return false
+        return !(dia.fecha === propiaFecha && hora === propiaHora)
+      }),
+    }))
+    .filter((dia) => dia.slots.length > 0)
 }

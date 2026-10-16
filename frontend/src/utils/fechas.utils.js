@@ -62,3 +62,17 @@ export function formatearFechaHoraEvento(iso) {
   const [anio, mes, dia] = fecha.split('-').map(Number);
   return `${dia} ${MESES_CORTOS[mes - 1]} ${anio} · ${hora} hs`;
 }
+
+
+// Calendar arithmetic on a YYYY-MM-DD date (no time zone involved).
+export function fechaEnDias(dias, desde) {
+  const [y, m, d] = desde.split('-').map(Number);
+  const fecha = new Date(Date.UTC(y, m - 1, d + dias));
+  return `${fecha.getUTCFullYear()}-${pad(fecha.getUTCMonth() + 1)}-${pad(fecha.getUTCDate())}`;
+}
+
+// Range to ask for free slots when reprogramming: from today, `dias` days (the backend
+// accepts at most 31 days per call).
+export function ventanaReprogramacion(ahora = ahoraEnZona(), dias = 30) {
+  return { desde: ahora.fecha, hasta: fechaEnDias(dias - 1, ahora.fecha) };
+}

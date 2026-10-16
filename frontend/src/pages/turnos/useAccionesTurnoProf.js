@@ -6,7 +6,7 @@ import { invalidarTurnosProfesional } from '../../hooks/useTurnosDia.jsx'
 
 // Shared by the desktop table and the mobile detail: runs an action from
 // `accionesProfesional` and owns the state of the confirm and history modals.
-// To add an action (e.g. reprogramar, T6), give it a branch in `ejecutar`.
+// To add another action, give it a branch in `ejecutar`.
 export function useAccionesTurnoProf() {
   const queryClient = useQueryClient()
   const cambiarEstado = useCambiarEstadoTurno()
@@ -17,9 +17,14 @@ export function useAccionesTurnoProf() {
 
   const [confirmacion, setConfirmacion] = useState(null) // { turno, accion }
   const [historialId, setHistorialId] = useState(null)
+  const [reprogramando, setReprogramando] = useState(null) // turno being reprogrammed
 
   // Cancel is not handled here: each view has its own cancel UI (modal / drawer).
   const ejecutar = (turno, accion) => {
+    if (accion.reprogramar) {
+      setReprogramando(turno)
+      return
+    }
     if (accion.confirmar) {
       setConfirmacion({ turno, accion })
       return
@@ -45,5 +50,7 @@ export function useAccionesTurnoProf() {
     historialId,
     abrirHistorial: (turno) => setHistorialId(turno.id_turno),
     cerrarHistorial: () => setHistorialId(null),
+    reprogramando,
+    cerrarReprogramar: () => setReprogramando(null),
   }
 }

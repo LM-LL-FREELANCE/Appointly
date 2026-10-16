@@ -5,29 +5,32 @@ import {
   IconCircleCheck,
   IconDotsVertical,
   IconHistory,
+  IconCalendarEvent,
   IconPlayerPlay,
   IconUserOff,
   IconX,
 } from '@tabler/icons-react'
 import { fechaCorta, horaCorta } from '../../utils/fechas.utils.js'
-import { accionesProfesional } from '../../utils/estadosTurno.js'
+import { accionesProfesional, claveAccion } from '../../utils/estadosTurno.js'
 import { CancelarTurnoProfModal } from './CancelarTurnoProfModal.jsx'
 import { ConfirmarEstadoModal } from './ConfirmarEstadoModal.jsx'
 import { TurnoHistorialModal } from './TurnoHistorialModal.jsx'
+import { ReprogramarTurnoModal } from './ReprogramarTurnoModal.jsx'
 import { useAccionesTurnoProf } from './useAccionesTurnoProf.js'
 import { UserAvatar } from '../../components/UserAvatar.jsx'
 import { EstadoTurnoBadge } from '../../components/EstadoTurnoBadge.jsx'
 
 const COLUMNS = ['Fecha', 'Hora', 'Paciente', 'Estado', 'Acciones']
 
-// Icon of each action of accionesProfesional(), keyed by target estado.
+// Icon of each action of accionesProfesional(), keyed by claveAccion().
 const ICONO_ACCION = {
+  reprogramar: <IconCalendarEvent size={14} />,
   en_curso: <IconPlayerPlay size={14} />,
   ausente: <IconUserOff size={14} />,
   completado: <IconCircleCheck size={14} />,
 }
 
-export default function TurnosTableProf({ turnos, ahora }) {
+export default function TurnosTableProf({ turnos, ahora, dniProfesional }) {
   const [cancelOpened, { open: openCancel, close: closeCancel }] = useDisclosure(false)
   const [selectedItem, setSelectedItem] = useState(null)
   const acciones = useAccionesTurnoProf()
@@ -92,8 +95,8 @@ export default function TurnosTableProf({ turnos, ahora }) {
                 </Menu.Item>
               ) : (
                 <Menu.Item
-                  key={accion.estado}
-                  leftSection={ICONO_ACCION[accion.estado]}
+                  key={claveAccion(accion)}
+                  leftSection={ICONO_ACCION[claveAccion(accion)]}
                   disabled={acciones.cambiandoEstado}
                   onClick={() => acciones.ejecutar(item, accion)}
                 >
@@ -144,6 +147,14 @@ export default function TurnosTableProf({ turnos, ahora }) {
         turno={acciones.confirmacion?.turno}
         accion={acciones.confirmacion?.accion}
         isPending={acciones.cambiandoEstado}
+      />
+
+      <ReprogramarTurnoModal
+        opened={!!acciones.reprogramando}
+        onClose={acciones.cerrarReprogramar}
+        turno={acciones.reprogramando}
+        dniProfesional={dniProfesional}
+        ahora={ahora}
       />
 
       <TurnoHistorialModal

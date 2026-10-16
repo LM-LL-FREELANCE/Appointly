@@ -4,9 +4,10 @@ import { useDisclosure } from '@mantine/hooks'
 import { IconAlertCircle, IconHistory } from '@tabler/icons-react'
 import { fechaCorta, horaCorta } from '../../utils/fechas.utils.js'
 import { EstadoTurnoBadge } from '../../components/EstadoTurnoBadge.jsx'
-import { accionesProfesional } from '../../utils/estadosTurno.js'
+import { accionesProfesional, claveAccion } from '../../utils/estadosTurno.js'
 import { ConfirmarEstadoModal } from './ConfirmarEstadoModal.jsx'
 import { TurnoHistorialModal } from './TurnoHistorialModal.jsx'
+import { ReprogramarTurnoModal } from './ReprogramarTurnoModal.jsx'
 import { useAccionesTurnoProf } from './useAccionesTurnoProf.js'
 
 function DetailRow({ label, children }) {
@@ -29,7 +30,7 @@ function DetailRow({ label, children }) {
 // muestra el PACIENTE, las acciones de atención del profesional, el historial y la
 // cancelación, y "Atrás" vuelve a la lista (in-page) en vez de navegar a otra ruta.
 // `turno` viene siempre de la query del día, así que refleja el estado actualizado.
-export function DetalleTurnoProfMobile({ turno, ahora, onVolver }) {
+export function DetalleTurnoProfMobile({ turno, ahora, dniProfesional, onVolver }) {
   const [drawerOpened, { open: openDrawer, close: closeDrawer }] = useDisclosure(false)
   const [motivo, setMotivo] = useState('')
   const acciones = useAccionesTurnoProf()
@@ -67,8 +68,9 @@ export function DetalleTurnoProfMobile({ turno, ahora, onVolver }) {
           </Button>
         ) : (
           <Button
-            key={accion.estado}
+            key={claveAccion(accion)}
             size="md"
+            variant={accion.reprogramar ? 'light' : 'filled'}
             radius="md"
             fullWidth
             loading={acciones.cambiandoEstado}
@@ -142,6 +144,14 @@ export function DetalleTurnoProfMobile({ turno, ahora, onVolver }) {
         turno={acciones.confirmacion?.turno}
         accion={acciones.confirmacion?.accion}
         isPending={acciones.cambiandoEstado}
+      />
+
+      <ReprogramarTurnoModal
+        opened={!!acciones.reprogramando}
+        onClose={acciones.cerrarReprogramar}
+        turno={acciones.reprogramando}
+        dniProfesional={dniProfesional}
+        ahora={ahora}
       />
 
       <TurnoHistorialModal

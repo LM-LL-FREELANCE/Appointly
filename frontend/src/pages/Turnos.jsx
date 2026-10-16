@@ -58,10 +58,10 @@ export default function Turnos() {
           {/* Desktop: tabla */}
           {isDesktop ? (
             <Box px={{ base: 0, md: 'xl' }}>
-              <TurnosTableProf turnos={turnos} ahora={ahora} />
+              <TurnosTableProf turnos={turnos} ahora={ahora} dniProfesional={user?.dni} />
             </Box>
           ) : detalle ? (
-            <DetalleTurnoProfMobile turno={detalle} ahora={ahora} onVolver={() => setDetalleId(null)} />
+            <DetalleTurnoProfMobile turno={detalle} ahora={ahora} dniProfesional={user?.dni} onVolver={() => setDetalleId(null)} />
           ) : (
             <Stack gap="sm" pb={10}>
               {turnos.map((turno) => (
