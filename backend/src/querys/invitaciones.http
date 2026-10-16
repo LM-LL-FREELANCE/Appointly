@@ -1,12 +1,23 @@
 ### Requiere sesion de admin (cookie). Inicia sesion primero con role "admin".
 
-### invitar a un admin (DNI + correo; el link llega por mail y vale 24h, un solo uso)
+### invitar a un profesional (role: "profesional"; por defecto es "admin")
 POST http://localhost:4000/api/invitaciones
 Content-Type: application/json
 
 {
   "dni": "40111222",
-  "correo": "nueva.admin@example.com"
+  "correo": "nueva.profesional@example.com",
+  "role": "profesional"
+}
+
+### invitar a un admin (role: "admin")
+POST http://localhost:4000/api/invitaciones
+Content-Type: application/json
+
+{
+  "dni": "40222333",
+  "correo": "nueva.admin@example.com",
+  "role": "admin"
 }
 
 ### listar invitaciones (pendiente / usada / revocada / vencida)
@@ -18,8 +29,9 @@ DELETE http://localhost:4000/api/invitaciones/1
 ### validar un token sin consumirlo (publico)
 GET http://localhost:4000/api/invitaciones/validar/TOKEN_DEL_LINK
 
-### aceptar la invitacion y crear la cuenta admin (publico; DNI y correo salen de la invitacion)
-### Persona nueva: hay que mandar datos personales. Persona existente: solo password.
+### aceptar la invitacion y crear la cuenta (publico; DNI y correo salen de la invitacion)
+### Para profesional: requiere numero_matricula. Para admin: no.
+### Persona nueva: mandar datos personales. Persona existente: solo password (+ matricula si prof).
 POST http://localhost:4000/api/auth/registro/invitacion/TOKEN_DEL_LINK
 Content-Type: application/json
 
@@ -27,7 +39,8 @@ Content-Type: application/json
   "password": "miclave123",
   "confirm": "miclave123",
   "nombre": "Nueva",
-  "apellido": "Admin",
+  "apellido": "Profesional",
   "genero": "F",
-  "fecha_nacimiento": "1992-03-04"
+  "fecha_nacimiento": "1992-03-04",
+  "numero_matricula": "MP-77777"
 }
