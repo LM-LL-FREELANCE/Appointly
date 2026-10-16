@@ -42,6 +42,22 @@ Content-Type: application/json
   "genero": "M"
 }
 
+### registro de cliente (con DNI que ya tiene cuenta en otro rol: requiere contraseña de la cuenta existente)
+POST http://localhost:4000/api/auth/registro
+Content-Type: application/json
+
+{
+  "dni": "27845123",
+  "nombre": "Martin",
+  "apellido": "Aguirre",
+  "correo": "martin.cliente@example.com",
+  "password": "miclave123",
+  "confirm": "miclave123",
+  "fecha_nacimiento": "1980-03-15",
+  "genero": "M",
+  "password_cuenta_existente": "password123"
+}
+
 ###forgot password mail
 POST http://localhost:4000/api/auth/forgot-password
 Content-Type: application/json

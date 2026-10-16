@@ -19,10 +19,6 @@ export const getAllObraSociales = () => {
   return request('/api/obra-sociales/')
 }
 
-export const registerProfesional = (data) => {
-  return request('/api/auth/registro-profesional', { method: 'POST', body: JSON.stringify(data) })
-}
-
 export const getProfesionalByDni = async ({ dni }) => {
   return request(`/api/profesionales/${dni}`)
 }

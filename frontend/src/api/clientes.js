@@ -21,10 +21,6 @@ export const cancelTurnoById = (arg1, ...rest) => {
   })
 }
 
-export const createAccount = (data) => {
-  return request('/api/auth/registro', { method: 'POST', body: JSON.stringify(data) })
-}
-
 export const getTurnosMes = ({ dni }) => {
   return request(`/api/clientes/${dni}/mes`)
 }
