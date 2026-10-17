@@ -82,9 +82,12 @@ export default function App() {
 
         <Route path="/" element={<MainLayout links={links} role={user?.role} />}>
 
-          <Route element={<ProtectedRoute />}>
+          <Route element={<ProtectedRoute roles={['cliente']} />}>
             {defaultLinks.map(link => <Route key={link.path} path={link.path} element={link.element} />)}
             <Route path="/user" element={<User />} />
+          </Route>
+
+          <Route element={<ProtectedRoute />}>
             <Route path="/miperfil" element={<MiPerfil />} />
           </Route>
 
