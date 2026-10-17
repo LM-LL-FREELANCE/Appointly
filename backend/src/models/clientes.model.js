@@ -1,4 +1,5 @@
 import { pool } from "../config/db.js"
+import { ESTADOS_ABIERTOS } from "../config/constants.js"
 
 export class ClientesModel {
   static async getTurnosClienteByDni(dni, estado) {
@@ -25,7 +26,10 @@ export class ClientesModel {
     `
     const params = [dni]
 
-    if (estado) {
+    if (estado === "abiertos") {
+      query += ` AND turno.estado IN (?)`
+      params.push(ESTADOS_ABIERTOS)
+    } else if (estado) {
       query += ` AND turno.estado = ?`
       params.push(estado)
     }
@@ -90,9 +94,9 @@ export class ClientesModel {
       FROM turno t
       INNER JOIN profesional prof ON t.dni_profesional = prof.dni_profesional
       INNER JOIN persona p ON p.dni_persona = prof.dni_profesional
-      WHERE t.dni_cliente = ? AND t.estado = 'activo'
+      WHERE t.dni_cliente = ? AND t.estado IN (?)
       ORDER BY t.fecha_turno ASC, t.hora_turno ASC
-      `, [dni])
+      `, [dni, ESTADOS_ABIERTOS])
     return rows
   }
 

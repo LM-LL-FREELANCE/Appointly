@@ -4,6 +4,7 @@ import { AuthModel } from "../models/auth.model.js"
 import { ObraSocialesModel } from "../models/obra-sociales.model.js"
 import { AppError } from "../utils/AppError.js"
 import { SALT_ROUNDS } from "../config/constants.js"
+import { esMayorDeEdad } from "../utils/time.js"
 
 /**
  * Per-role registration rules. Adding a role means adding one entry here:
@@ -22,7 +23,10 @@ const ROLES = {
     extra: ({ id_obra_social }) => ({ id_obra_social: id_obra_social ?? null }),
   },
   profesional: {
-    async validar({ numero_matricula }) {
+    async validar({ numero_matricula, fecha_nacimiento }) {
+      if (fecha_nacimiento && !esMayorDeEdad(fecha_nacimiento)) {
+        throw new AppError("Debes ser mayor de 18 años.", 400, "VALIDATION_FAILED")
+      }
       if (await AuthModel.existeMatricula({ numero_matricula })) {
         throw new AppError("Ya existe una cuenta con esa matrícula.", 409, "DUPLICATE_MATRICULA")
       }
@@ -31,7 +35,11 @@ const ROLES = {
     extra: ({ numero_matricula }) => ({ numero_matricula }),
   },
   admin: {
-    async validar() {},
+    async validar({ fecha_nacimiento }) {
+      if (fecha_nacimiento && !esMayorDeEdad(fecha_nacimiento)) {
+        throw new AppError("Debes ser mayor de 18 años.", 400, "VALIDATION_FAILED")
+      }
+    },
     insertPerfil: async () => {}, // admin has no subtype table
     extra: () => ({}),
   },
@@ -86,8 +94,13 @@ export class AccountService {
 
     const personaExistente = await AuthModel.getPersona(dni)
 
-    if (personaExistente && !identityVerified) {
-      await AccountService.#verifyExistingIdentity(dni, password_cuenta_existente)
+    if (personaExistente) {
+      if ((role === "profesional" || role === "admin") && !esMayorDeEdad(personaExistente.fecha_nacimiento)) {
+        throw new AppError("Debes ser mayor de 18 años.", 400, "VALIDATION_FAILED")
+      }
+      if (!identityVerified) {
+        await AccountService.#verifyExistingIdentity(dni, password_cuenta_existente)
+      }
     }
 
     const password_hash = await bcrypt.hash(password, SALT_ROUNDS)

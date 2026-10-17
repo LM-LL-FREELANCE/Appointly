@@ -1,10 +1,12 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Badge, Box, Button, Divider, Drawer, Grid, Group, Paper, Stack, Text } from '@mantine/core'
+import { Box, Button, Divider, Drawer, Grid, Group, Paper, Stack, Text } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { IconAlertCircle } from '@tabler/icons-react'
 import { PageHeader } from '../../../components/PageHeader.jsx'
 import { cancelTurnoById } from '../../../api/clientes.js'
+import { EstadoTurnoBadge } from '../../../components/EstadoTurnoBadge.jsx'
+import { esCancelable } from '../../../utils/estadosTurno.js'
 
 function DetailRow({ label, children }) {
   return (
@@ -25,7 +27,7 @@ function DetailRow({ label, children }) {
 export function DetalleTurnoMobile() {
   const location = useLocation()
   const navigate = useNavigate()
-  const { turno, tab = 'activo' } = location.state || {}
+  const { turno, tab = 'proximos' } = location.state || {}
   const [drawerOpened, { open: openDrawer, close: closeDrawer }] = useDisclosure(false)
 
   const queryClient = useQueryClient()
@@ -51,8 +53,6 @@ export function DetalleTurnoMobile() {
     )
   }
 
-  const badgeColor = turno.estado === 'activo' ? 'green' : turno.estado === 'cancelado' ? 'red' : 'gray'
-
   return (
     <>
       <PageHeader title="Detalle" />
@@ -72,13 +72,11 @@ export function DetalleTurnoMobile() {
             <Text fz="md" fw={600}>{turno.hora_turno} hs</Text>
           </DetailRow>
           <DetailRow label="Estado">
-            <Badge variant="light" color={badgeColor} radius="xl" size="md" tt="uppercase">
-              {turno.estado}
-            </Badge>
+            <EstadoTurnoBadge estado={turno.estado} />
           </DetailRow>
         </Paper>
 
-        {turno.estado === 'activo' && (
+        {esCancelable(turno.estado) && !turno.esPasado && (
           <Button variant="light" color="red" size="md" radius="md" fullWidth onClick={openDrawer}>
             Cancelar turno
           </Button>

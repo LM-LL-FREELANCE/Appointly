@@ -13,6 +13,7 @@ export class ProfesionalesModel {
           INNER JOIN profesional
             ON horario_atencion.dni_profesional = profesional.dni_profesional
           WHERE profesional.dni_profesional = ?
+          ORDER BY horario_atencion.dia_semana ASC, horario_atencion.hora_inicio ASC
         `, [dni])
 
     return rows
