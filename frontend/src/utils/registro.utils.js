@@ -9,6 +9,30 @@ export const toGeneroCode = (genero) => {
 export const isIdentityError = (code) =>
   code === 'IDENTITY_VERIFICATION_REQUIRED' || code === 'IDENTITY_VERIFICATION_FAILED'
 
+export const formatearFechaISO = (fecha) => {
+  if (!fecha) return null
+  if (fecha instanceof Date) {
+    const y = fecha.getFullYear()
+    const m = String(fecha.getMonth() + 1).padStart(2, '0')
+    const d = String(fecha.getDate()).padStart(2, '0')
+    return `${y}-${m}-${d}`
+  }
+  return String(fecha).slice(0, 10)
+}
+
+export const calcularEdad = (fecha) => {
+  if (!fecha) return 0
+  const d = fecha instanceof Date ? fecha : new Date(fecha)
+  if (isNaN(d.getTime())) return 0
+  const hoy = new Date()
+  let edad = hoy.getFullYear() - d.getFullYear()
+  const m = hoy.getMonth() - d.getMonth()
+  if (m < 0 || (m === 0 && hoy.getDate() < d.getDate())) {
+    edad--
+  }
+  return edad
+}
+
 /**
  * Builds the request body for a role from the form values.
  * - admin: DNI and correo come from the invitation, so they are never sent.
@@ -25,7 +49,7 @@ export const buildRegistroPayload = (role, values, { hidePersonalData = false, i
   if (!hidePersonalData) {
     payload.nombre = values.nombre
     payload.apellido = values.apellido
-    payload.fecha_nacimiento = values.fecha_nacimiento
+    payload.fecha_nacimiento = formatearFechaISO(values.fecha_nacimiento)
     payload.genero = toGeneroCode(values.genero)
   }
 

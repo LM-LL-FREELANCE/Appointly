@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
 import { Group, Stack, Button, Paper, TextInput, Grid, Select, Flex, FileButton } from '@mantine/core'
-import { DatePickerInput } from '@mantine/dates'
+import { DateInput } from '@mantine/dates'
 import { IconLock, IconCalendar, IconCheck, IconX } from '@tabler/icons-react'
 import { PageHeader } from '../components/PageHeader.jsx'
 import { MultiSelectCombobox } from '../components/MultiSelectCombobox.jsx'
@@ -329,14 +329,16 @@ function MiPerfilContent({ user, perfilData }) {
               />
             </Grid.Col>
             <Grid.Col span={{ base: 12, sm: 6 }}>
-              <DatePickerInput
+              <DateInput
                 label="Fecha de nacimiento"
                 size={inputSize}
-                placeholder="Seleccione una fecha"
+                placeholder="DD/MM/AAAA"
+                valueFormat="DD/MM/YYYY"
                 value={fechaNacimiento}
                 onChange={setFechaNacimiento}
                 rightSection={<IconCalendar size={16} stroke={1.5} color="gray" />}
                 locale="es"
+                defaultLevel="decade"
                 maxDate={new Date()}
               />
             </Grid.Col>

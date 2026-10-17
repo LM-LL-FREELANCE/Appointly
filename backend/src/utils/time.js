@@ -40,3 +40,18 @@ export const esHoy = (fecha, ahora = ahoraEnTimezone()) => aFechaISO(fecha) === 
 /** True when fecha+hora (HH:MM or HH:MM:SS) is at or before `ahora`, at minute precision. */
 export const yaComenzo = (fecha, hora, ahora = ahoraEnTimezone()) =>
   `${aFechaISO(fecha)}T${String(hora).slice(0, 5)}` <= `${ahora.fecha}T${ahora.hora}`
+
+/** True when the birthdate is at least 18 years before `ahora`. */
+export const esMayorDeEdad = (fechaNacimiento, ahora = ahoraEnTimezone()) => {
+  if (!fechaNacimiento) return false
+  const fechaStr = aFechaISO(fechaNacimiento)
+  const [yNac, mNac, dNac] = fechaStr.split("-").map(Number)
+  const [yHoy, mHoy, dHoy] = ahora.fecha.split("-").map(Number)
+
+  let edad = yHoy - yNac
+  const diffMes = mHoy - mNac
+  if (diffMes < 0 || (diffMes === 0 && dHoy < dNac)) {
+    edad--
+  }
+  return edad >= 18
+}
