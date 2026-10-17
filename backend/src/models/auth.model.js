@@ -25,120 +25,100 @@ export class AuthModel {
     return { ...rows[0] }
   }
 
-  static async existeDniCliente(dni) {
-    const [rows] = await pool.query(`
-      SELECT 1 FROM cliente WHERE dni_cliente = ? LIMIT 1
-      `, [dni])
+  // --- Account existence / lookup (one query per concept, parametrized by role) ---
+  // `db` defaults to the pool; pass a transaction connection to run inside it.
 
-    return rows.length > 0
-  }
-
-  static async existeCorreoCliente(correo) {
-    const [rows] = await pool.query(`
-      SELECT 
-          1 
-        FROM persona_rol AS pr 
-        INNER JOIN rol r ON r.id_rol = pr.id_rol 
-        WHERE pr.correo = ? 
-          AND r.nombre = "cliente"
-        LIMIT 1
-      `, [correo])
-
-    return rows.length > 0
-  }
-
-  static async existeDniProfesional(dni) {
-    const [rows] = await pool.query(`
-      SELECT 
-          1 
-        FROM profesional 
-        WHERE dni_profesional = ? 
-        LIMIT 1
-      `, [dni])
-
-    return rows.length > 0
-  }
-
-  static async existeCorreoProfesional(correo) {
-    const [rows] = await pool.query(`
-      SELECT 
-          1 
+  static async existeCuenta({ dni, role }, db = pool) {
+    const [rows] = await db.query(`
+      SELECT 1
         FROM persona_rol pr
         INNER JOIN rol r ON r.id_rol = pr.id_rol
-        WHERE pr.correo = ?
-        AND r.nombre = "profesional"
+        WHERE pr.dni_persona = ? AND r.nombre = ?
         LIMIT 1
-      `, [correo])
+      `, [dni, role])
 
     return rows.length > 0
   }
 
-  static async createClienteAccount({ data }) {
-    const { dni, nombre, apellido, correo, password_hash, telefono, fecha_nacimiento, genero, id_obra_social, numero_afiliado } = data
+  static async existeCorreo({ correo, role }, db = pool) {
+    const [rows] = await db.query(`
+      SELECT 1
+        FROM persona_rol pr
+        INNER JOIN rol r ON r.id_rol = pr.id_rol
+        WHERE pr.correo = ? AND r.nombre = ?
+        LIMIT 1
+      `, [correo, role])
 
-    await pool.query(`
-      INSERT IGNORE INTO 
-        persona(dni_persona, nombre, apellido, fecha_nacimiento, genero, telefono) 
-      VALUES
-        (?,?,?,?,?,?)
-      `, [dni, nombre, apellido, fecha_nacimiento, genero, telefono ?? null])
-    await pool.query(`
-      INSERT INTO 
-        persona_rol(dni_persona, correo, password_hash, id_rol) 
-      VALUES
-        (?,?,?, (
-        SELECT 
-            id_rol 
-          FROM rol
-          WHERE nombre = "cliente"
-        ))
-      `, [dni, correo, password_hash])
-
-    await pool.query(`
-      INSERT INTO cliente
-        (dni_cliente, id_obra_social, numero_afiliado, id_rol)
-      VALUES (?,?,?,(
-        SELECT
-            id_rol
-          FROM rol 
-          WHERE nombre = "cliente"
-      ))
-      `, [dni, id_obra_social ?? null, numero_afiliado ?? null])
-    return true
+    return rows.length > 0
   }
 
-  static async createProfesionalAccount({ data }) {
-    const { dni, nombre, apellido, correo, password_hash, telefono, fecha_nacimiento, genero, numero_matricula } = data
-    await pool.query(`
-      INSERT IGNORE INTO persona
-        (dni_persona, nombre, apellido, fecha_nacimiento, genero, telefono)
-      VALUES 
-        (?,?,?,?,?,?)
-      `, [dni, nombre, apellido, fecha_nacimiento, genero, telefono ?? null])
-    await pool.query(`
-      INSERT IGNORE INTO persona_rol
-        (dni_persona, correo, password_hash, id_rol)
-      VALUES 
-        (?,?,?, (
-          SELECT 
-              id_rol
-            FROM rol
-            WHERE nombre = "profesional"
-        ))
-      `, [dni, correo, password_hash])
+  static async existeMatricula({ numero_matricula }, db = pool) {
+    const [rows] = await db.query(`
+      SELECT 1 FROM profesional WHERE numero_matricula = ? LIMIT 1
+      `, [numero_matricula])
 
-    await pool.query(`
-        INSERT INTO profesional
-          (dni_profesional,numero_matricula, id_rol)
-        VALUES
-          (?,?,(
-          SELECT
-              id_rol
-            FROM rol
-            WHERE nombre = "profesional"
-          ))
-        `, [dni, numero_matricula])
-    return true
+    return rows.length > 0
+  }
+
+  static async getPersona(dni, db = pool) {
+    const [rows] = await db.query(`
+      SELECT dni_persona AS dni, nombre, apellido
+        FROM persona
+        WHERE dni_persona = ?
+      `, [dni])
+
+    return rows[0] ?? null
+  }
+
+  // Active (not deleted) accounts of a person: used to prove identity
+  // when a DNI that already exists registers a new role.
+  static async getCuentasActivas(dni, db = pool) {
+    const [rows] = await db.query(`
+      SELECT pr.password_hash
+        FROM persona_rol pr
+        WHERE pr.dni_persona = ?
+          AND pr.eliminado_en IS NULL
+      `, [dni])
+
+    return rows
+  }
+
+  // --- Account creation: every method takes the transaction connection ---
+
+  static async insertPersona({ dni, nombre, apellido, fecha_nacimiento, genero, telefono }, db) {
+    // No-op on duplicate DNI (a person can hold several roles) without
+    // swallowing any other error, unlike INSERT IGNORE.
+    await db.query(`
+      INSERT INTO persona
+        (dni_persona, nombre, apellido, fecha_nacimiento, genero, telefono)
+      VALUES (?,?,?,?,?,?)
+      ON DUPLICATE KEY UPDATE dni_persona = dni_persona
+      `, [dni, nombre, apellido, fecha_nacimiento, genero, telefono ?? null])
+  }
+
+  static async insertCuenta({ dni, correo, password_hash, role }, db) {
+    await db.query(`
+      INSERT INTO persona_rol
+        (dni_persona, correo, password_hash, id_rol)
+      VALUES
+        (?,?,?, (SELECT id_rol FROM rol WHERE nombre = ?))
+      `, [dni, correo, password_hash, role])
+  }
+
+  static async insertPerfilCliente({ dni, id_obra_social, numero_afiliado }, db) {
+    await db.query(`
+      INSERT INTO cliente
+        (dni_cliente, id_obra_social, numero_afiliado, id_rol)
+      VALUES (?,?,?, (SELECT id_rol FROM rol WHERE nombre = "cliente"))
+      `, [dni, id_obra_social ?? null, numero_afiliado ?? null])
+  }
+
+  static async insertPerfilProfesional({ dni, numero_matricula }, db) {
+    await db.query(`
+      INSERT INTO profesional
+        (dni_profesional, numero_matricula, id_rol)
+      VALUES (?,?, (SELECT id_rol FROM rol WHERE nombre = "profesional"))
+      `, [dni, numero_matricula])
   }
 
   static async getDniByCorreo({ correo, role }) {

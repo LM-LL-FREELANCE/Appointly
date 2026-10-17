@@ -16,7 +16,7 @@ export function NavbarFooter({ onNavigate }) {
         label="Configuración"
         leftSection={<IconSettings size={20} stroke={1.5} />}
         component={Link}
-        to="/miperfil"
+        to={user?.role === 'admin' ? '/admin/configuracion' : '/miperfil'}
         onClick={onNavigate}
         className={navLinkClassName}
         styles={navLinkStyles}

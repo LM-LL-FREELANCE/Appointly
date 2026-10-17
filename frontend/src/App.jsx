@@ -10,6 +10,7 @@ import {
   IconSearch,
   IconCalendarPlus,
   IconCalendarEvent,
+  IconMailPlus,
 } from '@tabler/icons-react'
 import { useAuth } from './hooks/useAuth.js'
 import { ProtectedRoute } from './components/ProtectedRoute.jsx'
@@ -17,8 +18,9 @@ import { ProtectedRoute } from './components/ProtectedRoute.jsx'
 /*Auth components (lazy loaded) */
 const Login = lazy(() => import('./pages/Login.jsx'))
 const SignUp = lazy(() => import('./pages/SignUp.jsx'))
-const ProfessionalLogin = lazy(() => import('./pages/ProfessionalLogin.jsx'))
-const ProfessionalSignUp = lazy(() => import('./pages/ProfessionalSignUp.jsx'))
+const RoleLogin = lazy(() => import('./pages/RoleLogin.jsx'))
+const ProfessionalInvitation = lazy(() => import('./pages/ProfessionalInvitation.jsx'))
+const AdminInvitation = lazy(() => import('./pages/AdminInvitation.jsx'))
 const ResetPassword = lazy(() => import('./pages/ResetPassword.jsx'))
 
 /*Other components (lazy loaded) */
@@ -32,6 +34,9 @@ const MisTurnos = lazy(() => import('./pages/client/MisTurnos/MisTurnos.jsx'))
 const User = lazy(() => import('./pages/User.jsx'))
 const MiPerfil = lazy(() => import('./pages/MiPerfil.jsx'))
 const Inicio = lazy(() => import('./pages/Inicio.jsx'))
+const AdminInicio = lazy(() => import('./pages/admin/AdminInicio.jsx'))
+const AdminInvitaciones = lazy(() => import('./pages/admin/AdminInvitaciones.jsx'))
+const AdminConfiguracion = lazy(() => import('./pages/admin/AdminConfiguracion.jsx'))
 
 /*Layout & static components */
 import MainLayout from './MainLayout.jsx'
@@ -46,6 +51,14 @@ export default function App() {
     { label: "Horarios de Atención", path: "/horarios", element: <Horarios />, icon: IconClock },
   ]
 
+  const linksForAdmin = [
+    { label: "Inicio", path: "/admin", element: <AdminInicio />, icon: IconLayoutDashboard },
+    { label: "Invitaciones", path: "/admin/invitaciones", element: <AdminInvitaciones />, icon: IconMailPlus },
+  ]
+  // "Configuración" is not listed here: the sidebar footer already links to it
+  // (together with the theme toggle and logout), so it only needs its route.
+  const adminConfigRoute = { path: "/admin/configuracion", element: <AdminConfiguracion /> }
+
   const defaultLinks = [
     { label: "Inicio", path: "/", element: <Inicio />, icon: IconHome2 },
     { label: "Buscar Doctores", path: "/buscar", element: <Buscar />, icon: IconSearch },
@@ -53,14 +66,17 @@ export default function App() {
     { label: "Mis Turnos", path: "/misturnos/*", element: <MisTurnos />, icon: IconCalendarEvent },
   ]
 
-  const links = (user?.role === "profesional") ? linksForProfesional : defaultLinks
+  const linksByRole = { profesional: linksForProfesional, admin: linksForAdmin }
+  const links = linksByRole[user?.role] ?? defaultLinks
 
   return (
     <Suspense fallback={<Center h="100vh"><Loader /></Center>}>
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/professional-login" element={<ProfessionalLogin />} />
-        <Route path="/professional-signup" element={<ProfessionalSignUp />} />
+        <Route path="/professional-login" element={<RoleLogin role="profesional" />} />
+        <Route path="/registro/profesional/:token" element={<ProfessionalInvitation />} />
+        <Route path="/admin-login" element={<RoleLogin role="admin" />} />
+        <Route path="/registro/admin/:token" element={<AdminInvitation />} />
         <Route path="/registrarse" element={<SignUp />} />
         <Route path="/resetear-contraseña/:token?" element={<ResetPassword />} />
 
@@ -75,6 +91,11 @@ export default function App() {
 
           <Route element={<ProtectedRoute roles={['profesional']} />}>
             {linksForProfesional.map(link => <Route key={link.path} path={link.path} element={link.element} />)}
+          </Route>
+
+          <Route element={<ProtectedRoute roles={['admin']} loginPath="/admin-login" />}>
+            {linksForAdmin.map(link => <Route key={link.path} path={link.path} element={link.element} />)}
+            <Route path={adminConfigRoute.path} element={adminConfigRoute.element} />
           </Route>
 
         </Route>

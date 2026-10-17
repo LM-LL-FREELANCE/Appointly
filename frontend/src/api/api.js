@@ -30,6 +30,7 @@ export async function request(path, options = {}) {
 }
 
 export const login = (credentials) => request('/api/auth/login', { method: 'POST', body: JSON.stringify(credentials) })
+export const registrarCuenta = (data) => request('/api/auth/registro', { method: 'POST', body: JSON.stringify(data) })
 export const logout = () => request('/api/auth/logout', { method: 'POST' })
 export const getMe = () => request('/api/auth/me')
 export const sentEmailPassword = (data) => request('/api/auth/forgot-password', { method: 'POST', body: JSON.stringify(data) })

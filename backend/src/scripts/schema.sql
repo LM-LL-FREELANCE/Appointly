@@ -48,6 +48,8 @@ CREATE TABLE persona (
 -- Como se autentica una persona en un rol. Una fila = una cuenta.
 -- PK compuesta (dni_persona, id_rol): una sola cuenta por persona y rol.
 -- UNIQUE (correo, id_rol): el mismo correo puede reusarse en otro rol.
+-- No hay estado de aprobacion: cliente se registra solo, y profesional y admin
+-- se crean unicamente desde una invitacion, que ya es la autorizacion.
 
 CREATE TABLE persona_rol (
     dni_persona INT UNSIGNED NOT NULL,
@@ -73,7 +75,6 @@ CREATE TABLE profesional (
     dni_profesional INT UNSIGNED PRIMARY KEY,
     id_rol INT UNSIGNED NOT NULL DEFAULT 2,
     numero_matricula VARCHAR(30) NOT NULL UNIQUE,
-    estado_validacion ENUM('pendiente', 'aprobado', 'rechazado') NOT NULL DEFAULT 'pendiente',
     duracion_turno_min INT UNSIGNED NOT NULL DEFAULT 30,
     FOREIGN KEY (dni_profesional, id_rol) REFERENCES persona_rol(dni_persona, id_rol) ON DELETE CASCADE,
     CONSTRAINT chk_profesional_rol CHECK (id_rol = 2)
@@ -150,4 +151,29 @@ CREATE TABLE turno (
     FOREIGN KEY (dni_cliente) REFERENCES cliente(dni_cliente),
     INDEX idx_turno_profesional_fecha (dni_profesional, fecha_turno),
     INDEX idx_turno_cliente (dni_cliente)
+);
+
+
+-- invitacion
+-- Invitaciones para crear cuentas con privilegios (hoy solo admin). El token
+-- NUNCA se guarda en claro: solo su sha256 (token_hash). Una invitacion es
+-- valida si usada_en IS NULL, revocada_en IS NULL y expira_en > NOW().
+-- Se consume con un UPDATE atomico dentro de la misma transaccion que crea la
+-- cuenta. dni_persona no tiene FK: la persona puede no existir todavia.
+-- creado_por es NULL para invitaciones emitidas desde consola (primer admin).
+
+CREATE TABLE invitacion (
+    id_invitacion INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    token_hash CHAR(64) NOT NULL UNIQUE,
+    dni_persona INT UNSIGNED NOT NULL,
+    correo VARCHAR(255) NOT NULL,
+    id_rol INT UNSIGNED NOT NULL,
+    creado_por INT UNSIGNED NULL,
+    creada_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    expira_en TIMESTAMP NOT NULL,
+    usada_en TIMESTAMP NULL DEFAULT NULL,
+    revocada_en TIMESTAMP NULL DEFAULT NULL,
+    FOREIGN KEY (id_rol) REFERENCES rol(id_rol),
+    FOREIGN KEY (creado_por) REFERENCES persona(dni_persona) ON DELETE SET NULL,
+    INDEX idx_invitacion_dni_rol (dni_persona, id_rol)
 );
