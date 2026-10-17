@@ -16,13 +16,14 @@ const DIAS_VENTANA = 30
 // Picks a new date (only days with free slots), a time and an optional reason, then calls
 // POST /turnos/:id/reprogramacion. Stays open on error so another slot can be chosen.
 export function ReprogramarTurnoModal({ opened, onClose, turno, dniProfesional, ahora = ahoraEnZona() }) {
+  const isOpened = opened !== undefined ? Boolean(opened) : Boolean(turno)
   const [fecha, setFecha] = useState(null)
   const [hora, setHora] = useState(null)
   const [motivo, setMotivo] = useState('')
 
   const { desde, hasta } = ventanaReprogramacion(ahora, DIAS_VENTANA)
   const { data: slotData, isLoading, isError, error, refetch } = useSlots({
-    dni: opened ? dniProfesional : undefined,
+    dni: isOpened ? dniProfesional : undefined,
     desde,
     hasta,
   })
@@ -61,7 +62,7 @@ export function ReprogramarTurnoModal({ opened, onClose, turno, dniProfesional, 
 
   return (
     <Modal
-      opened={opened}
+      opened={isOpened}
       onClose={cerrar}
       centered
       size="md"

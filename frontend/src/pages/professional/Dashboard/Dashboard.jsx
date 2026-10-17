@@ -12,7 +12,7 @@ import useSlots from '../../../hooks/useSlots.jsx'
 import { useIsDesktop } from '../../../hooks/useIsDesktop.js'
 import { IconChartBar } from '@tabler/icons-react'
 import QueryError from '../../../components/QueryError.jsx'
-import { esAbierto } from '../../../utils/estadosTurno.js'
+import { esAbierto, calcularProximoTurno } from '../../../utils/estadosTurno.js'
 
 const DIA_LABEL = ['D', 'L', 'M', 'X', 'J', 'V', 'S']
 
@@ -98,6 +98,7 @@ export default function Dashboard() {
   const turnosDeHoy = turnos
     .filter((t) => t.fecha_turno?.slice(0, 10) === startDateISO)
     .map((t) => ({
+      ...t,
       id: t.id_turno,
       hora: t.hora_turno?.slice(0, 5),
       paciente: `${t.nombre} ${t.apellido}`,
@@ -107,17 +108,8 @@ export default function Dashboard() {
       estado: t.estado,
     }))
 
-  const minAhora = new Date().getHours() * 60 + new Date().getMinutes()
-  const proximoTurno = turnos.find((t) => {
-    if (!esAbierto(t.estado)) return false
-    const fecha = t.fecha_turno?.slice(0, 10)
-    if (fecha > startDateISO) return true
-    if (fecha === startDateISO) {
-      const [h, m] = (t.hora_turno ?? '').split(':').map(Number)
-      return h * 60 + m >= minAhora
-    }
-    return false
-  }) ?? null
+  const proximoTurnoInfo = calcularProximoTurno({ turnos })
+  const proximoTurno = proximoTurnoInfo.turno
 
   const isDesktop = useIsDesktop('sm')
   const saludo = perfil ? `Hola, ${perfil.nombre} ${perfil.apellido}` : 'Hola'
@@ -151,8 +143,12 @@ export default function Dashboard() {
             <StatCard label="Cancelados" value={cancelados7d} color="red" />
             <StatCard label="Slots libres" value={freeSlotsToday} color="cyan" />
           </SimpleGrid>
-          <ProximoTurno turno={proximoTurno} isDesktop={isDesktop} />
-          <TurnosDeHoy turnos={turnosDeHoy} />
+          <ProximoTurno
+            turno={proximoTurno}
+            estadoJornada={proximoTurnoInfo.estadoJornada}
+            dniProfesional={user?.dni}
+          />
+          <TurnosDeHoy turnos={turnosDeHoy} dniProfesional={user?.dni} />
           <TurnosPorDia data={barData} />
         </Stack>
       )}
@@ -173,10 +169,14 @@ export default function Dashboard() {
           <StatCard label="Cancelados" value={cancelados7d} color="red" />
           <StatCard label="Slots libres hoy" value={freeSlotsToday} color="cyan" />
 
-          <TurnosDeHoy turnos={turnosDeHoy} />
+          <TurnosDeHoy turnos={turnosDeHoy} dniProfesional={user?.dni} />
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, minHeight: 0 }}>
-            <ProximoTurno turno={proximoTurno} isDesktop={isDesktop} />
+            <ProximoTurno
+              turno={proximoTurno}
+              estadoJornada={proximoTurnoInfo.estadoJornada}
+              dniProfesional={user?.dni}
+            />
             <TurnosPorDia data={barData} />
           </div>
         </Box>

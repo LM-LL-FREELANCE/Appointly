@@ -109,3 +109,54 @@ export function diasReprogramables({ dias, ahora = ahoraEnZona(), original }) {
     }))
     .filter((dia) => dia.slots.length > 0)
 }
+
+// --- Próximo turno logic for the professional dashboard -----------------------------------
+// Rules:
+// 1. Strictly turnos of today in Buenos Aires time (fechaISODeApi(t.fecha_turno) === ahora.fecha).
+//    Never shows turnos of tomorrow, next week, or weekends if today has no turnos.
+// 2. Priority 1: any turno currently 'en_curso' today.
+// 3. From start of the day (00:00), the next open upcoming turno of today is shown.
+// 4. Returns { turno, estadoJornada, primerTurnoHora } where estadoJornada is:
+//    - 'activo': there is an active/upcoming turno right now.
+//    - 'finalizada': had turnos today, but all their hours have passed or they are closed.
+//    - 'sin_turnos': no turnos scheduled for today at all.
+export function calcularProximoTurno({ turnos = [], ahora = ahoraEnZona() }) {
+  const turnosHoy = turnos.filter((t) => fechaISODeApi(t.fecha_turno) === ahora.fecha)
+
+  if (turnosHoy.length === 0) {
+    return { turno: null, estadoJornada: 'sin_turnos', primerTurnoHora: null }
+  }
+
+  // 1. Any turno currently in course takes top priority:
+  const enCurso = turnosHoy.find((t) => t.estado === 'en_curso')
+  if (enCurso) {
+    return { turno: enCurso, estadoJornada: 'activo', primerTurnoHora: String(enCurso.hora_turno).slice(0, 5) }
+  }
+
+  const [hAhora, mAhora] = (ahora.hora ?? '00:00').split(':').map(Number)
+  const minAhora = hAhora * 60 + mAhora
+
+  const turnosAbiertosHoy = turnosHoy
+    .filter((t) => esAbierto(t.estado))
+    .map((t) => {
+      const [h, m] = String(t.hora_turno ?? '00:00').slice(0, 5).split(':').map(Number)
+      return { turno: t, min: h * 60 + m, horaStr: String(t.hora_turno).slice(0, 5) }
+    })
+    .sort((a, b) => a.min - b.min)
+
+  if (turnosAbiertosHoy.length === 0) {
+    return { turno: null, estadoJornada: 'finalizada', primerTurnoHora: null }
+  }
+
+  // Turnos that have not yet ended (min >= minAhora):
+  const turnosFuturos = turnosAbiertosHoy.filter((t) => t.min >= minAhora)
+
+  if (turnosFuturos.length === 0) {
+    return { turno: null, estadoJornada: 'finalizada', primerTurnoHora: null }
+  }
+
+  const primerTurno = turnosFuturos[0]
+
+  return { turno: primerTurno.turno, estadoJornada: 'activo', primerTurnoHora: primerTurno.horaStr }
+}
+

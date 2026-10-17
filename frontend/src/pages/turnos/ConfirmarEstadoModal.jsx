@@ -5,7 +5,18 @@ import { fechaCorta, horaCorta } from '../../utils/fechas.utils.js'
 
 // Confirmation for state changes that are hard to undo (ausente, completado).
 // `accion` is an entry of accionesProfesional(); the motivo is optional and goes to the history.
-export function ConfirmarEstadoModal({ opened, onClose, onConfirm, turno, accion, isPending }) {
+export function ConfirmarEstadoModal({
+  opened,
+  onClose,
+  onConfirm,
+  turno: turnoProp,
+  accion: accionProp,
+  confirmacion,
+  isPending,
+}) {
+  const turno = turnoProp ?? confirmacion?.turno
+  const accion = accionProp ?? confirmacion?.accion
+  const isOpened = opened !== undefined ? Boolean(opened) : Boolean(turno && accion)
   const [motivo, setMotivo] = useState('')
 
   if (!turno || !accion) return null
@@ -18,7 +29,7 @@ export function ConfirmarEstadoModal({ opened, onClose, onConfirm, turno, accion
 
   return (
     <Modal
-      opened={opened}
+      opened={isOpened}
       onClose={cerrar}
       centered
       size="sm"

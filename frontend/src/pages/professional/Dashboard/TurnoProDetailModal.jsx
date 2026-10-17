@@ -1,31 +1,23 @@
-import { Box, Button, Divider, Grid, Group, Modal, Text } from '@mantine/core'
+import { Box, Button, Divider, Group, Modal, Stack, Text } from '@mantine/core'
 import { useQuery } from '@tanstack/react-query'
+import { IconHistory, IconCalendarEvent, IconX } from '@tabler/icons-react'
 import { getTurnoById } from '../../../api/clientes.js'
 import QueryError from '../../../components/QueryError.jsx'
 import { EstadoTurnoBadge } from '../../../components/EstadoTurnoBadge.jsx'
-import { esCancelable } from '../../../utils/estadosTurno.js'
+import { esCancelable, esReprogramable } from '../../../utils/estadosTurno.js'
 
-function DetailRow({ label, children }) {
-  return (
-    <>
-      <Grid py="md" align="center">
-        <Grid.Col span={5}>
-          <Text fz="sm" c="dimmed">{label}</Text>
-        </Grid.Col>
-        <Grid.Col span={7}>
-          {children}
-        </Grid.Col>
-      </Grid>
-      <Divider />
-    </>
-  )
-}
-
-export function TurnoProDetailModal({ opened, onClose, onCancelRequest, turno }) {
+export function TurnoProDetailModal({
+  opened,
+  onClose,
+  onCancelRequest,
+  onReprogramar,
+  onAbrirHistorial,
+  turno,
+}) {
   const { data: detail, isError, error, refetch } = useQuery({
     queryKey: ['turno', turno?.id_turno],
     queryFn: () => getTurnoById(turno?.id_turno),
-    enabled: opened && !!turno?.id_turno
+    enabled: opened && !!turno?.id_turno,
   })
 
   const reservadoEl = detail?.creado_en
@@ -35,56 +27,112 @@ export function TurnoProDetailModal({ opened, onClose, onCancelRequest, turno })
     }).replace(',', ' ·')
     : null
 
+  const pacienteNombre = detail
+    ? `${detail.c_nombre} ${detail.c_apellido}`.trim()
+    : `${turno?.nombre ?? ''} ${turno?.apellido ?? ''}`.trim()
+
   return (
     <Modal
       opened={opened}
       onClose={onClose}
       centered
-      size="md"
+      size="sm"
       withCloseButton={false}
       styles={{ body: { padding: 0 } }}
       overlayProps={{ backgroundOpacity: 0.5, blur: 7 }}
     >
-      <Box px="lg" pt="lg" pb="md">
-        <Text fw={700} fz="lg" mb="lg">Detalle del turno</Text>
-        <Divider />
+      <Box px="md" pt="md" pb="xs">
+        <Group justify="space-between" align="center" mb="xs">
+          <Text fw={700} fz="md">Detalle del turno</Text>
+          {turno?.estado && (
+            <EstadoTurnoBadge estado={turno.estado} size="sm" />
+          )}
+        </Group>
+        <Divider mb="sm" />
+
         {isError ? (
-          <QueryError message={error?.message || "No se pudo cargar el detalle del turno"} onRetry={refetch} />
+          <QueryError message={error?.message || 'No se pudo cargar el detalle del turno'} onRetry={refetch} />
         ) : (
-          <>
-            <DetailRow label="Paciente">
-              <Text fz="sm" fw={500}>
-                {detail ? `${detail.c_nombre} ${detail.c_apellido}` : `${turno.nombre} ${turno.apellido}`}
-              </Text>
-            </DetailRow>
+          <Stack gap="xs">
+            <Group justify="space-between" align="baseline" py={2}>
+              <Text fz="sm" c="dimmed">Paciente</Text>
+              <Text fz="sm" fw={600} ta="right">{pacienteNombre || '—'}</Text>
+            </Group>
+
             {detail?.tipo && (
-              <DetailRow label="Especialidad">
-                <Text fz="sm" fw={500}>{detail.tipo}</Text>
-              </DetailRow>
+              <Group justify="space-between" align="baseline" py={2}>
+                <Text fz="sm" c="dimmed">Especialidad</Text>
+                <Text fz="sm" fw={500} ta="right">{detail.tipo}</Text>
+              </Group>
             )}
-            <DetailRow label="Fecha">
-              <Text fz="sm" fw={500}>{turno.fecha_turno?.slice(0, 10)}</Text>
-            </DetailRow>
-            <DetailRow label="Hora">
-              <Text fz="sm" fw={500}>{turno.hora_turno?.slice(0, 5)} hs</Text>
-            </DetailRow>
-            <DetailRow label="Estado">
-              <EstadoTurnoBadge estado={turno.estado} />
-            </DetailRow>
+
+            <Group justify="space-between" align="baseline" py={2}>
+              <Text fz="sm" c="dimmed">Fecha</Text>
+              <Text fz="sm" fw={500} ta="right">{turno?.fecha_turno?.slice(0, 10)}</Text>
+            </Group>
+
+            <Group justify="space-between" align="baseline" py={2}>
+              <Text fz="sm" c="dimmed">Hora</Text>
+              <Text fz="sm" fw={500} ta="right">{turno?.hora_turno?.slice(0, 5)} hs</Text>
+            </Group>
+
             {reservadoEl && (
-              <DetailRow label="Reservado el">
-                <Text fz="sm" fw={500}>{reservadoEl}</Text>
-              </DetailRow>
+              <Group justify="space-between" align="baseline" py={2}>
+                <Text fz="sm" c="dimmed">Reservado el</Text>
+                <Text fz="xs" c="dimmed" ta="right">{reservadoEl}</Text>
+              </Group>
             )}
-          </>
+          </Stack>
         )}
       </Box>
-      <Box px="lg" py="md">
-        <Group justify="flex-end" gap="sm">
-          {esCancelable(turno.estado) && (
-            <Button variant="subtle" color="red" onClick={onCancelRequest}>Cancelar turno</Button>
-          )}
-          <Button variant="default" onClick={onClose}>Cerrar</Button>
+
+      <Divider mt="xs" />
+
+      <Box px="md" py="sm">
+        <Group justify="space-between" gap="xs" wrap="wrap">
+          {onAbrirHistorial ? (
+            <Button
+              variant="subtle"
+              size="xs"
+              leftSection={<IconHistory size={14} />}
+              onClick={() => {
+                onClose()
+                onAbrirHistorial(turno)
+              }}
+            >
+              Historial
+            </Button>
+          ) : <div />}
+
+          <Group gap="xs" ml="auto">
+            {esReprogramable(turno?.estado) && onReprogramar && (
+              <Button
+                variant="light"
+                size="xs"
+                leftSection={<IconCalendarEvent size={14} />}
+                onClick={() => {
+                  onClose()
+                  onReprogramar(turno)
+                }}
+              >
+                Reprogramar
+              </Button>
+            )}
+            {esCancelable(turno?.estado) && onCancelRequest && (
+              <Button
+                variant="subtle"
+                color="red"
+                size="xs"
+                leftSection={<IconX size={14} />}
+                onClick={onCancelRequest}
+              >
+                Cancelar
+              </Button>
+            )}
+            <Button variant="default" size="xs" onClick={onClose}>
+              Cerrar
+            </Button>
+          </Group>
         </Group>
       </Box>
     </Modal>

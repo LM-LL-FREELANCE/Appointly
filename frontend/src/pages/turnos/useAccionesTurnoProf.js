@@ -48,7 +48,7 @@ export function useAccionesTurnoProf() {
     cerrarConfirmacion: () => !cambiarEstado.isPending && setConfirmacion(null),
     cancelar,
     historialId,
-    abrirHistorial: (turno) => setHistorialId(turno.id_turno),
+    abrirHistorial: (turno) => setHistorialId(typeof turno === 'number' ? turno : (turno?.id_turno ?? turno?.id)),
     cerrarHistorial: () => setHistorialId(null),
     reprogramando,
     cerrarReprogramar: () => setReprogramando(null),
