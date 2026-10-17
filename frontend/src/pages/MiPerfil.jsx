@@ -419,7 +419,7 @@ export default function MiPerfil() {
   })
 
   const perfilData = user?.role === 'profesional' ? perfil : perfilCliente
-  const formKey = `${user?.dni || 'guest'}-${perfilData ? 'loaded' : 'loading'}`
+  const formKey = `${user?.dni}-${perfilData ? 'loaded' : 'loading'}`
 
   return <MiPerfilContent key={formKey} user={user} perfilData={perfilData} />
 }
