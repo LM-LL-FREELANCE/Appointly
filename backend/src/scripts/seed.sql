@@ -34,7 +34,6 @@ INSERT INTO obra_social (id_obra_social, nombre_obra_social) VALUES
 -- persona
 -- Aguirre aparece una sola vez: es la misma persona que despues asume
 -- el rol profesional Y el rol admin (Caso 2 del DER).
-
 INSERT INTO persona
 (dni_persona, nombre, apellido, fecha_nacimiento, genero, telefono, foto_url) VALUES
 -- profesionales
