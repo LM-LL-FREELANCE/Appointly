@@ -41,7 +41,9 @@ export const calcularEdad = (fecha) => {
 export const buildRegistroPayload = (role, values, { hidePersonalData = false, includeExistingPassword = false } = {}) => {
   const payload = { password: values.password, confirm: values.confirm }
 
-  if (role !== 'admin') {
+  // Only cliente sends DNI and correo on signup.
+  // profesional and admin register through an invitation token where DNI and correo are fixed.
+  if (role === 'cliente') {
     payload.dni = values.dni
     payload.correo = values.correo
   }
