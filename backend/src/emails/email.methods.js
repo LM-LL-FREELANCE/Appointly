@@ -14,6 +14,14 @@ const getResend = () => {
 const escapeHtml = (value) => String(value ?? '')
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
+// Cuerpo compartido de los comunicados: asunto como titulo + mensaje con los
+// saltos de linea respetados.
+const comunicadoHtml = ({ asunto, mensaje }) => `
+  <h2>${escapeHtml(asunto)}</h2>
+  ${escapeHtml(mensaje).replace(/\r?\n/g, '<br>')}
+  <p>Saludos,<br>Equipo de Appointly</p>
+`;
+
 // Shared sender for the account/invitation emails: one place for the
 // from/error handling instead of repeating it per message.
 const sendMail = async ({ to, subject, html, errorLabel }) => {
@@ -142,6 +150,145 @@ export class EmailMethods {
     }
 
     return data;
+  }
+
+  // ---- Panel de administracion (PLAN_ADMIN.md) ----
+
+  /**
+   * Segundo factor del admin: codigo de 6 digitos con TTL corto.
+   */
+  static async mfaCodigo({ correo, codigo, minutos }) {
+    return sendMail({
+      to: correo,
+      subject: 'Tu código de acceso',
+      errorLabel: 'código de verificación',
+      html: `
+      <p>Tu código de verificación para entrar al panel de Appointly es:</p>
+      <p style="font-size: 32px; font-weight: 700; letter-spacing: 8px;">${escapeHtml(codigo)}</p>
+      <p>Vence en ${minutos} minutos y se puede usar una sola vez.</p>
+      <p>Nadie de Appointly te va a pedir este código. Si no intentaste iniciar sesión, ignorá este mensaje.</p>
+      `,
+    });
+  }
+
+  /**
+   * Cancelacion hecha por un admin: avisa a AMBAS partes (cliente y
+   * profesional) por la misma cancelacion.
+   */
+  static async turnoCanceladoPorAdmin({ turno, motivo }) {
+    const fecha = new Date(turno.fecha_turno).toLocaleDateString('es-AR', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      timeZone: 'UTC',
+    });
+    const hora = turno.hora_turno?.slice(0, 5);
+    const motivoHtml = motivo ? `<p><strong>Motivo:</strong> ${escapeHtml(motivo)}</p>` : '';
+
+    const enviar = (to, nombre, contraparte) => sendMail({
+      to,
+      subject: 'Tu turno fue cancelado',
+      errorLabel: 'cancelación por admin',
+      html: `
+        <p>Hola <strong>${escapeHtml(nombre)}</strong>,</p>
+        <p>La administración del centro canceló el turno del día <strong>${fecha}</strong> a las <strong>${hora} hs</strong> entre <strong>${escapeHtml(contraparte)}</strong>.</p>
+        ${motivoHtml}
+        <p>Si necesitás reprogramar, podés hacerlo desde la plataforma.</p>
+        <p>Saludos,<br>Equipo de Appointly</p>
+      `,
+    });
+
+    const [cliente, profesional] = await Promise.all([
+      enviar(turno.c_correo, turno.c_nombre, `${turno.p_nombre} ${turno.p_apellido}`),
+      enviar(turno.p_correo, `${turno.p_nombre} ${turno.p_apellido}`, `${turno.c_nombre} ${turno.c_apellido}`),
+    ]);
+
+    return { cliente, profesional };
+  }
+
+  /**
+   * Reasignacion de un turno a otro profesional: avisa al cliente (cambio de
+   * profesional) y al profesional nuevo (turno asignado).
+   */
+  static async turnoReasignado({ turno, profesionalNuevo }) {
+    const fecha = new Date(turno.fecha_turno).toLocaleDateString('es-AR', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      timeZone: 'UTC',
+    });
+    const hora = turno.hora_turno?.slice(0, 5);
+    const nombreNuevo = `${profesionalNuevo.nombre} ${profesionalNuevo.apellido}`;
+
+    const [cliente, profesional] = await Promise.all([
+      sendMail({
+        to: turno.c_correo,
+        subject: 'Tu turno cambió de profesional',
+        errorLabel: 'reasignación al cliente',
+        html: `
+          <p>Hola <strong>${escapeHtml(turno.c_nombre)}</strong>,</p>
+          <p>Tu turno del día <strong>${fecha}</strong> a las <strong>${hora} hs</strong> ahora va a ser con <strong>${escapeHtml(nombreNuevo)}</strong>.</p>
+          <p>La fecha y el horario se mantienen. Si tenés alguna duda, contactá a la administración del centro.</p>
+          <p>Saludos,<br>Equipo de Appointly</p>
+        `,
+      }),
+      sendMail({
+        to: profesionalNuevo.correo,
+        subject: 'Te asignaron un turno',
+        errorLabel: 'reasignación al profesional',
+        html: `
+          <p>Hola <strong>${escapeHtml(nombreNuevo)}</strong>,</p>
+          <p>La administración del centro te asignó un turno con <strong>${escapeHtml(`${turno.c_nombre} ${turno.c_apellido}`)}</strong> para el día <strong>${fecha}</strong> a las <strong>${hora} hs</strong>.</p>
+          <p>Podés verlo en tu agenda.</p>
+          <p>Saludos,<br>Equipo de Appointly</p>
+        `,
+      }),
+    ]);
+
+    return { cliente, profesional };
+  }
+
+  /**
+   * Comunicado individual del centro (asunto + mensaje libres).
+   */
+  static async comunicado({ correo, asunto, mensaje }) {
+    return sendMail({
+      to: correo,
+      subject: asunto,
+      errorLabel: 'comunicado',
+      html: comunicadoHtml({ asunto, mensaje }),
+    });
+  }
+
+  /**
+   * Comunicado masivo: usa el batch de Resend en lotes de 100.
+   * Devuelve los conteos para el historial (exitos/fallos).
+   */
+  static async comunicadoLote({ destinatarios, asunto, mensaje }) {
+    const CHUNK = 100;
+    const html = comunicadoHtml({ asunto, mensaje });
+    let exitos = 0;
+    let fallos = 0;
+
+    for (let i = 0; i < destinatarios.length; i += CHUNK) {
+      const lote = destinatarios.slice(i, i + CHUNK);
+      try {
+        const { error } = await getResend().batch.send(
+          lote.map((to) => ({ from: process.env.EMAIL_FROM, to, subject: asunto, html })),
+        );
+        if (error) {
+          console.error('Error de Resend (comunicado masivo):', error);
+          fallos += lote.length;
+        } else {
+          exitos += lote.length;
+        }
+      } catch (err) {
+        console.error('Error de Resend (comunicado masivo):', err);
+        fallos += lote.length;
+      }
+    }
+
+    return { exitos, fallos };
   }
 
 }

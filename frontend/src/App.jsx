@@ -11,6 +11,10 @@ import {
   IconCalendarPlus,
   IconCalendarEvent,
   IconMailPlus,
+  IconCalendarStats,
+  IconUsers,
+  IconSpeakerphone,
+  IconBooks,
 } from '@tabler/icons-react'
 import { useAuth } from './hooks/useAuth.js'
 import { ProtectedRoute } from './components/ProtectedRoute.jsx'
@@ -37,6 +41,11 @@ const Inicio = lazy(() => import('./pages/Inicio.jsx'))
 const AdminInicio = lazy(() => import('./pages/admin/AdminInicio.jsx'))
 const AdminInvitaciones = lazy(() => import('./pages/admin/AdminInvitaciones.jsx'))
 const AdminConfiguracion = lazy(() => import('./pages/admin/AdminConfiguracion.jsx'))
+const AdminUsuarios = lazy(() => import('./pages/admin/AdminUsuarios.jsx'))
+const AdminUsuarioDetalle = lazy(() => import('./pages/admin/AdminUsuarioDetalle.jsx'))
+const AdminTurnos = lazy(() => import('./pages/admin/AdminTurnos.jsx'))
+const AdminComunicaciones = lazy(() => import('./pages/admin/AdminComunicaciones.jsx'))
+const AdminCatalogos = lazy(() => import('./pages/admin/AdminCatalogos.jsx'))
 
 /*Layout & static components */
 import MainLayout from './MainLayout.jsx'
@@ -51,13 +60,20 @@ export default function App() {
     { label: "Horarios de Atención", path: "/horarios", element: <Horarios />, icon: IconClock },
   ]
 
+  // Orden por frecuencia de uso diario (DISENO_ADMIN.md §3.1): el monitor de
+  // turnos es la pantalla operativa principal.
   const linksForAdmin = [
     { label: "Inicio", path: "/admin", element: <AdminInicio />, icon: IconLayoutDashboard },
+    { label: "Turnos", path: "/admin/turnos", element: <AdminTurnos />, icon: IconCalendarStats },
+    { label: "Usuarios", path: "/admin/usuarios", element: <AdminUsuarios />, icon: IconUsers },
+    { label: "Comunicaciones", path: "/admin/comunicaciones", element: <AdminComunicaciones />, icon: IconSpeakerphone },
+    { label: "Catálogos", path: "/admin/catalogos", element: <AdminCatalogos />, icon: IconBooks },
     { label: "Invitaciones", path: "/admin/invitaciones", element: <AdminInvitaciones />, icon: IconMailPlus },
   ]
   // "Configuración" is not listed here: the sidebar footer already links to it
   // (together with the theme toggle and logout), so it only needs its route.
   const adminConfigRoute = { path: "/admin/configuracion", element: <AdminConfiguracion /> }
+  const adminUsuarioDetalleRoute = { path: "/admin/usuarios/:dni/:rol", element: <AdminUsuarioDetalle /> }
 
   const defaultLinks = [
     { label: "Inicio", path: "/", element: <Inicio />, icon: IconHome2 },
@@ -96,6 +112,7 @@ export default function App() {
           <Route element={<ProtectedRoute roles={['admin']} loginPath="/admin-login" />}>
             {linksForAdmin.map(link => <Route key={link.path} path={link.path} element={link.element} />)}
             <Route path={adminConfigRoute.path} element={adminConfigRoute.element} />
+            <Route path={adminUsuarioDetalleRoute.path} element={adminUsuarioDetalleRoute.element} />
           </Route>
 
         </Route>
