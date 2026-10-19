@@ -5,7 +5,7 @@
   "main": "app.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node --env-file=.env --test \"test/*.test.js\"",
     "dev": "node --watch --env-file=.env src/server.js",
     "start": "node src/server.js",
     "db:schema": "node --env-file=.env src/scripts/run_sql.js schema.sql",

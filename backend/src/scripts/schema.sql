@@ -143,20 +143,49 @@ CREATE TABLE turno (
     id_turno INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     fecha_turno DATE NOT NULL,
     hora_turno TIME NOT NULL,
-    estado ENUM('activo', 'cancelado', 'completado', 'ausente') NOT NULL DEFAULT 'activo',
+    -- Ciclo de vida: pendiente_confirmacion -> confirmado -> en_espera -> en_curso
+    -- -> completado. Salidas: ausente, reprogramado (movido antes de ocurrir),
+    -- cancelado. Reglas de transicion en services/turnos.service.js.
+    estado ENUM('pendiente_confirmacion', 'confirmado', 'en_espera', 'en_curso',
+                'completado', 'ausente', 'reprogramado', 'cancelado')
+        NOT NULL DEFAULT 'confirmado',
     dni_profesional INT UNSIGNED NOT NULL,
     dni_cliente INT UNSIGNED NOT NULL,
+    -- Turno del que nace este (reprogramacion, o recupero de un ausente).
+    id_turno_origen INT UNSIGNED NULL,
     motivo_cancelacion VARCHAR(255),
     creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     cancelado_en TIMESTAMP NULL DEFAULT NULL,
     completado_en TIMESTAMP NULL DEFAULT NULL,
-    ausente_en TIMESTAMP NULL DEFAULT NULL,
     FOREIGN KEY (dni_profesional) REFERENCES profesional(dni_profesional),
     FOREIGN KEY (dni_cliente) REFERENCES cliente(dni_cliente),
+    FOREIGN KEY (id_turno_origen) REFERENCES turno(id_turno) ON DELETE SET NULL,
     INDEX idx_turno_profesional_fecha (dni_profesional, fecha_turno),
     INDEX idx_turno_cliente (dni_cliente),
     INDEX idx_turno_fecha (fecha_turno),
     INDEX idx_turno_estado_fecha (estado, fecha_turno)
+);
+
+
+-- turno_evento
+-- Historial de cambios de estado de un turno: quien lo hizo, desde que estado,
+-- hacia cual y por que. estado_anterior es NULL en el alta del turno. dni_actor
+-- y rol_actor son NULL cuando no se sabe quien fue (no se inventa el dato).
+-- rol_actor se guarda aparte porque una persona puede tener varios roles.
+
+CREATE TABLE turno_evento (
+    id_evento INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    id_turno INT UNSIGNED NOT NULL,
+    estado_anterior ENUM('pendiente_confirmacion', 'confirmado', 'en_espera', 'en_curso',
+                         'completado', 'ausente', 'reprogramado', 'cancelado') NULL,
+    estado_nuevo ENUM('pendiente_confirmacion', 'confirmado', 'en_espera', 'en_curso',
+                      'completado', 'ausente', 'reprogramado', 'cancelado') NOT NULL,
+    dni_actor INT UNSIGNED NULL,
+    rol_actor ENUM('cliente', 'profesional', 'admin') NULL,
+    motivo VARCHAR(255) NULL,
+    creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_turno) REFERENCES turno(id_turno) ON DELETE CASCADE,
+    INDEX idx_turno_evento_turno (id_turno, creado_en)
 );
 
 

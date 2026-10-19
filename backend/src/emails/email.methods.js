@@ -1,4 +1,5 @@
 import { Resend } from 'resend';
+import { aFechaISO } from '../utils/time.js';
 
 // Created on first use so the server can boot without the key (e.g. in dev
 // without email) and only fails when an email is actually sent.
@@ -33,6 +34,17 @@ const sendMail = async ({ to, subject, html, errorLabel }) => {
   }
 
   return data;
+};
+
+// DATE columns arrive as local-midnight Dates; format the calendar day, not the instant.
+const formatFecha = (fecha) => {
+  const [y, m, d] = aFechaISO(fecha).split('-').map(Number);
+  return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString('es-AR', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  });
 };
 
 export class EmailMethods {
@@ -121,6 +133,25 @@ export class EmailMethods {
     }
 
     return data;
+  }
+
+  static async turnoReprogramado({ original, nuevo, motivo }) {
+    const antes = `${formatFecha(original.fecha_turno)} a las ${original.hora_turno?.slice(0, 5)} hs`;
+    const ahora = `${formatFecha(nuevo.fecha_turno)} a las ${nuevo.hora_turno?.slice(0, 5)} hs`;
+
+    return sendMail({
+      to: nuevo.c_correo,
+      subject: 'Tu turno fue reprogramado',
+      errorLabel: 'turno reprogramado',
+      html: `
+        <p>Hola <strong>${escapeHtml(nuevo.c_nombre)}</strong>,</p>
+        <p>Te informamos que tu turno con el profesional <strong>${escapeHtml(nuevo.p_nombre)} ${escapeHtml(nuevo.p_apellido)}</strong> fue reprogramado.</p>
+        <p><strong>Antes:</strong> ${escapeHtml(antes)}<br><strong>Ahora:</strong> ${escapeHtml(ahora)}</p>
+        ${motivo ? `<p><strong>Motivo:</strong> ${escapeHtml(motivo)}</p>` : ''}
+        <p>Si el nuevo horario no te sirve, podés cancelar el turno desde la aplicación.</p>
+        <p>Saludos,<br>Equipo de Appointly</p>
+      `,
+    });
   }
 
   static async turnoCanceladoPorCliente({ turno }) {

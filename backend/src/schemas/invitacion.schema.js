@@ -30,4 +30,6 @@ export const aceptarInvitacionSchema = z.strictObject({
   fecha_nacimiento: z.string().optional(),
   telefono: z.string().nullish(),
   numero_matricula: z.string().optional(),
+  dni: z.string().optional(),
+  correo: z.string().optional(),
 }).refine(passwordsMatch, passwordsMatchError)

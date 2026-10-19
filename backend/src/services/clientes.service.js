@@ -3,6 +3,15 @@ import { AppError } from "../utils/AppError.js"
 
 export class ClientesService {
 
+  /** Open turnos of a cliente; only the cliente themself may read them (same rule as getTurnosClienteByDni). */
+  static async getActivos(dni, requesterDni) {
+    if (String(requesterDni) !== String(dni)) {
+      throw new AppError("No tienes permiso para realizar esta acción", 403, "FORBIDDEN")
+    }
+
+    return await ClientesModel.getActivos({ dni })
+  }
+
   /* static async getTurnosClienteByDni(dni, requesterDni, estado) {
 
     if (requesterDni !== dni) {

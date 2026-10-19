@@ -1,8 +1,11 @@
--- 002_panel_admin
+-- 003_panel_admin
 -- Intencion: base de datos del panel de administracion (PLAN_ADMIN.md §6):
 -- configuracion del centro, avisos, bloqueos de agenda, historial de
 -- comunicaciones, MFA para admins, auditoria de reasignaciones y estado de
 -- cuenta (suspension reversible).
+--
+-- Corre DESPUES de 002_estados_turno (numeracion correlativa): asume
+-- turno.estado con los ocho estados y no lo modifica.
 --
 -- NO es idempotente: correla UNA sola vez sobre una DB existente. Una DB
 -- nueva ya nace con estos cambios (schema.sql) y NO debe correr esta migracion.
@@ -141,11 +144,10 @@ ALTER TABLE especialidad ADD COLUMN activo TINYINT(1) NOT NULL DEFAULT 1;
 ALTER TABLE obra_social ADD COLUMN activo TINYINT(1) NOT NULL DEFAULT 1;
 
 
--- 9. turno: estado 'ausente' (fuente de verdad del ausentismo) + indices
---    para el monitor y las metricas.
+-- 9. turno: indices de lectura para el monitor y las metricas. No toca
+--    estado (eso lo hizo la 002_estados_turno) ni agrega columnas de estado:
+--    el ausente se trackea por turno_evento.
 
 ALTER TABLE turno
-    MODIFY estado ENUM('activo','cancelado','completado','ausente') NOT NULL DEFAULT 'activo',
-    ADD COLUMN ausente_en TIMESTAMP NULL DEFAULT NULL AFTER completado_en,
     ADD INDEX idx_turno_fecha (fecha_turno),
     ADD INDEX idx_turno_estado_fecha (estado, fecha_turno);

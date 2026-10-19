@@ -1,8 +1,11 @@
 import { useState } from 'react'
-import { Alert, Stack, Button, Box, Group } from '@mantine/core'
+import { Alert, Stack, Button, Box, Group, Loader } from '@mantine/core'
 import { PageHeader } from '../components/PageHeader.jsx'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useIsDesktop } from '../hooks/useIsDesktop.js'
+import { useAuth } from '../hooks/useAuth.js'
+import useTurnosDia, { useAhoraEnZona } from '../hooks/useTurnosDia.jsx'
+import QueryError from '../components/QueryError.jsx'
 import TurnosTableProf from './turnos/TurnosTableProf.jsx'
 import { TurnoCardProf } from './turnos/TurnoCardProf.jsx'
 import { DetalleTurnoProfMobile } from './turnos/DetalleTurnoProfMobile.jsx'
@@ -11,17 +14,20 @@ export default function Turnos() {
   const { state } = useLocation()
   const navigate = useNavigate()
   const isDesktop = useIsDesktop()
+  const { user } = useAuth()
 
   const fecha = state?.fecha ?? null
-  const dniProfesional = state?.dni_profesional ?? null
-  // Los turnos llegan como snapshot del state (no hay query en esta página),
-  // así que los guardamos en estado local para poder reflejar una cancelación.
-  const [turnos, setTurnos] = useState(state?.turnos ?? [])
+  // The Agenda's snapshot only paints the first frame; the query (polling) is the source of truth.
+  const { data: turnos = [], isError, error, refetch, isLoading } = useTurnosDia({
+    dni: user?.dni,
+    fecha,
+    initialData: state?.turnos,
+  })
+  const ahora = useAhoraEnZona()
   // Turno seleccionado para ver el detalle en mobile (in-page, sin cambiar de ruta).
-  const [detalle, setDetalle] = useState(null)
-
-  const marcarCancelado = (id_turno) =>
-    setTurnos((prev) => prev.map((t) => (t.id_turno === id_turno ? { ...t, estado: 'cancelado' } : t)))
+  // Guardamos solo el id y lo buscamos en la query, así el detalle refleja los datos frescos.
+  const [detalleId, setDetalleId] = useState(null)
+  const detalle = turnos.find((t) => t.id_turno === detalleId) ?? null
 
   if (turnos.length === 0 && !fecha) {
     return (
@@ -41,30 +47,25 @@ export default function Turnos() {
     <>
       <PageHeader title={`Turnos del ${fecha}`} />
 
-      {turnos.length === 0 ? (
+      {isLoading ? (
+        <Group justify="center" mt="xl"><Loader /></Group>
+      ) : isError && turnos.length === 0 ? (
+        <QueryError message={error?.message} onRetry={refetch} />
+      ) : turnos.length === 0 ? (
         <Alert color="blue" mt="md">No hay turnos para este día.</Alert>
       ) : (
         <>
           {/* Desktop: tabla */}
           {isDesktop ? (
             <Box px={{ base: 0, md: 'xl' }}>
-              <TurnosTableProf
-                turnos={turnos}
-                dniProfesional={dniProfesional}
-                onCancelled={marcarCancelado}
-              />
+              <TurnosTableProf turnos={turnos} ahora={ahora} dniProfesional={user?.dni} />
             </Box>
           ) : detalle ? (
-            <DetalleTurnoProfMobile
-              turno={detalle}
-              dniProfesional={dniProfesional}
-              onVolver={() => setDetalle(null)}
-              onCancelled={marcarCancelado}
-            />
+            <DetalleTurnoProfMobile turno={detalle} ahora={ahora} dniProfesional={user?.dni} onVolver={() => setDetalleId(null)} />
           ) : (
             <Stack gap="sm" pb={10}>
               {turnos.map((turno) => (
-                <TurnoCardProf key={turno.id_turno} turno={turno} onVerDetalle={setDetalle} />
+                <TurnoCardProf key={turno.id_turno} turno={turno} onVerDetalle={(t) => setDetalleId(t.id_turno)} />
               ))}
             </Stack>
           )}

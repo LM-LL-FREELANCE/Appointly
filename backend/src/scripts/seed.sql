@@ -219,45 +219,46 @@ INSERT INTO horario_atencion (dni_profesional, dia_semana, hora_inicio, hora_fin
 
 
 -- turno
--- Fechas RELATIVAS a hoy (CURDATE +/- n dias): el dashboard y el monitor
--- muestran siempre actividad del mes corriente, con turnos de hoy incluidos.
--- Incluye estados activo / completado / cancelado / ausente (el ausente es la
--- fuente de verdad de la tasa de ausentismo).
+-- Fechas RELATIVAS a hoy (CURDATE +/- n dias): dashboard y monitor muestran
+-- siempre actividad del mes corriente, con turnos de hoy incluidos.
+-- Estados de la 002_estados_turno; 'ausente' es la fuente de verdad de la tasa
+-- de ausentismo. Los turnos sembrados no tienen filas en turno_evento: el
+-- historial se llena con los cambios de estado reales.
 
 INSERT INTO turno
-(fecha_turno, hora_turno, estado, dni_profesional, dni_cliente, motivo_cancelacion, cancelado_en, completado_en, ausente_en) VALUES
+(fecha_turno, hora_turno, estado, dni_profesional, dni_cliente, motivo_cancelacion, cancelado_en, completado_en) VALUES
 -- Aguirre
-(CURDATE(),                    '10:00', 'activo',     27845123, 22456789, NULL, NULL, NULL, NULL),
-(CURDATE() - INTERVAL 1 DAY,   '09:00', 'completado', 27845123, 25890123, NULL, NULL, CURDATE() - INTERVAL 1 DAY + INTERVAL 9 HOUR + INTERVAL 30 MINUTE, NULL),
-(CURDATE() - INTERVAL 2 DAY,   '10:00', 'ausente',    27845123, 30890123, NULL, NULL, NULL, CURDATE() - INTERVAL 2 DAY + INTERVAL 10 HOUR + INTERVAL 30 MINUTE),
-(CURDATE() + INTERVAL 1 DAY,   '16:00', 'activo',     27845123, 34123458, NULL, NULL, NULL, NULL),
-(CURDATE() + INTERVAL 2 DAY,   '17:00', 'activo',     27845123, 38235674, NULL, NULL, NULL, NULL),
-(CURDATE() - INTERVAL 4 DAY,   '09:00', 'cancelado',  27845123, 42235680, 'Paciente reprogramo por motivos personales', CURDATE() - INTERVAL 5 DAY + INTERVAL 18 HOUR + INTERVAL 32 MINUTE, NULL, NULL),
+(CURDATE(),                    '10:00', 'confirmado',             27845123, 22456789, NULL, NULL, NULL),
+(CURDATE() - INTERVAL 1 DAY,   '09:00', 'completado',             27845123, 25890123, NULL, NULL, CURDATE() - INTERVAL 1 DAY + INTERVAL 9 HOUR + INTERVAL 30 MINUTE),
+(CURDATE() - INTERVAL 2 DAY,   '10:00', 'ausente',                27845123, 30890123, NULL, NULL, NULL),
+(CURDATE() + INTERVAL 1 DAY,   '16:00', 'confirmado',             27845123, 34123458, NULL, NULL, NULL),
+(CURDATE() + INTERVAL 2 DAY,   '17:00', 'pendiente_confirmacion', 27845123, 38235674, NULL, NULL, NULL),
+(CURDATE() - INTERVAL 4 DAY,   '09:00', 'cancelado',              27845123, 42235680, 'Paciente reprogramo por motivos personales', CURDATE() - INTERVAL 5 DAY + INTERVAL 18 HOUR + INTERVAL 32 MINUTE, NULL),
 -- Vega
-(CURDATE(),                    '09:00', 'activo',     30156789, 24123456, NULL, NULL, NULL, NULL),
-(CURDATE() - INTERVAL 1 DAY,   '10:00', 'completado', 30156789, 32123450, NULL, NULL, CURDATE() - INTERVAL 1 DAY + INTERVAL 10 HOUR + INTERVAL 30 MINUTE, NULL),
-(CURDATE() + INTERVAL 2 DAY,   '11:00', 'activo',     30156789, 36901232, NULL, NULL, NULL, NULL),
-(CURDATE() - INTERVAL 3 DAY,   '12:00', 'cancelado',  30156789, 42902346, 'Imprevisto del profesional', CURDATE() - INTERVAL 4 DAY + INTERVAL 9 HOUR + INTERVAL 15 MINUTE, NULL, NULL),
-(CURDATE() + INTERVAL 1 DAY,   '15:00', 'activo',     30156789, 26345678, NULL, NULL, NULL, NULL),
+(CURDATE(),                    '09:00', 'confirmado',             30156789, 24123456, NULL, NULL, NULL),
+(CURDATE() - INTERVAL 1 DAY,   '10:00', 'completado',             30156789, 32123450, NULL, NULL, CURDATE() - INTERVAL 1 DAY + INTERVAL 10 HOUR + INTERVAL 30 MINUTE),
+(CURDATE() + INTERVAL 2 DAY,   '11:00', 'confirmado',             30156789, 36901232, NULL, NULL, NULL),
+(CURDATE() - INTERVAL 3 DAY,   '12:00', 'cancelado',              30156789, 42902346, 'Imprevisto del profesional', CURDATE() - INTERVAL 4 DAY + INTERVAL 9 HOUR + INTERVAL 15 MINUTE, NULL),
+(CURDATE() + INTERVAL 1 DAY,   '15:00', 'confirmado',             30156789, 26345678, NULL, NULL, NULL),
 -- Fernandez
-(CURDATE() - INTERVAL 2 DAY,   '10:00', 'completado', 28934567, 23789012, NULL, NULL, CURDATE() - INTERVAL 2 DAY + INTERVAL 10 HOUR + INTERVAL 30 MINUTE, NULL),
-(CURDATE(),                    '11:00', 'activo',     28934567, 29234567, NULL, NULL, NULL, NULL),
-(CURDATE() - INTERVAL 3 DAY,   '12:00', 'cancelado',  28934567, 33456782, 'Cliente no pudo asistir', CURDATE() - INTERVAL 4 DAY + INTERVAL 14 HOUR + INTERVAL 50 MINUTE, NULL, NULL),
-(CURDATE() + INTERVAL 1 DAY,   '14:00', 'activo',     28934567, 37568908, NULL, NULL, NULL, NULL),
-(CURDATE() + INTERVAL 3 DAY,   '16:00', 'activo',     28934567, 41569014, NULL, NULL, NULL, NULL),
-(CURDATE() + INTERVAL 4 DAY,   '17:00', 'activo',     28934567, 44902344, NULL, NULL, NULL, NULL),
-(CURDATE() - INTERVAL 5 DAY,   '16:00', 'ausente',    28934567, 41569014, NULL, NULL, NULL, CURDATE() - INTERVAL 5 DAY + INTERVAL 16 HOUR + INTERVAL 30 MINUTE),
+(CURDATE() - INTERVAL 2 DAY,   '10:00', 'completado',             28934567, 23789012, NULL, NULL, CURDATE() - INTERVAL 2 DAY + INTERVAL 10 HOUR + INTERVAL 30 MINUTE),
+(CURDATE(),                    '11:00', 'confirmado',             28934567, 29234567, NULL, NULL, NULL),
+(CURDATE() - INTERVAL 3 DAY,   '12:00', 'cancelado',              28934567, 33456782, 'Cliente no pudo asistir', CURDATE() - INTERVAL 4 DAY + INTERVAL 14 HOUR + INTERVAL 50 MINUTE, NULL),
+(CURDATE() + INTERVAL 1 DAY,   '14:00', 'confirmado',             28934567, 37568908, NULL, NULL, NULL),
+(CURDATE() + INTERVAL 3 DAY,   '16:00', 'confirmado',             28934567, 41569014, NULL, NULL, NULL),
+(CURDATE() + INTERVAL 4 DAY,   '17:00', 'pendiente_confirmacion', 28934567, 44902344, NULL, NULL, NULL),
+(CURDATE() - INTERVAL 5 DAY,   '16:00', 'ausente',                28934567, 41569014, NULL, NULL, NULL),
 -- Paz
-(CURDATE() + INTERVAL 1 DAY,   '15:00', 'activo',     33412890, 28567890, NULL, NULL, NULL, NULL),
-(CURDATE(),                    '09:00', 'activo',     33412890, 35567890, NULL, NULL, NULL, NULL),
-(CURDATE() - INTERVAL 1 DAY,   '09:00', 'ausente',    33412890, 40902348, NULL, NULL, NULL, CURDATE() - INTERVAL 1 DAY + INTERVAL 9 HOUR + INTERVAL 30 MINUTE),
-(CURDATE() + INTERVAL 3 DAY,   '11:00', 'activo',     33412890, 44235678, NULL, NULL, NULL, NULL),
-(CURDATE() - INTERVAL 2 DAY,   '10:00', 'completado', 33412890, 28567890, NULL, NULL, CURDATE() - INTERVAL 2 DAY + INTERVAL 10 HOUR + INTERVAL 30 MINUTE, NULL),
+(CURDATE() + INTERVAL 1 DAY,   '15:00', 'confirmado',             33412890, 28567890, NULL, NULL, NULL),
+(CURDATE(),                    '09:00', 'en_espera',              33412890, 35567890, NULL, NULL, NULL),
+(CURDATE() - INTERVAL 1 DAY,   '09:00', 'ausente',                33412890, 40902348, NULL, NULL, NULL),
+(CURDATE() + INTERVAL 3 DAY,   '11:00', 'confirmado',             33412890, 44235678, NULL, NULL, NULL),
+(CURDATE() - INTERVAL 2 DAY,   '10:00', 'completado',             33412890, 28567890, NULL, NULL, CURDATE() - INTERVAL 2 DAY + INTERVAL 10 HOUR + INTERVAL 30 MINUTE),
 -- Quiroga
-(CURDATE(),                    '14:00', 'activo',     31678234, 31456789, NULL, NULL, NULL, NULL),
-(CURDATE() + INTERVAL 1 DAY,   '15:00', 'activo',     31678234, 36234566, NULL, NULL, NULL, NULL),
-(CURDATE() - INTERVAL 1 DAY,   '17:00', 'cancelado',  31678234, 40235682, 'Cliente no pudo asistir', CURDATE() - INTERVAL 2 DAY + INTERVAL 11 HOUR + INTERVAL 5 MINUTE, NULL, NULL),
-(CURDATE() + INTERVAL 2 DAY,   '14:00', 'activo',     31678234, 35567890, NULL, NULL, NULL, NULL);
+(CURDATE(),                    '14:00', 'confirmado',             31678234, 31456789, NULL, NULL, NULL),
+(CURDATE() + INTERVAL 1 DAY,   '15:00', 'confirmado',             31678234, 36234566, NULL, NULL, NULL),
+(CURDATE() - INTERVAL 1 DAY,   '17:00', 'cancelado',              31678234, 40235682, 'Cliente no pudo asistir', CURDATE() - INTERVAL 2 DAY + INTERVAL 11 HOUR + INTERVAL 5 MINUTE, NULL),
+(CURDATE() + INTERVAL 2 DAY,   '14:00', 'confirmado',             31678234, 35567890, NULL, NULL, NULL);
 
 
 -- configuracion
