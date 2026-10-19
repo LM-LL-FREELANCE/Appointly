@@ -1,0 +1,282 @@
+### Panel de administracion (PLAN_ADMIN.md §8).
+### Requiere sesion de admin: primero POST /api/auth/login con role "admin"
+### (paso MFA incluido) para que el cliente HTTP guarde la cookie.
+
+@host = http://localhost:4000
+
+### ------------------------------------------------------------------
+### Auth / MFA (§8.1)
+### ------------------------------------------------------------------
+
+### login admin: responde { mfa_required, challenge, expira_en } SIN cookie
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "dni": "27845123",
+  "password": "password123",
+  "role": "admin"
+}
+
+### verificar codigo (el codigo llega por email)
+POST {{host}}/api/auth/mfa/verificar
+Content-Type: application/json
+
+{
+  "challenge": "CHALLENGE_JWT",
+  "codigo": "123456"
+}
+
+### reenviar codigo (cooldown 60 s)
+POST {{host}}/api/auth/mfa/reenviar
+Content-Type: application/json
+
+{
+  "challenge": "CHALLENGE_JWT"
+}
+
+### ------------------------------------------------------------------
+### Configuracion y avisos (§8.2)
+### ------------------------------------------------------------------
+
+### C1 · configuracion publica (defaults si no hay fila)
+GET {{host}}/api/configuracion
+
+### C2 · guardar configuracion (reemplazo completo)
+PUT {{host}}/api/admin/configuracion
+Content-Type: application/json
+
+{
+  "nombre_centro": "Centro Medico Appointly",
+  "telefono": "11 4000-0000",
+  "email_institucional": "contacto@appointly.dev",
+  "direccion": "Av. Siempre Viva 742, Salta",
+  "anticipacion_reserva_min": 60,
+  "limite_cancelacion_horas": 2,
+  "dias_habiles": [1, 2, 3, 4, 5],
+  "hora_apertura": "08:00",
+  "hora_cierre": "20:00"
+}
+
+### C3 · avisos vigentes (publico)
+GET {{host}}/api/avisos/activos
+
+### C4 · todos los avisos (admin)
+GET {{host}}/api/admin/avisos
+
+### C5 · crear aviso
+POST {{host}}/api/admin/avisos
+Content-Type: application/json
+
+{
+  "titulo": "Corte de luz programado",
+  "mensaje": "El sabado de 8 a 12 el centro permanece cerrado.",
+  "tipo": "advertencia",
+  "activo": true,
+  "vigente_desde": "2026-10-17",
+  "vigente_hasta": "2026-10-24"
+}
+
+### C6 · editar aviso
+PUT {{host}}/api/admin/avisos/1
+Content-Type: application/json
+
+{
+  "titulo": "Corte de luz programado",
+  "mensaje": "Actualizado: el sabado de 9 a 13.",
+  "tipo": "advertencia",
+  "activo": false,
+  "vigente_desde": null,
+  "vigente_hasta": null
+}
+
+### C7 · eliminar aviso
+DELETE {{host}}/api/admin/avisos/1
+
+### ------------------------------------------------------------------
+### Usuarios y cuentas (§8.3)
+### ------------------------------------------------------------------
+
+### U1 · listado con filtros (rol, estado, q)
+GET {{host}}/api/admin/usuarios?rol=cliente&estado=activa&q=ana
+
+### U2 · ficha (datos + historial de turnos)
+GET {{host}}/api/admin/usuarios/22456789/cliente
+
+### U3 · edicion parcial
+PATCH {{host}}/api/admin/usuarios/22456789/cliente
+Content-Type: application/json
+
+{
+  "telefono": "11-5555-0000",
+  "obra_social": "OSDE",
+  "numero_afiliado": "OS1-22456789/00"
+}
+
+### U4 · suspender
+POST {{host}}/api/admin/usuarios/22456789/cliente/suspension
+
+### U5 · reactivar
+POST {{host}}/api/admin/usuarios/22456789/cliente/reactivacion
+
+### U6 · baja logica
+DELETE {{host}}/api/admin/usuarios/22456789/cliente
+
+### U7 · reset de contraseña (envia email con el link)
+POST {{host}}/api/admin/usuarios/22456789/cliente/reset-password
+
+### ------------------------------------------------------------------
+### Turnos: monitor, acciones y bloqueos (§8.4)
+### ------------------------------------------------------------------
+
+### T1 · vista maestra (default: mes corriente)
+GET {{host}}/api/admin/turnos?desde=2026-10-01&hasta=2026-10-31&estado=activo&profesional=27845123&cliente=Ana
+
+### T2 · cancelar (motivo obligatorio)
+POST {{host}}/api/admin/turnos/1/cancelacion
+Content-Type: application/json
+
+{
+  "motivo": "El profesional se ausenta por una urgencia."
+}
+
+### T3 · reasignar profesional
+POST {{host}}/api/admin/turnos/1/reasignacion
+Content-Type: application/json
+
+{
+  "dni_profesional": 30156789,
+  "motivo": "Reprogramacion interna"
+}
+
+### T4 · marcar completado
+POST {{host}}/api/admin/turnos/1/completacion
+
+### T5 · marcar ausente
+POST {{host}}/api/admin/turnos/1/ausencia
+
+### B1 · bloqueos del rango
+GET {{host}}/api/admin/bloqueos?desde=2026-10-01&hasta=2026-10-31&profesional=27845123
+
+### B2 · crear bloqueo (una fila por fecha)
+POST {{host}}/api/admin/bloqueos
+Content-Type: application/json
+
+{
+  "fechas": ["2026-10-30", "2026-10-31"],
+  "hora_inicio": "09:00",
+  "hora_fin": "13:00",
+  "dni_profesional": null,
+  "motivo": "Capacitacion interna"
+}
+
+### B3 · eliminar bloqueo
+DELETE {{host}}/api/admin/bloqueos/1
+
+### ------------------------------------------------------------------
+### Comunicaciones (§8.5)
+### ------------------------------------------------------------------
+
+### M1 · historial
+GET {{host}}/api/admin/comunicaciones
+
+### M2 · preview de segmento
+GET {{host}}/api/admin/comunicaciones/segmentos/profesionales
+GET {{host}}/api/admin/comunicaciones/segmentos/clientes_turnos_activos?desde=2026-10-01&hasta=2026-10-31
+GET {{host}}/api/admin/comunicaciones/segmentos/todos
+
+### M3 · individual
+POST {{host}}/api/admin/comunicaciones/individual
+Content-Type: application/json
+
+{
+  "dni": 22456789,
+  "rol": "cliente",
+  "asunto": "Recordatorio de turno",
+  "mensaje": "Hola, te recordamos que tenes turno esta semana."
+}
+
+### M4 · masivo (rate limit: 3/hora)
+POST {{host}}/api/admin/comunicaciones/masivo
+Content-Type: application/json
+
+{
+  "segmento": "profesionales",
+  "asunto": "Nueva politica de turnos",
+  "mensaje": "A partir del lunes rige la nueva politica de anticipacion minima."
+}
+
+### ------------------------------------------------------------------
+### Metricas y reportes (§8.6)
+### ------------------------------------------------------------------
+
+### D1 · bundle de metricas
+GET {{host}}/api/admin/metricas?desde=2026-10-01&hasta=2026-10-31
+
+### D2 · CSV de turnos (abre en Excel por el BOM)
+GET {{host}}/api/admin/reportes/turnos.csv?desde=2026-10-01&hasta=2026-10-31
+
+### D3 · CSV de usuarios
+GET {{host}}/api/admin/reportes/usuarios.csv?rol=cliente&estado=activa
+
+### ------------------------------------------------------------------
+### Catalogos (§8.7)
+### ------------------------------------------------------------------
+
+### E1 · especialidades (publico; incluye activo)
+GET {{host}}/api/especialidades
+
+### E2 · crear especialidad
+POST {{host}}/api/especialidades
+Content-Type: application/json
+
+{
+  "tipo": "Rehabilitacion"
+}
+
+### E3 · editar especialidad
+PUT {{host}}/api/especialidades/1
+Content-Type: application/json
+
+{
+  "tipo": "Kinesiologia"
+}
+
+### E4 · habilitar/deshabilitar especialidad
+PATCH {{host}}/api/especialidades/1/estado
+Content-Type: application/json
+
+{
+  "activo": false
+}
+
+### E5 · profesionales asociados a una especialidad
+GET {{host}}/api/especialidades/1/profesionales
+
+### E6–E10 · espejo en obras sociales
+GET {{host}}/api/obra-sociales
+POST {{host}}/api/obra-sociales
+Content-Type: application/json
+
+{
+  "nombre_obra_social": "Nueva Prepaga"
+}
+
+### 
+PUT {{host}}/api/obra-sociales/1
+Content-Type: application/json
+
+{
+  "nombre_obra_social": "OSDE"
+}
+
+### 
+PATCH {{host}}/api/obra-sociales/1/estado
+Content-Type: application/json
+
+{
+  "activo": true
+}
+
+### 
+GET {{host}}/api/obra-sociales/1/profesionales

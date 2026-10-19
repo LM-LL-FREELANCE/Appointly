@@ -2,6 +2,9 @@ import { pool } from "../config/db.js"
 
 export class AuthModel {
   static async findCredentialsByDniAndRole(dni, role) {
+    // Devuelve la cuenta aunque este dada de baja o suspendida: el service
+    // decide la respuesta (401 generico vs 403 ACCOUNT_SUSPENDED) despues de
+    // validar la contrasena, para no filtrar que cuentas existen.
     const [rows] = await pool.query(`
         SELECT
             pr.dni_persona AS dni,
@@ -10,6 +13,8 @@ export class AuthModel {
             p.apellido,
             p.foto_url,
             pr.password_hash,
+            pr.eliminado_en IS NOT NULL AS eliminada,
+            pr.suspendido_en IS NOT NULL AS suspendida,
             r.nombre AS role
           FROM persona_rol pr
           INNER JOIN persona p 
@@ -17,8 +22,7 @@ export class AuthModel {
           INNER JOIN rol r 
             ON pr.id_rol = r.id_rol
           WHERE pr.dni_persona = ? 
-            AND r.nombre = ? 
-            AND pr.eliminado_en IS NULL
+            AND r.nombre = ?
       `, [dni, role])
     if (!rows[0]) return null
 

@@ -9,9 +9,20 @@ export class AuthService {
   static async login(dni, password, role) {
     const userFound = await AuthModel.findCredentialsByDniAndRole(dni, role)
 
+    // La comparacion corre aunque la cuenta este eliminada: el mismo tiempo de
+    // respuesta no delata si el DNI existe, y el error queda generico.
     const isMatch = userFound && await bcrypt.compare(password, userFound.password_hash)
 
     if (!isMatch) throw new AppError("Credenciales inválidas", 401, "INVALID_CREDENTIALS")
+
+    // Baja logica: se trata como credenciales invalidas (no se filtra que
+    // existe una cuenta dada de baja).
+    if (userFound.eliminada) throw new AppError("Credenciales inválidas", 401, "INVALID_CREDENTIALS")
+
+    // Suspension reversible: la contrasena ya valido, recien aca se informa.
+    if (userFound.suspendida) {
+      throw new AppError("Tu cuenta está suspendida. Contactá a la administración del centro.", 403, "ACCOUNT_SUSPENDED")
+    }
 
     if (typeof userFound.role !== "string" || userFound.role.length === 0) {
       throw new AppError("No se pudo determinar el rol de la cuenta.", 500, "ROLE_RESOLUTION_FAILED")
@@ -41,6 +52,9 @@ export class AuthService {
 
     const userFound = await AuthModel.findCredentialsByDniAndRole(dni, role)
     if (!userFound) return null
+
+    // Cuenta dada de baja o suspendida: no hay sesion valida.
+    if (userFound.eliminada || userFound.suspendida) return null
 
     return {
       dni: userFound.dni,

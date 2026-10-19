@@ -219,44 +219,79 @@ INSERT INTO horario_atencion (dni_profesional, dia_semana, hora_inicio, hora_fin
 
 
 -- turno
--- Fechas: semana del 15 al 19 de junio de 2026.
--- 15=lunes, 16=martes, 17=miercoles, 18=jueves, 19=viernes.
--- Todos los turnos caen dentro del horario_atencion del profesional.
+-- Fechas RELATIVAS a hoy (CURDATE +/- n dias): dashboard y monitor muestran
+-- siempre actividad del mes corriente, con turnos de hoy incluidos.
+-- Estados de la 002_estados_turno; 'ausente' es la fuente de verdad de la tasa
+-- de ausentismo. Los turnos sembrados no tienen filas en turno_evento: el
+-- historial se llena con los cambios de estado reales.
 
-INSERT INTO turno (fecha_turno, hora_turno, estado, dni_profesional, dni_cliente, motivo_cancelacion, cancelado_en) VALUES
+INSERT INTO turno
+(fecha_turno, hora_turno, estado, dni_profesional, dni_cliente, motivo_cancelacion, cancelado_en, completado_en) VALUES
 -- Aguirre
-('2026-06-15', '08:00', 'confirmado',27845123, 22456789, NULL, NULL),
-('2026-06-15', '09:00', 'confirmado',27845123, 25890123, NULL, NULL),
-('2026-06-15', '10:00', 'cancelado', 27845123, 30890123, 'Paciente reprogramo por motivos personales', '2026-06-10 18:32:00'),
-('2026-06-17', '16:00', 'confirmado',27845123, 34123458, NULL, NULL),
-('2026-06-17', '17:00', 'confirmado',27845123, 38235674, NULL, NULL),
-('2026-06-19', '09:00', 'confirmado',27845123, 42235680, NULL, NULL),
+(CURDATE(),                    '10:00', 'confirmado',             27845123, 22456789, NULL, NULL, NULL),
+(CURDATE() - INTERVAL 1 DAY,   '09:00', 'completado',             27845123, 25890123, NULL, NULL, CURDATE() - INTERVAL 1 DAY + INTERVAL 9 HOUR + INTERVAL 30 MINUTE),
+(CURDATE() - INTERVAL 2 DAY,   '10:00', 'ausente',                27845123, 30890123, NULL, NULL, NULL),
+(CURDATE() + INTERVAL 1 DAY,   '16:00', 'confirmado',             27845123, 34123458, NULL, NULL, NULL),
+(CURDATE() + INTERVAL 2 DAY,   '17:00', 'pendiente_confirmacion', 27845123, 38235674, NULL, NULL, NULL),
+(CURDATE() - INTERVAL 4 DAY,   '09:00', 'cancelado',              27845123, 42235680, 'Paciente reprogramo por motivos personales', CURDATE() - INTERVAL 5 DAY + INTERVAL 18 HOUR + INTERVAL 32 MINUTE, NULL),
 -- Vega
-('2026-06-16', '09:00', 'confirmado',30156789, 24123456, NULL, NULL),
-('2026-06-16', '10:00', 'confirmado',30156789, 32123450, NULL, NULL),
-('2026-06-18', '11:00', 'confirmado',30156789, 36901232, NULL, NULL),
-('2026-06-18', '12:00', 'cancelado', 30156789, 42902346, 'Imprevisto del profesional', '2026-06-11 09:15:00'),
-('2026-06-19', '15:00', 'confirmado',30156789, 26345678, NULL, NULL),
+(CURDATE(),                    '09:00', 'confirmado',             30156789, 24123456, NULL, NULL, NULL),
+(CURDATE() - INTERVAL 1 DAY,   '10:00', 'completado',             30156789, 32123450, NULL, NULL, CURDATE() - INTERVAL 1 DAY + INTERVAL 10 HOUR + INTERVAL 30 MINUTE),
+(CURDATE() + INTERVAL 2 DAY,   '11:00', 'confirmado',             30156789, 36901232, NULL, NULL, NULL),
+(CURDATE() - INTERVAL 3 DAY,   '12:00', 'cancelado',              30156789, 42902346, 'Imprevisto del profesional', CURDATE() - INTERVAL 4 DAY + INTERVAL 9 HOUR + INTERVAL 15 MINUTE, NULL),
+(CURDATE() + INTERVAL 1 DAY,   '15:00', 'confirmado',             30156789, 26345678, NULL, NULL, NULL),
 -- Fernandez
-('2026-06-15', '10:00', 'confirmado',28934567, 23789012, NULL, NULL),
-('2026-06-15', '11:00', 'confirmado',28934567, 29234567, NULL, NULL),
-('2026-06-15', '12:00', 'cancelado', 28934567, 33456782, 'Cliente no pudo asistir', '2026-06-09 14:50:00'),
-('2026-06-16', '14:00', 'confirmado',28934567, 37568908, NULL, NULL),
-('2026-06-18', '16:00', 'confirmado',28934567, 41569014, NULL, NULL),
-('2026-06-18', '17:00', 'confirmado',28934567, 44902344, NULL, NULL),
+(CURDATE() - INTERVAL 2 DAY,   '10:00', 'completado',             28934567, 23789012, NULL, NULL, CURDATE() - INTERVAL 2 DAY + INTERVAL 10 HOUR + INTERVAL 30 MINUTE),
+(CURDATE(),                    '11:00', 'confirmado',             28934567, 29234567, NULL, NULL, NULL),
+(CURDATE() - INTERVAL 3 DAY,   '12:00', 'cancelado',              28934567, 33456782, 'Cliente no pudo asistir', CURDATE() - INTERVAL 4 DAY + INTERVAL 14 HOUR + INTERVAL 50 MINUTE, NULL),
+(CURDATE() + INTERVAL 1 DAY,   '14:00', 'confirmado',             28934567, 37568908, NULL, NULL, NULL),
+(CURDATE() + INTERVAL 3 DAY,   '16:00', 'confirmado',             28934567, 41569014, NULL, NULL, NULL),
+(CURDATE() + INTERVAL 4 DAY,   '17:00', 'pendiente_confirmacion', 28934567, 44902344, NULL, NULL, NULL),
+(CURDATE() - INTERVAL 5 DAY,   '16:00', 'ausente',                28934567, 41569014, NULL, NULL, NULL),
 -- Paz
-('2026-06-16', '15:00', 'confirmado',33412890, 28567890, NULL, NULL),
-('2026-06-17', '09:00', 'confirmado',33412890, 35567890, NULL, NULL),
-('2026-06-17', '10:00', 'confirmado',33412890, 40902348, NULL, NULL),
-('2026-06-19', '11:00', 'confirmado',33412890, 44235678, NULL, NULL),
+(CURDATE() + INTERVAL 1 DAY,   '15:00', 'confirmado',             33412890, 28567890, NULL, NULL, NULL),
+(CURDATE(),                    '09:00', 'en_espera',              33412890, 35567890, NULL, NULL, NULL),
+(CURDATE() - INTERVAL 1 DAY,   '09:00', 'ausente',                33412890, 40902348, NULL, NULL, NULL),
+(CURDATE() + INTERVAL 3 DAY,   '11:00', 'confirmado',             33412890, 44235678, NULL, NULL, NULL),
+(CURDATE() - INTERVAL 2 DAY,   '10:00', 'completado',             33412890, 28567890, NULL, NULL, CURDATE() - INTERVAL 2 DAY + INTERVAL 10 HOUR + INTERVAL 30 MINUTE),
 -- Quiroga
-('2026-06-15', '14:00', 'confirmado',31678234, 31456789, NULL, NULL),
-('2026-06-15', '15:00', 'confirmado',31678234, 36234566, NULL, NULL),
-('2026-06-18', '17:00', 'cancelado', 31678234, 40235682, 'Cliente no pudo asistir', '2026-06-11 11:05:00');
+(CURDATE(),                    '14:00', 'confirmado',             31678234, 31456789, NULL, NULL, NULL),
+(CURDATE() + INTERVAL 1 DAY,   '15:00', 'confirmado',             31678234, 36234566, NULL, NULL, NULL),
+(CURDATE() - INTERVAL 1 DAY,   '17:00', 'cancelado',              31678234, 40235682, 'Cliente no pudo asistir', CURDATE() - INTERVAL 2 DAY + INTERVAL 11 HOUR + INTERVAL 5 MINUTE, NULL),
+(CURDATE() + INTERVAL 2 DAY,   '14:00', 'confirmado',             31678234, 35567890, NULL, NULL, NULL);
 
 
-INSERT INTO turno (fecha_turno, hora_turno, estado, dni_profesional, dni_cliente, completado_en) VALUES
-('2026-06-15', '11:00', 'completado', 27845123, 24123456, '2026-06-15 11:30:00'),
-('2026-06-15', '13:00', 'completado', 28934567, 32123450, '2026-06-15 13:30:00'),
-('2026-06-16', '11:00', 'completado', 30156789, 22456789, '2026-06-16 11:30:00'),
-('2026-06-17', '11:00', 'completado', 33412890, 25890123, '2026-06-17 11:30:00');
+-- configuracion
+-- Fila unica (singleton) con las politicas demo del centro:
+-- anticipacion 60 min, limite de cancelacion 2 hs, dias habiles L-V,
+-- franja global 08:00-20:00.
+
+INSERT INTO configuracion
+(id, nombre_centro, telefono, email_institucional, direccion,
+ anticipacion_reserva_min, limite_cancelacion_horas, dias_habiles, hora_apertura, hora_cierre, actualizado_por) VALUES
+(1, 'Centro Medico Appointly', '11 4000-0000', 'contacto@appointly.dev',
+ 'Av. Siempre Viva 742, Salta', 60, 2, JSON_ARRAY(1, 2, 3, 4, 5), '08:00', '20:00', 27845123);
+
+
+-- aviso
+-- Uno vigente (advertencia) y uno programado a futuro (info). El primero
+-- aparece en el banner de todos los usuarios logueados.
+
+INSERT INTO aviso (titulo, mensaje, tipo, activo, vigente_desde, vigente_hasta, creado_por) VALUES
+('Corte de luz programado',
+ 'El sabado de 8 a 12 el centro permanece cerrado por tareas de mantenimiento.',
+ 'advertencia', 1, CURDATE(), CURDATE() + INTERVAL 3 DAY, 27845123),
+('Campana de vacunacion',
+ 'Ya esta abierta la campana de vacunacion antigripal. Consulta disponibilidad en recepcion.',
+ 'info', 1, CURDATE() - INTERVAL 7 DAY, NULL, 27845123),
+('Vacaciones de verano',
+ 'Del 5 al 20 de enero el centro atiende con guardias minimas.',
+ 'info', 1, CURDATE() + INTERVAL 30 DAY, CURDATE() + INTERVAL 60 DAY, 27845123);
+
+
+-- bloqueo_agenda
+-- Demo: un feriado con el centro cerrado (bloqueo a nivel centro, dia
+-- completo) para ver el efecto en /slots y en el monitor.
+
+INSERT INTO bloqueo_agenda (dni_profesional, fecha, hora_inicio, hora_fin, motivo, creado_por) VALUES
+(NULL, CURDATE() + INTERVAL 10 DAY, NULL, NULL, 'Feriado - centro cerrado', 27845123);
