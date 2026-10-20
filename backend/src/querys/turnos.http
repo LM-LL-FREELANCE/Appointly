@@ -21,6 +21,54 @@ Content-Type: application/json
 }
 
 ###get agenda
-GET http://localhost:4000/api/turnos?profesional=27845123&desde=2026-06-01&hasta=2026-06-30&estado=activo
+GET http://localhost:4000/api/turnos?profesional=27845123&desde=2026-06-01&hasta=2026-06-30&estado=confirmado
 x-user-dni: 27845123
 x-user-rol: profesional
+
+### The requests below use the session cookie (access_token) from POST /api/auth/login,
+### like the rest of the API; replace :id with a real id_turno.
+
+###get one turno (cliente, profesional or admin)
+GET http://localhost:4000/api/turnos/1
+
+###change state: pendiente_confirmacion->confirmado, confirmado|en_espera->en_curso|ausente|completado, en_curso->completado
+###(estado: confirmado | en_espera | en_curso | completado | ausente; motivo optional)
+PATCH http://localhost:4000/api/turnos/1/estado
+Content-Type: application/json
+
+{
+  "estado": "en_curso"
+}
+
+###mark a started turno as ausente
+PATCH http://localhost:4000/api/turnos/1/estado
+Content-Type: application/json
+
+{
+  "estado": "ausente",
+  "motivo": "El paciente no se presento"
+}
+
+###cancel (pendiente_confirmacion or confirmado)
+POST http://localhost:4000/api/turnos/1/cancelacion
+Content-Type: application/json
+
+{
+  "motivo": "Imprevisto"
+}
+
+###reprogram (profesional or admin): pendiente_confirmacion|confirmado -> reprogramado, ausente stays ausente; creates a linked new turno
+POST http://localhost:4000/api/turnos/1/reprogramacion
+Content-Type: application/json
+
+{
+  "fecha_turno": "2026-06-24",
+  "hora_turno": "10:00",
+  "motivo": "El profesional no atiende ese dia"
+}
+
+###history of one turno (profesional owner or admin)
+GET http://localhost:4000/api/turnos/1/eventos
+
+###history of all turnos of a profesional (own, or any for admin), optional desde/hasta (turno date)
+GET http://localhost:4000/api/turnos/eventos?profesional=27845123&desde=2026-06-01&hasta=2026-06-30

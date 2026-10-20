@@ -35,6 +35,7 @@ pnpm db:migrate migrations/001_estado_cuenta_e_invitacion.sql
 | # | Archivo | Intencion |
 |---|---|---|
 | 001 | `001_estado_cuenta_e_invitacion.sql` | `persona_rol.estado` (`pendiente`/`aprobado`) reemplaza `profesional.estado_validacion`, asi el estado de aprobacion tambien aplica al admin. Agrega la tabla `invitacion` (token con hash, 24h, un solo uso) para altas de admin. Las cuentas existentes quedan `aprobado`, salvo profesionales no aprobados. |
+| 002 | `002_estados_turno.sql` | `turno.estado` pasa a ocho estados (`activo` se renombra `confirmado`; se suman `pendiente_confirmacion`, `en_espera`, `en_curso`, `ausente`, `reprogramado`). Agrega `turno.id_turno_origen` (enlace de reprogramacion/recupero) y la tabla `turno_evento` (historial de estados con su autor). Los cancelados previos quedan sin evento. |
 
 > **Obsoleta en parte**: `persona_rol.estado` se elimino despues (registro por
 > invitacion para profesional y admin), antes de que el modelo de aprobacion

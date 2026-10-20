@@ -226,33 +226,33 @@ INSERT INTO horario_atencion (dni_profesional, dia_semana, hora_inicio, hora_fin
 
 INSERT INTO turno (fecha_turno, hora_turno, estado, dni_profesional, dni_cliente, motivo_cancelacion, cancelado_en) VALUES
 -- Aguirre
-('2026-06-15', '08:00', 'activo',    27845123, 22456789, NULL, NULL),
-('2026-06-15', '09:00', 'activo',    27845123, 25890123, NULL, NULL),
+('2026-06-15', '08:00', 'confirmado',27845123, 22456789, NULL, NULL),
+('2026-06-15', '09:00', 'confirmado',27845123, 25890123, NULL, NULL),
 ('2026-06-15', '10:00', 'cancelado', 27845123, 30890123, 'Paciente reprogramo por motivos personales', '2026-06-10 18:32:00'),
-('2026-06-17', '16:00', 'activo',    27845123, 34123458, NULL, NULL),
-('2026-06-17', '17:00', 'activo',    27845123, 38235674, NULL, NULL),
-('2026-06-19', '09:00', 'activo',    27845123, 42235680, NULL, NULL),
+('2026-06-17', '16:00', 'confirmado',27845123, 34123458, NULL, NULL),
+('2026-06-17', '17:00', 'confirmado',27845123, 38235674, NULL, NULL),
+('2026-06-19', '09:00', 'confirmado',27845123, 42235680, NULL, NULL),
 -- Vega
-('2026-06-16', '09:00', 'activo',    30156789, 24123456, NULL, NULL),
-('2026-06-16', '10:00', 'activo',    30156789, 32123450, NULL, NULL),
-('2026-06-18', '11:00', 'activo',    30156789, 36901232, NULL, NULL),
+('2026-06-16', '09:00', 'confirmado',30156789, 24123456, NULL, NULL),
+('2026-06-16', '10:00', 'confirmado',30156789, 32123450, NULL, NULL),
+('2026-06-18', '11:00', 'confirmado',30156789, 36901232, NULL, NULL),
 ('2026-06-18', '12:00', 'cancelado', 30156789, 42902346, 'Imprevisto del profesional', '2026-06-11 09:15:00'),
-('2026-06-19', '15:00', 'activo',    30156789, 26345678, NULL, NULL),
+('2026-06-19', '15:00', 'confirmado',30156789, 26345678, NULL, NULL),
 -- Fernandez
-('2026-06-15', '10:00', 'activo',    28934567, 23789012, NULL, NULL),
-('2026-06-15', '11:00', 'activo',    28934567, 29234567, NULL, NULL),
+('2026-06-15', '10:00', 'confirmado',28934567, 23789012, NULL, NULL),
+('2026-06-15', '11:00', 'confirmado',28934567, 29234567, NULL, NULL),
 ('2026-06-15', '12:00', 'cancelado', 28934567, 33456782, 'Cliente no pudo asistir', '2026-06-09 14:50:00'),
-('2026-06-16', '14:00', 'activo',    28934567, 37568908, NULL, NULL),
-('2026-06-18', '16:00', 'activo',    28934567, 41569014, NULL, NULL),
-('2026-06-18', '17:00', 'activo',    28934567, 44902344, NULL, NULL),
+('2026-06-16', '14:00', 'confirmado',28934567, 37568908, NULL, NULL),
+('2026-06-18', '16:00', 'confirmado',28934567, 41569014, NULL, NULL),
+('2026-06-18', '17:00', 'confirmado',28934567, 44902344, NULL, NULL),
 -- Paz
-('2026-06-16', '15:00', 'activo',    33412890, 28567890, NULL, NULL),
-('2026-06-17', '09:00', 'activo',    33412890, 35567890, NULL, NULL),
-('2026-06-17', '10:00', 'activo',    33412890, 40902348, NULL, NULL),
-('2026-06-19', '11:00', 'activo',    33412890, 44235678, NULL, NULL),
+('2026-06-16', '15:00', 'confirmado',33412890, 28567890, NULL, NULL),
+('2026-06-17', '09:00', 'confirmado',33412890, 35567890, NULL, NULL),
+('2026-06-17', '10:00', 'confirmado',33412890, 40902348, NULL, NULL),
+('2026-06-19', '11:00', 'confirmado',33412890, 44235678, NULL, NULL),
 -- Quiroga
-('2026-06-15', '14:00', 'activo',    31678234, 31456789, NULL, NULL),
-('2026-06-15', '15:00', 'activo',    31678234, 36234566, NULL, NULL),
+('2026-06-15', '14:00', 'confirmado',31678234, 31456789, NULL, NULL),
+('2026-06-15', '15:00', 'confirmado',31678234, 36234566, NULL, NULL),
 ('2026-06-18', '17:00', 'cancelado', 31678234, 40235682, 'Cliente no pudo asistir', '2026-06-11 11:05:00');
 
 

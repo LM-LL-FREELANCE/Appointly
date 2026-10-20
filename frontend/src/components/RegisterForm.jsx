@@ -1,12 +1,12 @@
 import { Button, Loader, PasswordInput, Select, SimpleGrid, Stack, Text, TextInput } from '@mantine/core'
-import { DatePickerInput } from '@mantine/dates'
+import { DateInput } from '@mantine/dates'
 import { matchesField, useForm } from '@mantine/form'
 import { IconCalendar } from '@tabler/icons-react'
 import 'dayjs/locale/es'
 import useObrasSociales from '../hooks/useObraSociales.jsx'
 import useGetErrosMsg from '../hooks/useGetErrosMsg.jsx'
 import { useIsDesktop } from '../hooks/useIsDesktop.js'
-import { OPCIONES_GENERO, buildRegistroPayload, isIdentityError } from '../utils/registro.utils.js'
+import { OPCIONES_GENERO, buildRegistroPayload, isIdentityError, calcularEdad } from '../utils/registro.utils.js'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -70,7 +70,16 @@ export default function RegisterForm({
       ...(!hidePersonalData && {
         nombre: (value) => (value.trim().length > 0 ? null : 'El nombre es obligatorio'),
         apellido: (value) => (value.trim().length > 0 ? null : 'El apellido es obligatorio'),
-        fecha_nacimiento: (value) => (value ? null : 'Selecciona una fecha'),
+        fecha_nacimiento: (value) => {
+          if (!value) return 'Selecciona una fecha'
+          const d = value instanceof Date ? value : new Date(value)
+          if (isNaN(d.getTime())) return 'Fecha inválida'
+          if (d > new Date()) return 'La fecha no puede ser futura'
+          if ((role === 'profesional' || role === 'admin') && calcularEdad(d) < 18) {
+            return 'Debes tener al menos 18 años'
+          }
+          return null
+        },
         genero: (value) => (value ? null : 'Selecciona un género'),
       }),
       ...(role === 'profesional' && {
@@ -114,11 +123,23 @@ export default function RegisterForm({
             </SimpleGrid>
 
             <SimpleGrid cols={{ base: 1, sm: 2 }}>
-              <DatePickerInput
-                label="Fecha de nacimiento" placeholder="Selecciona una fecha" size={size} required
-                key={form.key('fecha_nacimiento')} {...form.getInputProps('fecha_nacimiento')}
-                rightSection={<IconCalendar size={20} stroke={1.5} color="gray" />}
-                locale="es" maxDate={new Date()}
+              <DateInput
+                label="Fecha de nacimiento"
+                placeholder="DD/MM/AAAA"
+                valueFormat="DD/MM/YYYY"
+                size={size}
+                required
+                key={form.key('fecha_nacimiento')}
+                {...form.getInputProps('fecha_nacimiento')}
+                rightSection={<IconCalendar size={18} stroke={1.5} color="gray" />}
+                locale="es"
+                defaultLevel="decade"
+                defaultDate={new Date(new Date().getFullYear() - 25, 0, 1)}
+                maxDate={
+                  role === 'profesional' || role === 'admin'
+                    ? new Date(new Date().getFullYear() - 18, new Date().getMonth(), new Date().getDate())
+                    : new Date()
+                }
               />
               <Select
                 label="Género" placeholder="Ej: Masculino" size={size} required data={OPCIONES_GENERO}

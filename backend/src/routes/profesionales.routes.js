@@ -11,7 +11,7 @@ profesionalesRouter.post("/:dni/horarios", requireAuth, grantAccess(["profesiona
 profesionalesRouter.patch("/:dni/actualizar", requireAuth, grantAccess(["profesional"]), ProfesionalesController.updateByDni) //working
 
 
-profesionalesRouter.get("/", ProfesionalesController.filterBy)
-profesionalesRouter.get("/:dni", ProfesionalesController.getByDni)
-profesionalesRouter.get("/:dni/slots", TurnosController.getSlots)
+profesionalesRouter.get("/", requireAuth, ProfesionalesController.filterBy)
+profesionalesRouter.get("/:dni", requireAuth, ProfesionalesController.getByDni)
+profesionalesRouter.get("/:dni/slots", requireAuth, TurnosController.getSlots)
 profesionalesRouter.delete("/:dni", requireAuth, grantAccess(["profesional", "admin"]), ProfesionalesController.deleteAcc)

@@ -1,4 +1,6 @@
-import { Button, Center, Loader, Paper, Stack, Text, Title } from '@mantine/core'
+import { useState } from 'react'
+import { Button, Center, Loader, Paper, Stack, Text, ThemeIcon, Title } from '@mantine/core'
+import { IconCheck } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
 import { useNavigate, useParams } from 'react-router-dom'
 import RegisterForm from '../components/RegisterForm.jsx'
@@ -25,6 +27,7 @@ export default function ProfessionalInvitation() {
   const { showSuccess } = useRegistroNotifications()
   const { data: invitacion, isPending, error: invalid } = useValidarInvitacion(token)
   const { submit, isPending: isSubmitting, error } = useRegistroFlow({ role: 'profesional', token })
+  const [creada, setCreada] = useState(false)
 
   if (isPending) return <Center mih="100vh"><Loader size="xl" /></Center>
 
@@ -52,15 +55,37 @@ export default function ProfessionalInvitation() {
   const handleSubmit = (payload) => submit(payload, {
     onSuccess: async (account) => {
       notifications.hide('registrandose')
+      setCreada(true)
+      showSuccess({ title: '¡Cuenta creada!', message: 'Bienvenido/a a tu panel profesional.' })
       try {
         await login({ dni: String(account.dni), password: payload.password, role: 'profesional' })
-        showSuccess({ title: 'Cuenta creada', message: 'Bienvenido/a a tu panel profesional.' })
-        navigate(HOME_BY_ROLE.profesional, { replace: true })
+        setTimeout(() => {
+          navigate(HOME_BY_ROLE.profesional, { replace: true })
+        }, 1600)
       } catch {
-        navigate('/professional-login', { replace: true })
+        setTimeout(() => {
+          navigate('/professional-login', { replace: true })
+        }, 1600)
       }
     },
   })
+
+  if (creada) {
+    return (
+      <Screen>
+        <Stack align="center" gap="md" ta="center" py="xl">
+          <ThemeIcon size={64} radius="100%" color="teal" variant="light">
+            <IconCheck size={36} stroke={2} />
+          </ThemeIcon>
+          <Title order={2} size="h3">¡Cuenta creada con éxito!</Title>
+          <Text c="dimmed" size="sm">
+            Bienvenido/a a tu panel profesional. Preparando tu espacio de trabajo...
+          </Text>
+          <Loader size="sm" mt="xs" color="teal" />
+        </Stack>
+      </Screen>
+    )
+  }
 
   return (
     <Screen>
