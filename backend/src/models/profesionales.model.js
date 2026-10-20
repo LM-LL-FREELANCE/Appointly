@@ -202,6 +202,16 @@ export class ProfesionalesModel {
     return rows.length > 0;
   }
 
+  static async existeActivo({ dni }) {
+    const [rows] = await pool.query(
+      `SELECT 1 FROM profesional p 
+        INNER JOIN persona_rol pr ON p.dni_profesional = pr.dni_persona AND p.id_rol = pr.id_rol
+        WHERE p.dni_profesional = ? AND pr.eliminado_en IS NULL AND pr.suspendido_en IS NULL LIMIT 1`,
+      [dni]
+    );
+    return rows.length > 0;
+  }
+
   static async updateByDni({ dni, ...fields }) {
     const { especialidades, obras_sociales, correo, ...profesionalFields } = fields;
     const keys = Object.keys(profesionalFields).filter(key => profesionalFields[key] !== undefined);

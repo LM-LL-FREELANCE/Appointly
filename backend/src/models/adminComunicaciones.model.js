@@ -4,13 +4,13 @@ import { ESTADOS_OCUPAN_SLOT } from "../config/constants.js"
 const HISTORIAL_LIMITE = 200
 
 export class AdminComunicacionesModel {
-  /** La cuenta es el par (dni, rol); devuelve su correo o null si no existe. */
+  /** La cuenta es el par (dni, rol); devuelve su correo o null si no existe o fue dada de baja. */
   static async findCuenta({ dni, rol }) {
     const [rows] = await pool.query(`
       SELECT pr.correo
       FROM persona_rol pr
       INNER JOIN rol r ON r.id_rol = pr.id_rol
-      WHERE pr.dni_persona = ? AND r.nombre = ?
+      WHERE pr.dni_persona = ? AND r.nombre = ? AND pr.eliminado_en IS NULL
       `, [dni, rol])
 
     return rows[0] ?? null

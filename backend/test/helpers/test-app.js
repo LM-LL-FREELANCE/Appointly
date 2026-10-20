@@ -76,6 +76,8 @@ export async function startTestApp() {
     { turnosRouter }, { clientesRouter }, { TurnosController }, { TurnosModel },
     { requireAuth, grantAccess }, { EmailMethods },
     { configuracionRouter }, { avisosRouter }, { adminConfiguracionRouter }, { adminAvisosRouter },
+    { adminTurnosRouter }, { adminBloqueosRouter }, { adminComunicacionesRouter },
+    { adminMetricasRouter }, { adminReportesRouter },
   ] = await Promise.all([
     import("../../src/routes/turnos.routes.js"),
     import("../../src/routes/clientes.routes.js"),
@@ -87,6 +89,11 @@ export async function startTestApp() {
     import("../../src/routes/avisos.routes.js"),
     import("../../src/routes/adminConfiguracion.routes.js"),
     import("../../src/routes/adminAvisos.routes.js"),
+    import("../../src/routes/adminTurnos.routes.js"),
+    import("../../src/routes/adminBloqueos.routes.js"),
+    import("../../src/routes/adminComunicaciones.routes.js"),
+    import("../../src/routes/adminMetricas.routes.js"),
+    import("../../src/routes/adminReportes.routes.js"),
   ])
 
   const [[{ db }]] = await pool.query("SELECT DATABASE() AS db")
@@ -107,6 +114,11 @@ export async function startTestApp() {
   app.use("/api/avisos", avisosRouter)
   app.use("/api/admin/configuracion", requireAuth, grantAccess(["admin"]), adminConfiguracionRouter)
   app.use("/api/admin/avisos", requireAuth, grantAccess(["admin"]), adminAvisosRouter)
+  app.use("/api/admin/turnos", requireAuth, grantAccess(["admin"]), adminTurnosRouter)
+  app.use("/api/admin/bloqueos", requireAuth, grantAccess(["admin"]), adminBloqueosRouter)
+  app.use("/api/admin/comunicaciones", requireAuth, grantAccess(["admin"]), adminComunicacionesRouter)
+  app.use("/api/admin/metricas", requireAuth, grantAccess(["admin"]), adminMetricasRouter)
+  app.use("/api/admin/reportes", requireAuth, grantAccess(["admin"]), adminReportesRouter)
   // Same route as profesionales.routes.js (which pulls in unrelated controllers).
   app.get("/api/profesionales/:dni/slots", requireAuth, TurnosController.getSlots)
   app.use(errorHandler)
@@ -117,7 +129,7 @@ export async function startTestApp() {
 
   const tokenFor = ({ dni, role }) => jwt.sign({ role }, JWT_SECRET, { algorithm: "HS256", subject: String(dni), expiresIn: "1h" })
 
-  /** `as` is { dni, role }; omitted means no cookie. Returns { status, body }. */
+  /** `as` is { dni, role }; omitted means no cookie. Returns { status, body, headers }. */
   const api = async (method, path, { as, body } = {}) => {
     const res = await fetch(`${baseUrl}${path}`, {
       method,
@@ -128,7 +140,11 @@ export async function startTestApp() {
       body: body === undefined ? undefined : JSON.stringify(body),
     })
     const text = await res.text()
-    return { status: res.status, body: text ? JSON.parse(text) : null }
+    const contentType = res.headers.get("content-type") ?? ""
+    const parsedBody = text
+      ? (contentType.includes("application/json") ? JSON.parse(text) : text)
+      : null
+    return { status: res.status, body: parsedBody, headers: res.headers }
   }
 
   /** Inserts a turno straight into the DB (no event row). Returns its id. */
