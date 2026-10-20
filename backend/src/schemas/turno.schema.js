@@ -40,3 +40,9 @@ export const reprogramarTurnoSchema = z.object({
     (d) => !yaComenzo(d.fecha_turno, d.hora_turno),
     { message: 'la nueva fecha y hora deben ser futuras', path: ['fecha_turno'] }
   );
+
+export const reasignarTurnoSchema = z.object({
+  dni_profesional: z.coerce.number().int().positive('Debés elegir un profesional válido'),
+  motivo: z.string().trim().max(255).nullish().transform((m) => m || null),
+});
+

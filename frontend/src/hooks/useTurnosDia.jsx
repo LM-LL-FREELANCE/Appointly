@@ -18,11 +18,13 @@ export default function useTurnosDia({ dni, fecha, initialData }) {
   })
 }
 
-// Every cache that shows professional turnos: the day view, the Agenda and the Dashboard.
+// Every cache that shows professional or admin turnos: day view, Agenda, Dashboard, and Admin Monitor.
 export function invalidarTurnosProfesional(queryClient, idTurno) {
   queryClient.invalidateQueries({ queryKey: ['turnos-dia'] })
   queryClient.invalidateQueries({ queryKey: ['agenda'] })
   queryClient.invalidateQueries({ queryKey: ['turnos-profesional'] })
+  queryClient.invalidateQueries({ queryKey: ['admin', 'turnos'] })
+  queryClient.invalidateQueries({ queryKey: ['admin', 'metricas'] })
   if (idTurno) {
     queryClient.invalidateQueries({ queryKey: ['turno-eventos', idTurno] })
     queryClient.invalidateQueries({ queryKey: ['turno', idTurno] })

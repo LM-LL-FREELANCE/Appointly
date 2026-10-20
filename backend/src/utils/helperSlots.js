@@ -74,6 +74,34 @@ export const cancelacionVencida = (
 }
 
 /**
+ * True cuando el slot [hora, hora + duracion) intersecta algún bloqueo de `bloqueos`
+ * en `fecha` (PLAN_ADMIN.md §11.5). Si `hora_inicio` o `hora_fin` es NULL, el bloqueo
+ * cubre todo el día.
+ */
+export const estaSlotBloqueado = ({
+  fecha,
+  hora,
+  duracion = SLOT_DURATION_MIN,
+  bloqueos = [],
+}) => {
+  if (!Array.isArray(bloqueos) || bloqueos.length === 0) return false
+
+  const fechaISO = aFechaISO(fecha)
+  const duracionMin = duracionValida(duracion)
+  const slotInicio = toMinutes(hora)
+  const slotFin = slotInicio + duracionMin
+
+  return bloqueos.some((b) => {
+    if (aFechaISO(b.fecha) !== fechaISO) return false
+    if (!b.hora_inicio || !b.hora_fin) return true
+
+    const bInicio = toMinutes(b.hora_inicio)
+    const bFin = toMinutes(b.hora_fin)
+    return slotInicio < bFin && slotFin > bInicio
+  })
+}
+
+/**
  * Bloques del día ya filtrados por día hábil y recortados a la franja global.
  * La intersección se calcula en minutos para tolerar TIME con segundos.
  */
@@ -104,6 +132,7 @@ export const calcularSlotsDisponibles = ({
   hasta,
   duracion = SLOT_DURATION_MIN,
   config = null,
+  bloqueos = [],
 }) => {
   const duracionMin = duracionValida(duracion)
   const porDia = new Map()
@@ -133,6 +162,7 @@ export const calcularSlotsDisponibles = ({
       .flatMap((b) => slotsDelBloque(b.hora_inicio, b.hora_fin, duracionMin))
     slots = [...new Set(slots)].sort()
     slots = slots.filter((h) => !tomados.has(h))
+    slots = slots.filter((h) => !estaSlotBloqueado({ fecha, hora: h, duracion: duracionMin, bloqueos }))
     slots = slots.filter((h) => `${fecha}T${h}` > limiteStr)
 
     return { fecha, dia_semana: dia, slots }
@@ -144,10 +174,13 @@ export const slotsDelDia = ({
   fecha,
   duracion = SLOT_DURATION_MIN,
   config = null,
+  bloqueos = [],
 }) => {
   const duracionMin = duracionValida(duracion)
   const slots = bloquesDelDia({ horarios, fecha, config })
     .flatMap((b) => slotsDelBloque(b.hora_inicio, b.hora_fin, duracionMin))
+    .filter((h) => !estaSlotBloqueado({ fecha, hora: h, duracion: duracionMin, bloqueos }))
 
   return [...new Set(slots)].sort()
-};
+}
+

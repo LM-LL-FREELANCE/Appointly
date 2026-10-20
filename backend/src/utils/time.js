@@ -68,3 +68,14 @@ export const esMayorDeEdad = (fechaNacimiento, ahora = ahoraEnTimezone()) => {
   }
   return edad >= 18
 }
+
+/** First and last calendar day (YYYY-MM-DD) of the current month in TIMEZONE. */
+export const rangoMesActual = (ahora = ahoraEnTimezone()) => {
+  const [y, m] = ahora.fecha.split("-").map(Number)
+  const ultimoDia = new Date(Date.UTC(y, m, 0)).getUTCDate()
+  return {
+    desde: `${y}-${pad(m)}-01`,
+    hasta: `${y}-${pad(m)}-${pad(ultimoDia)}`,
+  }
+}
+
