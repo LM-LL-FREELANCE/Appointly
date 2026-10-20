@@ -104,9 +104,11 @@ export class TurnosModel {
   static async getTurnosByProfesional({ dni, desde, hasta, estado }) {
     let query = `
     SELECT t.id_turno, t.fecha_turno, t.hora_turno, t.estado, t.creado_en, t.completado_en, t.cancelado_en,
-           p.dni_persona AS dni, p.nombre, p.apellido, p.foto_url
+           p.dni_persona AS dni, p.nombre, p.apellido, p.foto_url,
+           prof.duracion_turno_min
     FROM turno t
     INNER JOIN persona p ON p.dni_persona = t.dni_cliente
+    INNER JOIN profesional prof ON prof.dni_profesional = t.dni_profesional
     WHERE t.dni_profesional = ? AND t.fecha_turno BETWEEN ? AND ?
   `
     const params = [dni, desde, hasta]

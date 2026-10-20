@@ -1,16 +1,53 @@
-import { EspecialidadesModel } from "../models/especialidades.model.js";
+import { EspecialidadesService } from "../services/especialidades.service.js";
+import { idCatalogoSchema } from "../schemas/catalogos.schema.js";
 import { AppError } from "../utils/AppError.js";
+
+const parseId = (value) => {
+    const id = idCatalogoSchema.safeParse(value)
+    if (!id.success) throw new AppError("Id de especialidad inválido.", 400, "BAD_REQUEST")
+    return id.data
+}
 
 export class EspecialidadesController {
     static async getAll(req, res, next) {
         try {
-            const data = await EspecialidadesModel.getAll()
+            return res.json(await EspecialidadesService.getAll())
+        } catch (err) {
+            next(err);
+        }
+    }
 
-            if (!data) {
-                throw new AppError("We couldn't find any specialities", 404, "NOT_FOUND");
-            }
+    static async crear(req, res, next) {
+        try {
+            const especialidad = await EspecialidadesService.crear(req.body)
+            return res.status(201).json(especialidad)
+        } catch (err) {
+            next(err);
+        }
+    }
 
-            return res.json(data)
+    static async editar(req, res, next) {
+        try {
+            const especialidad = await EspecialidadesService.editar(parseId(req.params.id), req.body)
+            return res.json(especialidad)
+        } catch (err) {
+            next(err);
+        }
+    }
+
+    static async cambiarEstado(req, res, next) {
+        try {
+            const especialidad = await EspecialidadesService.cambiarEstado(parseId(req.params.id), req.body.activo)
+            return res.json(especialidad)
+        } catch (err) {
+            next(err);
+        }
+    }
+
+    static async getProfesionales(req, res, next) {
+        try {
+            const profesionales = await EspecialidadesService.getProfesionales(parseId(req.params.id))
+            return res.json(profesionales)
         } catch (err) {
             next(err);
         }

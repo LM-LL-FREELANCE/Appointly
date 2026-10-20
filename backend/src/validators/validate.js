@@ -6,7 +6,7 @@ export const validate = (schema) => (req, res, next) => {
 
   if (!result.success) {
     const { formErrors, fieldErrors } = z.flattenError(result.error)
-    throw new AppError("Datos de entrada inválidos.", 400, "BAD_REQUEST", { formErrors, fieldErrors })
+    throw new AppError(formErrors[0] ?? "Datos de entrada inválidos.", 400, "BAD_REQUEST", fieldErrors)
   }
 
   req.body = result.data

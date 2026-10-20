@@ -90,7 +90,9 @@ export default function Buscar() {
                 label="Especialidad"
                 placeholder="Todas"
                 clearable
-                data={especialidades.map((esp) => ({ value: String(esp.id), label: esp.especialidad }))}
+                data={especialidades
+                  .filter((esp) => Boolean(esp.activo))
+                  .map((esp) => ({ value: String(esp.id), label: esp.especialidad }))}
                 value={especialidad}
                 onChange={setEspecialidad}
               />
@@ -99,7 +101,9 @@ export default function Buscar() {
                 label="Obra social"
                 placeholder="Todas"
                 clearable
-                data={obraSociales.map((os) => ({ value: String(os.id), label: os.obra_social }))}
+                data={obraSociales
+                  .filter((os) => Boolean(os.activo))
+                  .map((os) => ({ value: String(os.id), label: os.obra_social }))}
                 value={obraSocial}
                 onChange={setObraSocial}
               />

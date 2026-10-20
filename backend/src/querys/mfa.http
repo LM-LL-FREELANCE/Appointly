@@ -1,0 +1,79 @@
+### Flujo MFA del admin (PLAN_ADMIN.md §8.1 / §10) — secuencia completa.
+### El login admin YA NO emite cookie: responde un challenge y manda un código
+### de 6 dígitos por email. La cookie access_token se emite recién al verificar.
+### En dev, el código también queda en el log del server:
+###   [MFA dev] codigo para 27845123: 123456
+
+@host = http://localhost:4000
+# Pegar acá el API_KEY de backend/.env (no commitear el valor real).
+@apiKey = REEMPLAZAR_CON_API_KEY
+
+### 1) login admin -> { mfa_required: true, challenge, expira_en } SIN cookie.
+### Credenciales malas: 401 INVALID_CREDENTIALS (igual que siempre).
+POST {{host}}/api/auth/login
+Content-Type: application/json
+x-api-key: {{apiKey}}
+
+{
+  "dni": "27845123",
+  "password": "password123",
+  "role": "admin"
+}
+
+### 2a) verificar el código recibido -> 200 user + cookie access_token (mismo
+### shape que el login común). Errores: 401 MFA_INVALID_CODE (con intentos
+### restantes), 401 MFA_EXPIRED, 401 MFA_CHALLENGE_INVALID, 429
+### MFA_TOO_MANY_ATTEMPTS (5 fallos), 429 MFA_RATE_LIMIT_EXCEEDED (límite por IP).
+POST {{host}}/api/auth/mfa/verificar
+Content-Type: application/json
+x-api-key: {{apiKey}}
+
+{
+  "challenge": "PEGAR_CHALLENGE_DEL_LOGIN",
+  "codigo": "123456"
+}
+
+### 2b) reenviar un código nuevo (invalida el anterior).
+### Cooldown 60 s desde el último envío -> 429 MFA_RESEND_TOO_SOON.
+### Máximo 3 reenvíos por challenge -> 429 MFA_RESEND_TOO_SOON.
+POST {{host}}/api/auth/mfa/reenviar
+Content-Type: application/json
+x-api-key: {{apiKey}}
+
+{
+  "challenge": "PEGAR_CHALLENGE_DEL_LOGIN"
+}
+
+### 3) con la cookie emitida por el paso 2a, la sesión es una normal:
+GET {{host}}/api/auth/me
+x-api-key: {{apiKey}}
+
+### 4) logout
+POST {{host}}/api/auth/logout
+x-api-key: {{apiKey}}
+
+### Regresión: cliente y profesional siguen logueando directo (200 user + cookie).
+POST {{host}}/api/auth/login
+Content-Type: application/json
+x-api-key: {{apiKey}}
+
+{
+  "dni": "22456789",
+  "password": "password123",
+  "role": "cliente"
+}
+
+### profesional (mismo DNI que el admin, cuenta distinta)
+POST {{host}}/api/auth/login
+Content-Type: application/json
+x-api-key: {{apiKey}}
+
+{
+  "dni": "27845123",
+  "password": "password123",
+  "role": "profesional"
+}
+
+### Seguridad: un access_token de sesión NO sirve para /mfa/verificar (401
+### MFA_CHALLENGE_INVALID) y el challenge NO sirve como cookie de sesión
+### (`GET /api/auth/me` con challenge -> 200 null).

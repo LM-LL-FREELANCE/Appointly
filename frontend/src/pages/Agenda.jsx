@@ -5,7 +5,7 @@ import { rangoMes, rangoSemana } from '../utils/fechas.utils.js'
 import { useNavigate } from 'react-router-dom'
 //ui
 import { Schedule } from '@mantine/schedule'
-import { Paper, Text, Alert, Grid, Group, Center, Loader, Button, Stack } from '@mantine/core'
+import { Paper, Grid, Center, Loader, Button, Stack } from '@mantine/core'
 import { PageHeader } from '../components/PageHeader.jsx'
 import { useAuth } from '../hooks/useAuth.js'
 import dayjs from 'dayjs'
@@ -46,7 +46,7 @@ const etiquetasEs = {
 export default function Agenda() {
   const navigate = useNavigate()
   const { user } = useAuth()
-  const [estado, setEstado] = useState(null)
+  const [estado] = useState(null)
   const [fecha, setFecha] = useState(new Date())
   const [vista, setVista] = useState('month')
   const esMes = vista === 'month'
@@ -56,7 +56,8 @@ export default function Agenda() {
   const eventos = (profesionalAgenda ?? []).map((t) => {
     const fechaISO = t.fecha_turno.slice(0, 10)
     const start = new Date(`${fechaISO}T${t.hora_turno}`)
-    const end = new Date(start.getTime() + 30 * 60 * 1000) // dura 30 min
+    const duracionMin = Number(t.duracion_turno_min) || 30
+    const end = new Date(start.getTime() + duracionMin * 60 * 1000)
     return {
       id: t.id_turno,
       title: `${t.nombre} ${t.apellido}`,

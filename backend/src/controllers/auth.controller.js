@@ -26,10 +26,46 @@ export class AuthController {
     const { dni, password, role } = req.body
 
     try {
-      const { user, token } = await AuthService.login(dni, password, role)
+      const result = await AuthService.login(dni, password, role)
+
+      // Admin: challenge MFA, SIN cookie (PLAN §8.1 A1). La sesion recien se
+      // emite en /mfa/verificar.
+      if (result.mfa_required) return res.json(result)
+
+      const { user, token } = result
       res.cookie("access_token", token, cookieOptions)
       //await EmailMethods.sendTest()
       return res.json(user)
+
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  // A2 (PLAN §8.1): valida challenge + codigo y emite la cookie access_token.
+  static async verificarMfa(req, res, next) {
+    const { challenge, codigo } = req.body
+
+    try {
+      const { user, token } = await AuthService.verificarMfa({ challenge, codigo })
+
+      res.cookie("access_token", token, cookieOptions)
+
+      return res.json(user)
+
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  // A3 (PLAN §8.1): regenera el codigo, reenvia el email e invalida el anterior.
+  static async reenviarMfa(req, res, next) {
+    const { challenge } = req.body
+
+    try {
+      const result = await AuthService.reenviarMfa({ challenge })
+
+      return res.json(result)
 
     } catch (error) {
       next(error)

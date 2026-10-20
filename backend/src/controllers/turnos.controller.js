@@ -2,8 +2,11 @@ import { TurnosService } from "../services/turnos.service.js"
 import { TurnosModel } from "../models/turnos.model.js"
 import { HorariosModel } from "../models/horarios.model.js"
 import { ProfesionalesModel } from "../models/profesionales.model.js"
-import { calcularSlotsDisponibles, slotsDelDia } from "../utils/helperSlots.js"
-import { ESTADOS_TURNO, MAX_RANGE_DAYS, SLOT_DURATION_MIN } from "../config/constants.js"
+import {
+  calcularSlotsDisponibles, estaDiaHabilitado, reservaDemasiadoPronto, slotsDelDia,
+} from "../utils/helperSlots.js"
+import { ConfiguracionModel } from "../models/configuracion.model.js"
+import { ESTADOS_TURNO, MAX_RANGE_DAYS } from "../config/constants.js"
 import { crearTurnoSchema, cambiarEstadoSchema, reprogramarTurnoSchema, cancelarTurnoSchema } from "../schemas/turno.schema.js"
 import { ClientesModel } from "../models/clientes.model.js"
 import { AppError } from "../utils/AppError.js"
@@ -194,12 +197,14 @@ export class TurnosController {
         throw new AppError('profesional not found', 404, 'NOT_FOUND');
       }
 
-      const [horarios, turnos] = await Promise.all([
+      const [horarios, turnos, config, duracion] = await Promise.all([
         HorariosModel.getHorariosByProfesional({ dni }),
         TurnosModel.getTurnosOcupados({ dni, desde, hasta }),
+        ConfiguracionModel.get(),
+        ProfesionalesModel.getDuracionTurno(dni),
       ])
-      const dias = calcularSlotsDisponibles({ horarios, turnos, desde, hasta });
-      return res.json({ dni_profesional: dni, desde, hasta, duracion_min: SLOT_DURATION_MIN, dias });
+      const dias = calcularSlotsDisponibles({ horarios, turnos, desde, hasta, config, duracion });
+      return res.json({ dni_profesional: dni, desde, hasta, duracion_min: duracion, dias });
 
     } catch (err) {
       next(err);
@@ -233,9 +238,25 @@ export class TurnosController {
         throw new AppError('profesional o cliente inexistente', 422, 'REFERENCE_NOT_FOUND');
       }
 
-      const horarios = await HorariosModel.getHorariosByProfesional({ dni: dni_profesional })
+      const [horarios, config, duracion] = await Promise.all([
+        HorariosModel.getHorariosByProfesional({ dni: dni_profesional }),
+        ConfiguracionModel.get(),
+        ProfesionalesModel.getDuracionTurno(dni_profesional),
+      ])
 
-      if (!slotsDelDia({ horarios: horarios, fecha: fecha_turno }).includes(hora_turno)) {
+      // Políticas del centro (PLAN_ADMIN.md §11): la validación server-side es
+      // la fuente de verdad, aunque los slots ya las reflejen.
+      if (!estaDiaHabilitado(config, fecha_turno)) {
+        throw new AppError('El centro permanece cerrado ese día.', 409, 'CENTER_CLOSED');
+      }
+
+      if (reservaDemasiadoPronto(fecha_turno, hora_turno, config)) {
+        throw new AppError('Ese horario es demasiado próximo para reservar.', 409, 'BOOKING_TOO_SOON');
+      }
+
+      if (!slotsDelDia({
+        horarios: horarios, fecha: fecha_turno, duracion, config,
+      }).includes(hora_turno)) {
         throw new AppError('the horarios is out of the profesional', 409, 'OUT_OF_SCHEDULE');
       }
 

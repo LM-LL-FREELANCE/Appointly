@@ -29,6 +29,19 @@ export const fechaEnDias = (dias, desde = ahoraEnTimezone().fecha) => {
   return `${fecha.getUTCFullYear()}-${pad(fecha.getUTCMonth() + 1)}-${pad(fecha.getUTCDate())}`
 }
 
+/** Wall-clock arithmetic on a date + HH:MM pair (no DST: used for center policies). */
+export const restarMinutosFechaHora = (fecha, hora, minutos) => {
+  const [y, m, d] = String(fecha).slice(0, 10).split("-").map(Number)
+  const [h, mi] = String(hora).slice(0, 5).split(":").map(Number)
+  const base = new Date(Date.UTC(y, m - 1, d, h, mi))
+
+  base.setUTCMinutes(base.getUTCMinutes() - minutos)
+  return {
+    fecha: `${base.getUTCFullYear()}-${pad(base.getUTCMonth() + 1)}-${pad(base.getUTCDate())}`,
+    hora: `${pad(base.getUTCHours())}:${pad(base.getUTCMinutes())}`,
+  }
+}
+
 /** Normalizes a DATE column value (mysql2 returns a local-midnight Date) to YYYY-MM-DD. */
 export const aFechaISO = (valor) =>
   valor instanceof Date
