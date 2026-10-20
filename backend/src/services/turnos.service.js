@@ -4,7 +4,11 @@ import { EmailMethods } from "../emails/email.methods.js"
 import { HorariosModel } from "../models/horarios.model.js"
 import { withTransaction } from "../config/db.js"
 import { ahoraEnTimezone, esHoy, yaComenzo } from "../utils/time.js"
-import { slotsDelDia } from "../utils/helperSlots.js"
+import {
+  cancelacionVencida, estaDiaHabilitado, reservaDemasiadoPronto, slotsDelDia,
+} from "../utils/helperSlots.js"
+import { ConfiguracionModel } from "../models/configuracion.model.js"
+import { ProfesionalesModel } from "../models/profesionales.model.js"
 import { bestEffort } from "../utils/bestEffort.js"
 
 const TODOS = ["cliente", "profesional", "admin"]
@@ -161,7 +165,16 @@ export class TurnosService {
     }
 
     if (!ESTADOS_CANCELABLES.includes(turno.estado)) {
-      throw new AppError("Solo se puede cancelar un turno pendiente de confirmación o confirmado.", 409, "NOT_CANCELLABLE")
+      throw new AppError("Solo se puede cancelar un turno pendiente de confirmaci��n o confirmado.", 409, "NOT_CANCELLABLE")
+    }
+
+    // Política del centro (PLAN_ADMIN.md §11.4): los admin pueden cancelar
+    // siempre; cliente y profesional no, dentro de la ventana configurada.
+    if (requesterRol !== "admin") {
+      const config = await ConfiguracionModel.get()
+      if (cancelacionVencida(turno.fecha_turno, turno.hora_turno, config.limite_cancelacion_horas)) {
+        throw new AppError("Ya no estǭs a tiempo de cancelar este turno.", 409, "CANCEL_TOO_LATE")
+      }
     }
 
     await this.#cambiarConEvento({
@@ -206,10 +219,22 @@ export class TurnosService {
     }
 
     const dni_profesional = turno.dni_profesional
-    const horarios = await HorariosModel.getHorariosByProfesional({ dni: dni_profesional })
+    const [horarios, config, duracion] = await Promise.all([
+      HorariosModel.getHorariosByProfesional({ dni: dni_profesional }),
+      ConfiguracionModel.get(),
+      ProfesionalesModel.getDuracionTurno(dni_profesional),
+    ])
 
-    if (!slotsDelDia({ horarios, fecha: fecha_turno }).includes(hora_turno)) {
-      throw new AppError("El horario está fuera de la agenda del profesional.", 409, "OUT_OF_SCHEDULE")
+    if (!estaDiaHabilitado(config, fecha_turno)) {
+      throw new AppError("El centro permanece cerrado ese d��a.", 409, "CENTER_CLOSED")
+    }
+
+    if (reservaDemasiadoPronto(fecha_turno, hora_turno, config)) {
+      throw new AppError("Ese horario es demasiado pr��ximo para reprogramar.", 409, "BOOKING_TOO_SOON")
+    }
+
+    if (!slotsDelDia({ horarios, fecha: fecha_turno, duracion, config }).includes(hora_turno)) {
+      throw new AppError("El horario estǭ fuera de la agenda del profesional.", 409, "OUT_OF_SCHEDULE")
     }
 
     const idNuevo = await withTransaction(async (conn) => {

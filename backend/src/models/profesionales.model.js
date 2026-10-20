@@ -182,6 +182,16 @@ export class ProfesionalesModel {
     return { ...profesional, especialidad, obraSociales }
   }
 
+  /** Duración del turno configurada por el profesional (fallback: 30 min). */
+  static async getDuracionTurno(dni) {
+    const [rows] = await pool.query(
+      `SELECT duracion_turno_min FROM profesional WHERE dni_profesional = ? LIMIT 1`,
+      [dni],
+    )
+    const duracion = Number(rows[0]?.duracion_turno_min)
+    return Number.isFinite(duracion) && duracion > 0 ? duracion : 30
+  }
+
   static async existe({ dni }) {
     const [rows] = await pool.query(
       `SELECT 1 FROM profesional p 

@@ -1,4 +1,7 @@
 import { Router } from "express"
+import { ConfiguracionController } from "../controllers/configuracion.controller.js"
 
-// Publico — Lectura de la configuracion del centro (PLAN §8.2, C1).
+// Público — lectura de la configuración del centro (PLAN_ADMIN.md §8.2 C1).
 export const configuracionRouter = Router()
+
+configuracionRouter.get("/", ConfiguracionController.get)

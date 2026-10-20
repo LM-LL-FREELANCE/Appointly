@@ -6,6 +6,8 @@ import { Outlet } from 'react-router-dom'
 import { NavbarFooter } from './components/NavbarFooter.jsx'
 import { NavLinks } from './components/NavLinks.jsx'
 import { SidebarContext } from './hooks/useSidebar.js'
+import { AdminRealtimeChannel } from './socket/AdminRealtimeChannel.jsx'
+import { AvisoBanner } from './components/AvisoBanner.jsx'
 
 export default function MainLayout({ links }) {
   const [mobileOpened, { toggle: toggleMobile, close: closeMobile }] = useDisclosure()
@@ -16,6 +18,7 @@ export default function MainLayout({ links }) {
 
   return (
     <SidebarContext.Provider value={{ mobileOpened, toggleMobile, desktopOpened, toggleDesktop }}>
+      <AdminRealtimeChannel />
       <AppShell
         navbar={{
           width: 230,
@@ -40,6 +43,7 @@ export default function MainLayout({ links }) {
         </AppShell.Navbar>
 
         <AppShell.Main>
+          <AvisoBanner />
           <Outlet />
         </AppShell.Main>
 

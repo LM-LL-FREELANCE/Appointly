@@ -72,13 +72,21 @@ export async function startTestApp() {
     import("../../src/config/db.js"),
     import("../../src/middlewares/error.middleware.js"),
   ])
-  const [{ turnosRouter }, { clientesRouter }, { TurnosController }, { TurnosModel }, { requireAuth }, { EmailMethods }] = await Promise.all([
+  const [
+    { turnosRouter }, { clientesRouter }, { TurnosController }, { TurnosModel },
+    { requireAuth, grantAccess }, { EmailMethods },
+    { configuracionRouter }, { avisosRouter }, { adminConfiguracionRouter }, { adminAvisosRouter },
+  ] = await Promise.all([
     import("../../src/routes/turnos.routes.js"),
     import("../../src/routes/clientes.routes.js"),
     import("../../src/controllers/turnos.controller.js"),
     import("../../src/models/turnos.model.js"),
     import("../../src/middlewares/auth.middleware.js"),
     import("../../src/emails/email.methods.js"),
+    import("../../src/routes/configuracion.routes.js"),
+    import("../../src/routes/avisos.routes.js"),
+    import("../../src/routes/adminConfiguracion.routes.js"),
+    import("../../src/routes/adminAvisos.routes.js"),
   ])
 
   const [[{ db }]] = await pool.query("SELECT DATABASE() AS db")
@@ -95,6 +103,10 @@ export async function startTestApp() {
   app.use(cookieParser())
   app.use("/api/turnos", turnosRouter)
   app.use("/api/clientes", clientesRouter)
+  app.use("/api/configuracion", configuracionRouter)
+  app.use("/api/avisos", avisosRouter)
+  app.use("/api/admin/configuracion", requireAuth, grantAccess(["admin"]), adminConfiguracionRouter)
+  app.use("/api/admin/avisos", requireAuth, grantAccess(["admin"]), adminAvisosRouter)
   // Same route as profesionales.routes.js (which pulls in unrelated controllers).
   app.get("/api/profesionales/:dni/slots", requireAuth, TurnosController.getSlots)
   app.use(errorHandler)

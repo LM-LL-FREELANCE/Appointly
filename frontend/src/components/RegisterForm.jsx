@@ -18,7 +18,9 @@ function ObraSocialSelect({ form, size }) {
       label="Seleccione una obra social (opcional)"
       size={size}
       placeholder={isLoading ? 'Cargando obras sociales...' : 'Elija una'}
-      data={obras.map((obra) => ({ value: obra.id.toString(), label: obra.obra_social }))}
+      data={obras
+        .filter((obra) => Boolean(obra.activo))
+        .map((obra) => ({ value: obra.id.toString(), label: obra.obra_social }))}
       disabled={isLoading}
       rightSection={isLoading ? <Loader size="xs" /> : null}
       key={form.key('id_obra_social')}

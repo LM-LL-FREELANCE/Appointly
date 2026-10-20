@@ -1,18 +1,33 @@
-import { Center, Stack, Text, ThemeIcon } from '@mantine/core'
-import { IconBooks } from '@tabler/icons-react'
+import { Tabs } from '@mantine/core'
+import { IconHeartHandshake, IconStethoscope } from '@tabler/icons-react'
 import { PageHeader } from '../../components/PageHeader.jsx'
+import { CatalogoTabla } from './catalogos/CatalogoTabla.jsx'
 
-// Placeholder: WS2 reemplaza por la gestión de especialidades y obras sociales.
 export default function AdminCatalogos() {
   return (
     <>
-      <PageHeader title="Catálogos" subtitle="Especialidades y obras sociales que ofrece el centro." />
-      <Center h="60vh">
-        <Stack align="center" gap="xs">
-          <ThemeIcon size={56} radius="xl" variant="light"><IconBooks size={30} /></ThemeIcon>
-          <Text c="dimmed">Pronto vas a poder administrar especialidades y obras sociales.</Text>
-        </Stack>
-      </Center>
+      <PageHeader
+        title="Catálogos"
+        subtitle="Especialidades y obras sociales que ofrece el centro."
+      />
+
+      <Tabs defaultValue="especialidades" variant="outline" radius="md">
+        <Tabs.List mb="md">
+          <Tabs.Tab value="especialidades" leftSection={<IconStethoscope size={16} />}>
+            Especialidades
+          </Tabs.Tab>
+          <Tabs.Tab value="obras-sociales" leftSection={<IconHeartHandshake size={16} />}>
+            Obras sociales
+          </Tabs.Tab>
+        </Tabs.List>
+
+        <Tabs.Panel value="especialidades">
+          <CatalogoTabla recurso="especialidades" />
+        </Tabs.Panel>
+        <Tabs.Panel value="obras-sociales">
+          <CatalogoTabla recurso="obras-sociales" />
+        </Tabs.Panel>
+      </Tabs>
     </>
   )
 }
