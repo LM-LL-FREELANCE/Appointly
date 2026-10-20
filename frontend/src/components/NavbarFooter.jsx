@@ -40,7 +40,6 @@ export function NavbarFooter({ onNavigate }) {
         onClick={logout}
         className={`${navLinkClassName} ${navLinkLogoutClassName}`}
         styles={navLinkStyles}
-        disabled={!user}
       />
     </>
   )

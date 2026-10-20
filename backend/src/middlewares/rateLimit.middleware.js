@@ -3,7 +3,7 @@ import { AppError } from "../utils/AppError.js"
 
 export const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: 100,
+  limit: 150,
   standardHeaders: 'draft-8',
   legacyHeaders: false,
   handler: (req, res, next) => {
@@ -25,7 +25,7 @@ export const authLimiter = rateLimit({
 
 export const sensitiveActionsLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
-  limit: 5,
+  limit: 8,
   standardHeaders: 'draft-8',
   legacyHeaders: false,
   handler: (req, res, next) => {

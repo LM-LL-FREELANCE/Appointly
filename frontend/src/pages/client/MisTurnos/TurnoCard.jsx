@@ -7,8 +7,10 @@ import { cancelTurnoById } from '../../../api/clientes.js'
 import { useAuth } from '../../../hooks/useAuth.js'
 import { EstadoTurnoBadge } from '../../../components/EstadoTurnoBadge.jsx'
 import { UserAvatar } from '../../../components/UserAvatar.jsx'
+import { esCancelable } from '../../../utils/estadosTurno.js'
 
-export function TurnoCard({ turno, estado }) {
+// `tab` is the list the card is shown in ('proximos' | 'historial'); the state shown is turno.estado.
+export function TurnoCard({ turno, tab }) {
   const { user } = useAuth()
 
   const [drawerOpened, { open: openDrawer, close: closeDrawer }] = useDisclosure(false)
@@ -28,7 +30,7 @@ export function TurnoCard({ turno, estado }) {
         <Stack gap="sm">
           <Group justify="space-between" align="center" wrap="nowrap">
             <Text fw={700} fz="md">{turno.fecha_turno} · {turno.hora_turno}</Text>
-            <EstadoTurnoBadge estado={estado} />
+            <EstadoTurnoBadge estado={turno.estado} />
           </Group>
 
           <Group gap="sm" wrap="nowrap">
@@ -46,8 +48,8 @@ export function TurnoCard({ turno, estado }) {
           </Group>
 
           <Group grow gap="sm">
-            <Button variant="default" radius="md" component={Link} to="/misturnos/detalle" state={{ turno, tab: estado }} size="md">Detalle</Button>
-            {estado === 'activo' && (
+            <Button variant="default" radius="md" component={Link} to="/misturnos/detalle" state={{ turno, tab }} size="md">Detalle</Button>
+            {esCancelable(turno.estado) && !turno.esPasado && (
               <Button variant="light" color="red" radius="md" size="md" onClick={openDrawer}>Cancelar</Button>
             )}
           </Group>

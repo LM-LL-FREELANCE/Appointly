@@ -1,12 +1,5 @@
 import { Badge } from '@mantine/core'
-
-const ESTADO_COLOR = {
-  activo: 'teal',
-  cancelado: 'red',
-  completado: 'gray',
-  ausente: 'orange',
-  reprogramado: 'yellow',
-}
+import { ESTADO_COLOR, estadoLabel } from '../utils/estadosTurno.js'
 
 export function EstadoTurnoBadge({ estado, ...badgeProps }) {
   const color = ESTADO_COLOR[estado] ?? 'gray'
@@ -20,7 +13,7 @@ export function EstadoTurnoBadge({ estado, ...badgeProps }) {
       tt="uppercase"
       {...badgeProps}
     >
-      {estado}
+      {estadoLabel(estado)}
     </Badge>
   )
 }

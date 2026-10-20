@@ -1,6 +1,7 @@
 import { Paper, Badge, Group, Stack, Title, Text } from '@mantine/core'
 import ButtonLay from './Button'
 import { UserAvatar } from './UserAvatar'
+import { esCancelable } from '../utils/estadosTurno.js'
 
 export default function TurnoCard({ data, openedModal, cancelarTurno }) {
   return (
@@ -33,7 +34,9 @@ export default function TurnoCard({ data, openedModal, cancelarTurno }) {
           </Group>
           <Group gap="xl" mt="xl">
             <ButtonLay label="Ver detalle" typeColor="light" link={openedModal} size="md" radius="md" px="md" />
-            <ButtonLay label="Cancelar" typeColor="light" color="red" link={cancelarTurno} size="md" radius="md" px="md" />
+            {esCancelable(data.estado) && (
+              <ButtonLay label="Cancelar" typeColor="light" color="red" link={cancelarTurno} size="md" radius="md" px="md" />
+            )}
           </Group>
         </Stack>
       </Stack>

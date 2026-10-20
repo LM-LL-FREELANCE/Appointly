@@ -3,8 +3,8 @@ import { TurnosModel } from "../models/turnos.model.js"
 import { HorariosModel } from "../models/horarios.model.js"
 import { ProfesionalesModel } from "../models/profesionales.model.js"
 import { calcularSlotsDisponibles, slotsDelDia } from "../utils/helperSlots.js"
-import { MAX_RANGE_DAYS, SLOT_DURATION_MIN } from "../config/constants.js"
-import { crearTurnoSchema } from "../schemas/turno.schema.js"
+import { ESTADOS_TURNO, MAX_RANGE_DAYS, SLOT_DURATION_MIN } from "../config/constants.js"
+import { crearTurnoSchema, cambiarEstadoSchema, reprogramarTurnoSchema, cancelarTurnoSchema } from "../schemas/turno.schema.js"
 import { ClientesModel } from "../models/clientes.model.js"
 import { AppError } from "../utils/AppError.js"
 
@@ -14,7 +14,7 @@ const diffDias = (desde, hasta) => Math.round((new Date(hasta + 'T00:00:00') - n
 
 const hoy = () => new Date().toISOString().slice(0, 10)
 const enDias = (n) => new Date(Date.now() + n * 86_400_000).toISOString().slice(0, 10)
-const ESTADOS_VALIDOS = new Set(['activo', 'cancelado', 'completado'])
+const ESTADOS_VALIDOS = new Set(ESTADOS_TURNO)
 
 export class TurnosController {
 
@@ -64,6 +64,82 @@ export class TurnosController {
     }
   }
 
+  static async getEventos(req, res, next) {
+    try {
+      const { profesional, desde, hasta } = req.query
+
+      if (!profesional) {
+        throw new AppError('"profesional" query param is required', 400, 'VALIDATION_FAILED');
+      }
+
+      const dni = Number(profesional)
+
+      if (!Number.isFinite(dni) || dni <= 0) {
+        throw new AppError('"profesional" must be a valid DNI', 400, 'VALIDATION_FAILED');
+      }
+
+      if ((desde !== undefined && !esFecha(desde)) || (hasta !== undefined && !esFecha(hasta))) {
+        throw new AppError('"desde" and "hasta" must be valid dates (YYYY-MM-DD)', 400, 'VALIDATION_FAILED');
+      }
+
+      if (desde && hasta && desde > hasta) {
+        throw new AppError('"desde" cannot be later than "hasta"', 400, 'VALIDATION_FAILED');
+      }
+
+      const eventos = await TurnosService.getEventosByProfesional({
+        dni,
+        desde,
+        hasta,
+        requesterDni: req.user.dni,
+        requesterRol: req.user.role,
+      })
+
+      res.status(200).json(eventos)
+
+    } catch (err) {
+      next(err)
+    }
+  }
+
+  static async getEventosTurno(req, res, next) {
+    try {
+      const eventos = await TurnosService.getEventosByTurno(req.params.id, req.user.dni, req.user.role)
+      res.status(200).json(eventos)
+    } catch (err) {
+      next(err)
+    }
+  }
+
+  static async cambiarEstado(req, res, next) {
+    try {
+      const parsed = cambiarEstadoSchema.safeParse(req.body ?? {})
+
+      if (!parsed.success) {
+        throw new AppError('invalid', 400, 'VALIDATION_FAILED', parsed.error.flatten().fieldErrors);
+      }
+
+      const turno = await TurnosService.cambiarEstado(req.params.id, parsed.data, req.user)
+      res.status(200).json(turno)
+    } catch (err) {
+      next(err)
+    }
+  }
+
+  static async reprogramar(req, res, next) {
+    try {
+      const parsed = reprogramarTurnoSchema.safeParse(req.body ?? {})
+
+      if (!parsed.success) {
+        throw new AppError('invalid', 400, 'VALIDATION_FAILED', parsed.error.flatten().fieldErrors);
+      }
+
+      const resultado = await TurnosService.reprogramar(req.params.id, parsed.data, req.user)
+      res.status(201).json(resultado)
+    } catch (err) {
+      next(err)
+    }
+  }
+
   static async getTurnoById(req, res, next) {
     const { id } = req.params
     const requesterDni = req.user.dni
@@ -81,10 +157,15 @@ export class TurnosController {
     const { id } = req.params
     const requesterDni = req.user.dni
     const requesterRol = req.user.role
-    const { motivo } = req.body ?? {}
 
     try {
-      const turno = await TurnosService.cancelTurnoById(id, requesterDni, requesterRol, motivo)
+      const parsed = cancelarTurnoSchema.safeParse(req.body ?? {})
+
+      if (!parsed.success) {
+        throw new AppError('invalid', 400, 'VALIDATION_FAILED', parsed.error.flatten().fieldErrors);
+      }
+
+      const turno = await TurnosService.cancelTurnoById(id, requesterDni, requesterRol, parsed.data.motivo)
       res.status(200).json(turno)
     } catch (err) {
       next(err)
@@ -115,7 +196,7 @@ export class TurnosController {
 
       const [horarios, turnos] = await Promise.all([
         HorariosModel.getHorariosByProfesional({ dni }),
-        TurnosModel.getTurnosActivos({ dni, desde, hasta }),
+        TurnosModel.getTurnosOcupados({ dni, desde, hasta }),
       ])
       const dias = calcularSlotsDisponibles({ horarios, turnos, desde, hasta });
       return res.json({ dni_profesional: dni, desde, hasta, duracion_min: SLOT_DURATION_MIN, dias });
@@ -140,7 +221,7 @@ export class TurnosController {
         : parsedSchema.data.dni_cliente
 
       if (!dni_cliente) {
-        throw new AppError('dni_cliente es requerido cuando el rol es profesional', 400, 'VALIDATION_FAILED');
+        throw new AppError('dni_cliente es requerido cuando el rol es profesional o admin', 400, 'VALIDATION_FAILED');
       }
 
       const [existeProf, existeCli] = await Promise.all([
@@ -158,11 +239,7 @@ export class TurnosController {
         throw new AppError('the horarios is out of the profesional', 409, 'OUT_OF_SCHEDULE');
       }
 
-      if (await TurnosModel.existeActivo({ dni: dni_profesional, fecha: fecha_turno, hora: hora_turno })) {
-        throw new AppError('that turno has just been taken', 409, 'SLOT_TAKEN');
-      }
-
-      const idTurno = await TurnosModel.crearTurno({ dni_profesional, dni_cliente, fecha_turno, hora_turno })
+      const idTurno = await TurnosService.crearTurno({ dni_profesional, dni_cliente, fecha_turno, hora_turno, actor: req.user })
       const turno = await TurnosModel.getById({ id: idTurno })
       return res.status(201).json({ status: "success", data: turno });
 

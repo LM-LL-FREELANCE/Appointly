@@ -77,7 +77,7 @@ export class ClientesController {
       const { dni } = req.params
       if (!dni) throw new AppError("the dni must be on the request", 404, "NOT_FOUND")
 
-      const turnosActivos = await ClientesModel.getActivos({ dni })
+      const turnosActivos = await ClientesService.getActivos(dni, req.user.dni)
 
       if (turnosActivos.length === 0) throw new AppError("we could not find the turnos for the cliente")
 

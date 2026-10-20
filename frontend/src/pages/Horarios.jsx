@@ -7,7 +7,7 @@ import HorariosSkeleton from "../components/skeletons/HorariosSkeleton.jsx"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { getHorariosByDni, createHorario, updateHorario, deleteHorario } from "../api/profesionales.js"
 import { useAuth } from "../hooks/useAuth.js"
-import { IconCheck, IconX, IconPlus } from '@tabler/icons-react'
+import { IconCheck, IconPlus } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
 import QueryError from "../components/QueryError.jsx"
 
@@ -41,11 +41,18 @@ export default function Horarios() {
       .map(s => edited[s._localId] ? { ...s, ...edited[s._localId] } : s)
   ), [serverSlots, added, deleted, edited])
 
-  // Agrupar por dia
+  // Agrupar por dia ordenados cronológicamente por hora_inicio
   const slotsByDay = useMemo(() => {
     const result = {}
     DIAS.forEach((_, i) => { result[i] = [] })
     allSlots.forEach(s => result[s.dia_semana].push(s))
+    DIAS.forEach((_, i) => {
+      result[i].sort((a, b) => {
+        if (!a.hora_inicio) return 1
+        if (!b.hora_inicio) return -1
+        return a.hora_inicio.localeCompare(b.hora_inicio)
+      })
+    })
     return result
   }, [allSlots])
 

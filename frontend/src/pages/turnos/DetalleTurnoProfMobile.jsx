@@ -1,10 +1,14 @@
 import { useState } from 'react'
-import { Badge, Box, Button, Divider, Drawer, Grid, Group, Paper, Stack, Text, Textarea } from '@mantine/core'
+import { Box, Button, Divider, Drawer, Grid, Group, Paper, Stack, Text, Textarea } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { IconAlertCircle } from '@tabler/icons-react'
-import { cancelTurnoById } from '../../api/clientes.js'
+import { IconAlertCircle, IconHistory } from '@tabler/icons-react'
 import { fechaCorta, horaCorta } from '../../utils/fechas.utils.js'
+import { EstadoTurnoBadge } from '../../components/EstadoTurnoBadge.jsx'
+import { accionesProfesional, claveAccion } from '../../utils/estadosTurno.js'
+import { ConfirmarEstadoModal } from './ConfirmarEstadoModal.jsx'
+import { TurnoHistorialModal } from './TurnoHistorialModal.jsx'
+import { ReprogramarTurnoModal } from './ReprogramarTurnoModal.jsx'
+import { useAccionesTurnoProf } from './useAccionesTurnoProf.js'
 
 function DetailRow({ label, children }) {
   return (
@@ -23,24 +27,22 @@ function DetailRow({ label, children }) {
 }
 
 // Detalle de UN turno para mobile. Adaptado del detalle del cliente:
-// muestra el PACIENTE, cancela con rol 'profesional' y "Atrás" vuelve a la lista
-// (in-page) en vez de navegar a otra ruta, para no perder los datos del día.
-export function DetalleTurnoProfMobile({ turno, dniProfesional, onVolver, onCancelled }) {
+// muestra el PACIENTE, las acciones de atención del profesional, el historial y la
+// cancelación, y "Atrás" vuelve a la lista (in-page) en vez de navegar a otra ruta.
+// `turno` viene siempre de la query del día, así que refleja el estado actualizado.
+export function DetalleTurnoProfMobile({ turno, ahora, dniProfesional, onVolver }) {
   const [drawerOpened, { open: openDrawer, close: closeDrawer }] = useDisclosure(false)
   const [motivo, setMotivo] = useState('')
+  const acciones = useAccionesTurnoProf()
+  const { mutate: cancelar, isPending } = acciones.cancelar
 
-  const queryClient = useQueryClient()
-  const { mutate: cancelar, isPending } = useMutation({
-    mutationFn: () => cancelTurnoById({ id: turno.id_turno, motivo: motivo.trim() }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['agenda'] })
-      onCancelled?.(turno.id_turno)
-      closeDrawer()
-      onVolver()
-    },
-  })
-
-  const badgeColor = turno.estado === 'activo' ? 'green' : turno.estado === 'cancelado' ? 'red' : 'gray'
+  const confirmarCancelacion = () =>
+    cancelar({ id: turno.id_turno, motivo: motivo.trim() }, {
+      onSuccess: () => {
+        closeDrawer()
+        onVolver()
+      },
+    })
 
   return (
     <>
@@ -56,17 +58,37 @@ export function DetalleTurnoProfMobile({ turno, dniProfesional, onVolver, onCanc
             <Text fz="md" fw={600}>{horaCorta(turno.hora_turno)} hs</Text>
           </DetailRow>
           <DetailRow label="Estado">
-            <Badge variant="light" color={badgeColor} radius="xl" size="md" tt="uppercase">
-              {turno.estado}
-            </Badge>
+            <EstadoTurnoBadge estado={turno.estado} />
           </DetailRow>
         </Paper>
 
-        {turno.estado === 'activo' && (
-          <Button variant="light" color="red" size="md" radius="md" fullWidth onClick={openDrawer}>
-            Cancelar turno
+        {accionesProfesional(turno, ahora).map((accion) => accion.cancelar ? (
+          <Button key="cancelar" variant="light" color="red" size="md" radius="md" fullWidth onClick={openDrawer}>
+            {accion.label}
           </Button>
-        )}
+        ) : (
+          <Button
+            key={claveAccion(accion)}
+            size="md"
+            variant={accion.reprogramar ? 'light' : 'filled'}
+            radius="md"
+            fullWidth
+            loading={acciones.cambiandoEstado}
+            onClick={() => acciones.ejecutar(turno, accion)}
+          >
+            {accion.label}
+          </Button>
+        ))}
+
+        <Button
+          variant="default"
+          size="md"
+          radius="md"
+          leftSection={<IconHistory size={16} />}
+          onClick={() => acciones.abrirHistorial(turno)}
+        >
+          Ver historial
+        </Button>
 
         <Button variant="default" color="gray" size="md" radius="md" onClick={onVolver}>
           Atrás
@@ -105,7 +127,7 @@ export function DetalleTurnoProfMobile({ turno, dniProfesional, onVolver, onCanc
         </Box>
         <Box px="lg" pb="xl">
           <Stack gap="sm">
-            <Button fullWidth variant="light" color="red" size="md" radius="xl" onClick={() => cancelar()} loading={isPending}>
+            <Button fullWidth variant="light" color="red" size="md" radius="xl" onClick={confirmarCancelacion} loading={isPending}>
               Sí, cancelar
             </Button>
             <Button fullWidth variant="default" size="md" radius="xl" onClick={closeDrawer} disabled={isPending}>
@@ -114,6 +136,29 @@ export function DetalleTurnoProfMobile({ turno, dniProfesional, onVolver, onCanc
           </Stack>
         </Box>
       </Drawer>
+
+      <ConfirmarEstadoModal
+        opened={!!acciones.confirmacion}
+        onClose={acciones.cerrarConfirmacion}
+        onConfirm={acciones.confirmar}
+        turno={acciones.confirmacion?.turno}
+        accion={acciones.confirmacion?.accion}
+        isPending={acciones.cambiandoEstado}
+      />
+
+      <ReprogramarTurnoModal
+        opened={!!acciones.reprogramando}
+        onClose={acciones.cerrarReprogramar}
+        turno={acciones.reprogramando}
+        dniProfesional={dniProfesional}
+        ahora={ahora}
+      />
+
+      <TurnoHistorialModal
+        opened={acciones.historialId !== null}
+        onClose={acciones.cerrarHistorial}
+        turnoId={acciones.historialId}
+      />
     </>
   )
 }

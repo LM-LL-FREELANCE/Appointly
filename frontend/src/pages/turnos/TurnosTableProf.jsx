@@ -1,28 +1,41 @@
 import { useState } from 'react'
-import { Badge, Box, Button, Group, Table, Text } from '@mantine/core'
+import { ActionIcon, Box, Group, Menu, Table, Text } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { cancelTurnoById } from '../../api/clientes.js'
+import {
+  IconCircleCheck,
+  IconDotsVertical,
+  IconHistory,
+  IconCalendarEvent,
+  IconPlayerPlay,
+  IconUserOff,
+  IconX,
+} from '@tabler/icons-react'
 import { fechaCorta, horaCorta } from '../../utils/fechas.utils.js'
+import { accionesProfesional, claveAccion } from '../../utils/estadosTurno.js'
 import { CancelarTurnoProfModal } from './CancelarTurnoProfModal.jsx'
+import { ConfirmarEstadoModal } from './ConfirmarEstadoModal.jsx'
+import { TurnoHistorialModal } from './TurnoHistorialModal.jsx'
+import { ReprogramarTurnoModal } from './ReprogramarTurnoModal.jsx'
+import { useAccionesTurnoProf } from './useAccionesTurnoProf.js'
 import { UserAvatar } from '../../components/UserAvatar.jsx'
+import { EstadoTurnoBadge } from '../../components/EstadoTurnoBadge.jsx'
 
 const COLUMNS = ['Fecha', 'Hora', 'Paciente', 'Estado', 'Acciones']
 
-export default function TurnosTableProf({ turnos, dniProfesional, onCancelled }) {
+// Icon of each action of accionesProfesional(), keyed by claveAccion().
+const ICONO_ACCION = {
+  reprogramar: <IconCalendarEvent size={14} />,
+  en_curso: <IconPlayerPlay size={14} />,
+  ausente: <IconUserOff size={14} />,
+  completado: <IconCircleCheck size={14} />,
+}
+
+export default function TurnosTableProf({ turnos, ahora, dniProfesional }) {
   const [cancelOpened, { open: openCancel, close: closeCancel }] = useDisclosure(false)
   const [selectedItem, setSelectedItem] = useState(null)
-
-  const queryClient = useQueryClient()
-  const { mutate: cancelTurno, isPending: isCancelling } = useMutation({
-    mutationFn: ({ id_turno, motivo }) => cancelTurnoById({ id: id_turno, motivo }),
-    onSuccess: (_data, { id_turno }) => {
-      queryClient.invalidateQueries({ queryKey: ['agenda'] })
-      onCancelled?.(id_turno)
-      closeCancel()
-      setSelectedItem(null)
-    },
-  })
+  const acciones = useAccionesTurnoProf()
+  const { cancelar: cancelTurno } = acciones
+  const isCancelling = cancelTurno.isPending
 
   const handleOpenCancel = (item) => {
     setSelectedItem(item)
@@ -35,8 +48,14 @@ export default function TurnosTableProf({ turnos, dniProfesional, onCancelled })
     setSelectedItem(null)
   }
 
+  const handleConfirmCancel = (motivo) => {
+    cancelTurno.mutate(
+      { id: selectedItem.id_turno, motivo },
+      { onSuccess: () => { closeCancel(); setSelectedItem(null) } },
+    )
+  }
+
   const rows = turnos?.map((item) => {
-    const badgeColor = item.estado === 'activo' ? 'green' : item.estado === 'cancelado' ? 'red' : 'gray'
     return (
       <Table.Tr key={item.id_turno}>
         <Table.Td><Text fz="sm">{fechaCorta(item.fecha_turno)}</Text></Table.Td>
@@ -54,18 +73,43 @@ export default function TurnosTableProf({ turnos, dniProfesional, onCancelled })
           </Group>
         </Table.Td>
         <Table.Td>
-          <Badge variant="dot" color={badgeColor} size="md" radius="xl" tt="capitalize">
-            {item.estado}
-          </Badge>
+          <EstadoTurnoBadge estado={item.estado} />
         </Table.Td>
         <Table.Td>
-          {item.estado === 'activo' ? (
-            <Button variant="light" color="red" radius="md" size="compact-sm" onClick={() => handleOpenCancel(item)}>
-              Cancelar
-            </Button>
-          ) : (
-            <Text fz="sm" c="dimmed">—</Text>
-          )}
+          <Menu shadow="md" position="bottom-end" withinPortal>
+            <Menu.Target>
+              <ActionIcon variant="subtle" color="gray" aria-label="Opciones de turno">
+                <IconDotsVertical size={16} />
+              </ActionIcon>
+            </Menu.Target>
+
+            <Menu.Dropdown>
+              {accionesProfesional(item, ahora).map((accion) => accion.cancelar ? (
+                <Menu.Item
+                  key="cancelar"
+                  color="red"
+                  leftSection={<IconX size={14} />}
+                  onClick={() => handleOpenCancel(item)}
+                >
+                  {accion.label}
+                </Menu.Item>
+              ) : (
+                <Menu.Item
+                  key={claveAccion(accion)}
+                  leftSection={ICONO_ACCION[claveAccion(accion)]}
+                  disabled={acciones.cambiandoEstado}
+                  onClick={() => acciones.ejecutar(item, accion)}
+                >
+                  {accion.label}
+                </Menu.Item>
+              ))}
+
+              <Menu.Divider />
+              <Menu.Item leftSection={<IconHistory size={14} />} onClick={() => acciones.abrirHistorial(item)}>
+                Ver historial
+              </Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
         </Table.Td>
       </Table.Tr>
     )
@@ -91,9 +135,32 @@ export default function TurnosTableProf({ turnos, dniProfesional, onCancelled })
       <CancelarTurnoProfModal
         opened={cancelOpened}
         onClose={handleCloseCancel}
-        onConfirm={(motivo) => cancelTurno({ id_turno: selectedItem.id_turno, motivo })}
+        onConfirm={handleConfirmCancel}
         turno={selectedItem}
         isPending={isCancelling}
+      />
+
+      <ConfirmarEstadoModal
+        opened={!!acciones.confirmacion}
+        onClose={acciones.cerrarConfirmacion}
+        onConfirm={acciones.confirmar}
+        turno={acciones.confirmacion?.turno}
+        accion={acciones.confirmacion?.accion}
+        isPending={acciones.cambiandoEstado}
+      />
+
+      <ReprogramarTurnoModal
+        opened={!!acciones.reprogramando}
+        onClose={acciones.cerrarReprogramar}
+        turno={acciones.reprogramando}
+        dniProfesional={dniProfesional}
+        ahora={ahora}
+      />
+
+      <TurnoHistorialModal
+        opened={acciones.historialId !== null}
+        onClose={acciones.cerrarHistorial}
+        turnoId={acciones.historialId}
       />
     </Box>
   )
